@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <blockdev/utils.h>
 #include <libdevmapper.h>
+#include <json-glib/json-glib.h>
 
 #include "lvm.h"
 #include "lvm-private.h"
@@ -271,174 +272,152 @@ static gboolean call_lvm_and_report_progress (const gchar **args, const BDExtraA
 }
 
 /**
- * parse_lvm_vars:
- * @str: string to parse
- * @num_items: (out): number of parsed items
+ * call_lvm_and_parse_json_report:
+ * @args: LVM command arguments (must include --reportformat json_std)
+ * @report_key: the key in the report object to extract (e.g., "pv", "vg", "lv")
+ * @out_parser: (out): the JsonParser that owns the returned array; caller must unref
+ * @allow_no_output: if %TRUE, return %NULL without error when there is no output
+ * @error: (out) (optional): place to store error
  *
- * Returns: (transfer full): a GHashTable containing key-value items parsed from the @string
+ * Runs an LVM command, parses its JSON output, and returns the array of objects
+ * from the report section identified by @report_key.
+ *
+ * Returns: (transfer none): the JsonArray from the report, owned by @out_parser,
+ *          or %NULL on error (or empty output if @allow_no_output is %TRUE)
  */
-static GHashTable* parse_lvm_vars (const gchar *str, guint *num_items) {
-    GHashTable *table = NULL;
-    gchar **items = NULL;
-    gchar **item_p = NULL;
-    gchar **key_val = NULL;
+static JsonArray* call_lvm_and_parse_json_report (const gchar **args,
+                                                   const gchar *report_key,
+                                                   JsonParser **out_parser,
+                                                   gboolean allow_no_output,
+                                                   GError **error) {
+    gboolean success = FALSE;
+    gchar *output = NULL;
+    JsonParser *parser = NULL;
+    JsonArray *report_array = NULL;
+    JsonObject *report_obj = NULL;
+    JsonArray *data_array = NULL;
+    GError *l_error = NULL;
 
-    table = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
-    *num_items = 0;
+    *out_parser = NULL;
 
-    items = g_strsplit_set (str, " \t\n", 0);
-    for (item_p=items; *item_p; item_p++) {
-        key_val = g_strsplit (*item_p, "=", 2);
-        if (g_strv_length (key_val) == 2) {
-            /* we only want to process valid lines (with the '=' character) */
-            g_hash_table_insert (table, key_val[0], key_val[1]);
-            g_free (key_val);
-            (*num_items)++;
-        } else
-            /* invalid line, just free key_val */
-            g_strfreev (key_val);
+    success = call_lvm_and_capture_output (args, NULL, &output, &l_error);
+    if (!success) {
+        if (allow_no_output && g_error_matches (l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
+            g_clear_error (&l_error);
+            return NULL;
+        }
+        g_propagate_error (error, l_error);
+        return NULL;
     }
 
-    g_strfreev (items);
-    return table;
+    parser = json_parser_new ();
+    if (!json_parser_load_from_data (parser, output, -1, &l_error)) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                     "Failed to parse JSON output from LVM: %s", l_error->message);
+        g_error_free (l_error);
+        g_object_unref (parser);
+        g_free (output);
+        return NULL;
+    }
+    g_free (output);
+
+    report_array = json_object_get_array_member (
+        json_node_get_object (json_parser_get_root (parser)), "report");
+
+    if (!report_array || json_array_get_length (report_array) == 0) {
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                             "Failed to parse LVM report");
+        g_object_unref (parser);
+        return NULL;
+    }
+
+    report_obj = json_array_get_object_element (report_array, 0);
+    data_array = json_object_get_array_member (report_obj, report_key);
+
+    if (!data_array) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                     "Failed to parse LVM report: missing '%s' key", report_key);
+        g_object_unref (parser);
+        return NULL;
+    }
+
+    *out_parser = parser;
+    return data_array;
 }
 
-static BDLVMPVdata* get_pv_data_from_table (GHashTable *table, gboolean free_table) {
+
+/* LVM json_std outputs "" for absent string values (e.g. vg_name for a PV
+   not in any VG). Convert these to NULL for consistency with the dbus plugin. */
+static gchar* _lvm_json_get_string (JsonObject *obj, const gchar *key) {
+    const gchar *value = json_object_get_string_member_with_default (obj, key, NULL);
+    if (!value || !*value)
+        return NULL;
+    return g_strdup (value);
+}
+
+static BDLVMPVdata* get_pv_data_from_json (JsonObject *pv_obj) {
     BDLVMPVdata *data = g_new0 (BDLVMPVdata, 1);
-    gchar *value = NULL;
+    JsonArray *tags_array = NULL;
+    guint tags_len = 0;
 
-    data->pv_name = g_strdup ((gchar*) g_hash_table_lookup (table, "LVM2_PV_NAME"));
-    data->pv_uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "LVM2_PV_UUID"));
+    data->pv_name = _lvm_json_get_string (pv_obj, "pv_name");
+    data->pv_uuid = _lvm_json_get_string (pv_obj, "pv_uuid");
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_PV_FREE");
-    if (value)
-        data->pv_free = g_ascii_strtoull (value, NULL, 0);
-    else
-        data->pv_free = 0;
+    data->pv_free = g_ascii_strtoull (json_object_get_string_member_with_default (pv_obj, "pv_free", "0"), NULL, 0);
+    data->pv_size = g_ascii_strtoull (json_object_get_string_member_with_default (pv_obj, "pv_size", "0"), NULL, 0);
+    data->pe_start = g_ascii_strtoull (json_object_get_string_member_with_default (pv_obj, "pe_start", "0"), NULL, 0);
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_PV_SIZE");
-    if (value)
-        data->pv_size = g_ascii_strtoull (value, NULL, 0);
-    else
-        data->pv_size = 0;
+    data->vg_name = _lvm_json_get_string (pv_obj, "vg_name");
+    data->vg_uuid = _lvm_json_get_string (pv_obj, "vg_uuid");
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_PE_START");
-    if (value)
-        data->pe_start = g_ascii_strtoull (value, NULL, 0);
-    else
-        data->pe_start = 0;
+    data->vg_size = g_ascii_strtoull (json_object_get_string_member_with_default (pv_obj, "vg_size", "0"), NULL, 0);
+    data->vg_free = g_ascii_strtoull (json_object_get_string_member_with_default (pv_obj, "vg_free", "0"), NULL, 0);
+    data->vg_extent_size = g_ascii_strtoull (json_object_get_string_member_with_default (pv_obj, "vg_extent_size", "0"), NULL, 0);
 
-    data->vg_name = g_strdup ((gchar*) g_hash_table_lookup (table, "LVM2_VG_NAME"));
-    data->vg_uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "LVM2_VG_UUID"));
+    data->vg_extent_count = (guint64) json_object_get_int_member_with_default (pv_obj, "vg_extent_count", 0);
+    data->vg_free_count = (guint64) json_object_get_int_member_with_default (pv_obj, "vg_free_count", 0);
+    data->vg_pv_count = (guint64) json_object_get_int_member_with_default (pv_obj, "pv_count", 0);
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_SIZE");
-    if (value)
-        data->vg_size = g_ascii_strtoull (value, NULL, 0);
-    else
-        data->vg_size = 0;
+    if (json_object_has_member (pv_obj, "pv_tags")) {
+        tags_array = json_object_get_array_member (pv_obj, "pv_tags");
+        tags_len = json_array_get_length (tags_array);
+        data->pv_tags = g_new0 (gchar *, tags_len + 1);
+        for (guint i = 0; i < tags_len; i++)
+            data->pv_tags[i] = g_strdup (json_array_get_string_element (tags_array, i));
+        data->pv_tags[tags_len] = NULL;
+    }
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_FREE");
-    if (value)
-        data->vg_free = g_ascii_strtoull (value, NULL, 0);
-    else
-        data->vg_free = 0;
-
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_EXTENT_SIZE");
-    if (value)
-        data->vg_extent_size = g_ascii_strtoull (value, NULL, 0);
-    else
-        data->vg_extent_size = 0;
-
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_EXTENT_COUNT");
-    if (value)
-        data->vg_extent_count = g_ascii_strtoull (value, NULL, 0);
-    else
-        data->vg_extent_count = 0;
-
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_FREE_COUNT");
-    if (value)
-        data->vg_free_count = g_ascii_strtoull (value, NULL, 0);
-    else
-        data->vg_free_count = 0;
-
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_PV_COUNT");
-    if (value)
-        data->vg_pv_count = g_ascii_strtoull (value, NULL, 0);
-    else
-        data->vg_pv_count = 0;
-
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_PV_TAGS");
-    if (value)
-        data->pv_tags = g_strsplit (value, ",", -1);
-    else
-        data->pv_tags = NULL;
-
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_PV_MISSING");
-    data->missing = (g_strcmp0 (value, "missing") == 0);
-
-    if (free_table)
-        g_hash_table_destroy (table);
+    data->missing = (gboolean) json_object_get_int_member_with_default (pv_obj, "pv_missing", 0);
 
     return data;
 }
 
-static BDLVMVGdata* get_vg_data_from_table (GHashTable *table, gboolean free_table) {
+static BDLVMVGdata* get_vg_data_from_json (JsonObject *vg_obj) {
     BDLVMVGdata *data = g_new0 (BDLVMVGdata, 1);
-    gchar *value = NULL;
+    JsonArray *tags_array = NULL;
+    guint tags_len = 0;
 
-    data->name = g_strdup (g_hash_table_lookup (table, "LVM2_VG_NAME"));
-    data->uuid = g_strdup (g_hash_table_lookup (table, "LVM2_VG_UUID"));
+    data->name = _lvm_json_get_string (vg_obj, "vg_name");
+    data->uuid = _lvm_json_get_string (vg_obj, "vg_uuid");
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_SIZE");
-    if (value)
-        data->size = g_ascii_strtoull (value, NULL, 0);
-    else
-        data->size = 0;
+    data->size = g_ascii_strtoull (json_object_get_string_member_with_default (vg_obj, "vg_size", "0"), NULL, 0);
+    data->free = g_ascii_strtoull (json_object_get_string_member_with_default (vg_obj, "vg_free", "0"), NULL, 0);
+    data->extent_size = g_ascii_strtoull (json_object_get_string_member_with_default (vg_obj, "vg_extent_size", "0"), NULL, 0);
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_FREE");
-    if (value)
-        data->free = g_ascii_strtoull (value, NULL, 0);
-    else
-        data->free= 0;
+    data->extent_count = (guint64) json_object_get_int_member_with_default (vg_obj, "vg_extent_count", 0);
+    data->free_count = (guint64) json_object_get_int_member_with_default (vg_obj, "vg_free_count", 0);
+    data->pv_count = (guint64) json_object_get_int_member_with_default (vg_obj, "pv_count", 0);
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_EXTENT_SIZE");
-    if (value)
-        data->extent_size = g_ascii_strtoull (value, NULL, 0);
-    else
-        data->extent_size = 0;
+    data->exported = (gboolean) json_object_get_int_member_with_default (vg_obj, "vg_exported", 0);
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_EXTENT_COUNT");
-    if (value)
-        data->extent_count = g_ascii_strtoull (value, NULL, 0);
-    else
-        data->extent_count = 0;
-
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_FREE_COUNT");
-    if (value)
-        data->free_count = g_ascii_strtoull (value, NULL, 0);
-    else
-        data->free_count = 0;
-
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_PV_COUNT");
-    if (value)
-        data->pv_count = g_ascii_strtoull (value, NULL, 0);
-    else
-        data->pv_count = 0;
-
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_EXPORTED");
-    if (value && g_strcmp0 (value, "exported") == 0)
-        data->exported = TRUE;
-    else
-        data->exported = FALSE;
-
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_TAGS");
-    if (value)
-        data->vg_tags = g_strsplit (value, ",", -1);
-    else
-        data->vg_tags = NULL;
-
-    if (free_table)
-        g_hash_table_destroy (table);
+    if (json_object_has_member (vg_obj, "vg_tags")) {
+        tags_array = json_object_get_array_member (vg_obj, "vg_tags");
+        tags_len = json_array_get_length (tags_array);
+        data->vg_tags = g_new0 (gchar *, tags_len + 1);
+        for (guint i = 0; i < tags_len; i++)
+            data->vg_tags[i] = g_strdup (json_array_get_string_element (tags_array, i));
+        data->vg_tags[tags_len] = NULL;
+    }
 
     return data;
 }
@@ -467,23 +446,21 @@ static gchar **prepare_sublvs (gchar **values, gchar *extra_value) {
   return values;
 }
 
-static BDLVMLVdata* get_lv_data_from_table (GHashTable *table, gboolean free_table) {
+static BDLVMLVdata* get_lv_data_from_json (JsonObject *lv_obj) {
     BDLVMLVdata *data = g_new0 (BDLVMLVdata, 1);
-    gchar *value = NULL;
+    JsonArray *array = NULL;
+    guint array_len = 0;
+    const gchar *value = NULL;
 
-    data->lv_name = g_strdup (g_hash_table_lookup (table, "LVM2_LV_NAME"));
-    data->vg_name = g_strdup (g_hash_table_lookup (table, "LVM2_VG_NAME"));
-    data->uuid = g_strdup (g_hash_table_lookup (table, "LVM2_LV_UUID"));
+    data->lv_name = _lvm_json_get_string (lv_obj, "lv_name");
+    data->vg_name = _lvm_json_get_string (lv_obj, "vg_name");
+    data->uuid = _lvm_json_get_string (lv_obj, "lv_uuid");
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_LV_SIZE");
-    if (value)
-        data->size = g_ascii_strtoull (value, NULL, 0);
-    else
-        data->size = 0;
+    data->size = g_ascii_strtoull (json_object_get_string_member_with_default (lv_obj, "lv_size", "0"), NULL, 0);
 
-    data->attr = g_strdup (g_hash_table_lookup (table, "LVM2_LV_ATTR"));
+    data->attr = _lvm_json_get_string (lv_obj, "lv_attr");
 
-    value = g_hash_table_lookup (table, "LVM2_SEGTYPE");
+    value = json_object_get_string_member_with_default (lv_obj, "segtype", NULL);
     if (g_strcmp0 (value, "error") == 0) {
       /* A segment type "error" appears when "vgreduce
        * --removemissing" replaces a missing PV with a device mapper
@@ -491,94 +468,118 @@ static BDLVMLVdata* get_lv_data_from_table (GHashTable *table, gboolean free_tab
        * and will again be "linear" after repair.  Let's not expose
        * this implementation detail.
        */
-      value = "linear";
+      data->segtype = g_strdup ("linear");
+    } else
+      data->segtype = (value && *value) ? g_strdup (value) : NULL;
+
+    data->origin = _lvm_json_get_string (lv_obj, "origin");
+    data->pool_lv = _lvm_json_get_string (lv_obj, "pool_lv");
+    data->data_lv = _lvm_json_get_string (lv_obj, "data_lv");
+    data->metadata_lv = _lvm_json_get_string (lv_obj, "metadata_lv");
+
+    /* lv_role is an array in JSON, join with "," */
+    if (json_object_has_member (lv_obj, "lv_role")) {
+        array = json_object_get_array_member (lv_obj, "lv_role");
+        array_len = json_array_get_length (array);
+        if (array_len > 0) {
+            gchar **role_strs = g_new0 (gchar *, array_len + 1);
+            for (guint i = 0; i < array_len; i++)
+                role_strs[i] = (gchar *) json_array_get_string_element (array, i);
+            data->roles = g_strjoinv (",", role_strs);
+            g_free (role_strs);
+        }
     }
-    data->segtype = g_strdup (value);
 
-    data->origin = g_strdup (g_hash_table_lookup (table, "LVM2_ORIGIN"));
-    data->pool_lv = g_strdup (g_hash_table_lookup (table, "LVM2_POOL_LV"));
-    data->data_lv = g_strdup (g_hash_table_lookup (table, "LVM2_DATA_LV"));
-    data->metadata_lv = g_strdup (g_hash_table_lookup (table, "LVM2_METADATA_LV"));
-    data->roles = g_strdup (g_hash_table_lookup (table, "LVM2_LV_ROLE"));
+    data->move_pv = _lvm_json_get_string (lv_obj, "move_pv");
 
-    data->move_pv = g_strdup (g_hash_table_lookup (table, "LVM2_MOVE_PV"));
-
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_DATA_PERCENT");
-    if (value)
-        data->data_percent = g_ascii_strtoull (value, NULL, 0);
+    if (json_object_has_member (lv_obj, "data_percent") && !json_object_get_null_member (lv_obj, "data_percent"))
+        data->data_percent = (guint64) json_object_get_double_member (lv_obj, "data_percent");
     else
         data->data_percent = 0;
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_METADATA_PERCENT");
-    if (value)
-        data->metadata_percent = g_ascii_strtoull (value, NULL, 0);
+    if (json_object_has_member (lv_obj, "metadata_percent") && !json_object_get_null_member (lv_obj, "metadata_percent"))
+        data->metadata_percent = (guint64) json_object_get_double_member (lv_obj, "metadata_percent");
     else
         data->metadata_percent = 0;
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_COPY_PERCENT");
-    if (value)
-        data->copy_percent = g_ascii_strtoull (value, NULL, 0);
+    if (json_object_has_member (lv_obj, "copy_percent") && !json_object_get_null_member (lv_obj, "copy_percent"))
+        data->copy_percent = (guint64) json_object_get_double_member (lv_obj, "copy_percent");
     else
         data->copy_percent = 0;
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_LV_TAGS");
-    if (value)
-        data->lv_tags = g_strsplit (value, ",", -1);
-    else
-        data->lv_tags = NULL;
+    if (json_object_has_member (lv_obj, "lv_tags")) {
+        array = json_object_get_array_member (lv_obj, "lv_tags");
+        array_len = json_array_get_length (array);
+        data->lv_tags = g_new0 (gchar *, array_len + 1);
+        for (guint i = 0; i < array_len; i++)
+            data->lv_tags[i] = g_strdup (json_array_get_string_element (array, i));
+        data->lv_tags[array_len] = NULL;
+    }
 
     /* replace '[' and ']' (marking LVs as internal) with spaces and then
        remove all the leading and trailing whitespace */
-    g_strstrip (g_strdelimit (data->pool_lv, "[]", ' '));
-    g_strstrip (g_strdelimit (data->data_lv, "[]", ' '));
-    g_strstrip (g_strdelimit (data->metadata_lv, "[]", ' '));
+    if (data->pool_lv)
+        g_strstrip (g_strdelimit (data->pool_lv, "[]", ' '));
+    if (data->data_lv)
+        g_strstrip (g_strdelimit (data->data_lv, "[]", ' '));
+    if (data->metadata_lv)
+        g_strstrip (g_strdelimit (data->metadata_lv, "[]", ' '));
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_DEVICES");
-    if (value) {
-      gchar **values = g_strsplit (value, ",", -1);
+    /* devices (present only in tree variant) */
+    if (json_object_has_member (lv_obj, "devices")) {
+        array = json_object_get_array_member (lv_obj, "devices");
+        array_len = json_array_get_length (array);
 
-      /* If values starts with "/dev/", we have a single PV.
+        /* If the list is empty, this is probably an "error" segment
+           resulting from a "vgreduce --removemissing" operation.
 
-         If the list is empty, this is probably an "error" segment
-         resulting from a "vgreduce --removemissing" operation.
+           If the first value starts with "[unknown]", it is a segment with a
+           missing PV that hasn't been converted to an "error" segment yet.
 
-         If the value starts with "[unknown]", it is a segment with a
-         missing PV that hasn't been converted to an "error" segment
-         yet.
+           If it starts with "/dev/", we have a single PV.
+           Additional segments are added in merge_lv_data below.
 
-         Otherwise it is a list of sub-lvs.
+           Otherwise it is a list of sub-lvs.
+        */
+        if (array_len == 0 || g_str_has_prefix (json_array_get_string_element (array, 0), "[unknown]")) {
+            data->segs = g_new0 (BDLVMSEGdata *, 1);
+            data->segs[0] = NULL;
+        } else if (g_str_has_prefix (json_array_get_string_element (array, 0), "/dev/")) {
+            data->segs = g_new0 (BDLVMSEGdata *, 2);
+            data->segs[0] = g_new0 (BDLVMSEGdata, 1);
+            data->segs[1] = NULL;
 
-         LVM2 guarantees: only one entry if the first is a PV
-         Additional segments are added in merge_lv_data below.
-      */
-      if (!values[0] || g_str_has_prefix (values[0], "[unknown]")) {
-        data->segs = g_new0 (BDLVMSEGdata *, 1);
-        data->segs[0] = NULL;
-        g_strfreev (values);
-      } else if (g_str_has_prefix (values[0], "/dev/")) {
-        data->segs = g_new0 (BDLVMSEGdata *, 2);
-        data->segs[0] = g_new0 (BDLVMSEGdata, 1);
-        data->segs[1] = NULL;
+            gchar *dev = g_strdup (json_array_get_string_element (array, 0));
+            gchar *paren = strrchr (dev, '(');
+            if (paren) {
+                data->segs[0]->pv_start_pe = g_ascii_strtoull (paren + 1, NULL, 10);
+                *paren = '\0';
+            }
+            data->segs[0]->pvdev = dev;
 
-        gchar *paren = strrchr (values[0], '(');
-        if (paren) {
-          data->segs[0]->pv_start_pe = atoi (paren+1);
-          *paren = '\0';
+            value = json_object_get_string_member_with_default (lv_obj, "seg_size_pe", NULL);
+            if (value)
+                data->segs[0]->size_pe = g_ascii_strtoull (value, NULL, 0);
+        } else {
+            /* sub-LVs */
+            gchar **values = g_new0 (gchar *, array_len + 1);
+            for (guint i = 0; i < array_len; i++)
+                values[i] = g_strdup (json_array_get_string_element (array, i));
+            values[array_len] = NULL;
+
+            data->data_lvs = prepare_sublvs (values, data->data_lv);
+
+            if (json_object_has_member (lv_obj, "metadata_devices")) {
+                JsonArray *md_array = json_object_get_array_member (lv_obj, "metadata_devices");
+                guint md_len = json_array_get_length (md_array);
+                gchar **md_values = g_new0 (gchar *, md_len + 1);
+                for (guint i = 0; i < md_len; i++)
+                    md_values[i] = g_strdup (json_array_get_string_element (md_array, i));
+                md_values[md_len] = NULL;
+                data->metadata_lvs = prepare_sublvs (md_values, data->metadata_lv);
+            }
         }
-        data->segs[0]->pvdev = g_strdup (values[0]);
-        value = (gchar*) g_hash_table_lookup (table, "LVM2_SEG_SIZE_PE");
-        if (value)
-          data->segs[0]->size_pe = g_ascii_strtoull (value, NULL, 0);
-        g_strfreev (values);
-      } else {
-        data->data_lvs = prepare_sublvs (values, data->data_lv);
-        value = (gchar*) g_hash_table_lookup (table, "LVM2_METADATA_DEVICES");
-        data->metadata_lvs = prepare_sublvs (g_strsplit (value ?: "", ",", -1), data->metadata_lv);
-      }
     }
-
-    if (free_table)
-        g_hash_table_destroy (table);
 
     return data;
 }
@@ -606,11 +607,11 @@ static void merge_lv_data (BDLVMLVdata *data, BDLVMLVdata *more_data) {
   }
 }
 
-static BDLVMVDOPooldata* get_vdo_data_from_table (GHashTable *table, gboolean free_table) {
+static BDLVMVDOPooldata* get_vdo_data_from_json (JsonObject *vdo_obj) {
     BDLVMVDOPooldata *data = g_new0 (BDLVMVDOPooldata, 1);
-    gchar *value = NULL;
+    const gchar *value = NULL;
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VDO_OPERATING_MODE");
+    value = json_object_get_string_member_with_default (vdo_obj, "vdo_operating_mode", NULL);
     if (g_strcmp0 (value, "recovering") == 0)
         data->operating_mode = BD_LVM_VDO_MODE_RECOVERING;
     else if (g_strcmp0 (value, "read-only") == 0)
@@ -622,7 +623,7 @@ static BDLVMVDOPooldata* get_vdo_data_from_table (GHashTable *table, gboolean fr
         data->operating_mode = BD_LVM_VDO_MODE_UNKNOWN;
     }
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VDO_COMPRESSION_STATE");
+    value = json_object_get_string_member_with_default (vdo_obj, "vdo_compression_state", NULL);
     if (g_strcmp0 (value, "online") == 0)
         data->compression_state = BD_LVM_VDO_COMPRESSION_ONLINE;
     else if (g_strcmp0 (value, "offline") == 0)
@@ -632,7 +633,7 @@ static BDLVMVDOPooldata* get_vdo_data_from_table (GHashTable *table, gboolean fr
         data->compression_state = BD_LVM_VDO_COMPRESSION_UNKNOWN;
     }
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VDO_INDEX_STATE");
+    value = json_object_get_string_member_with_default (vdo_obj, "vdo_index_state", NULL);
     if (g_strcmp0 (value, "error") == 0)
         data->index_state = BD_LVM_VDO_INDEX_ERROR;
     else if (g_strcmp0 (value, "closed") == 0)
@@ -650,7 +651,7 @@ static BDLVMVDOPooldata* get_vdo_data_from_table (GHashTable *table, gboolean fr
         data->index_state = BD_LVM_VDO_INDEX_UNKNOWN;
     }
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VDO_WRITE_POLICY");
+    value = json_object_get_string_member_with_default (vdo_obj, "vdo_write_policy", NULL);
     if (g_strcmp0 (value, "auto") == 0)
         data->write_policy = BD_LVM_VDO_WRITE_POLICY_AUTO;
     else if (g_strcmp0 (value, "sync") == 0)
@@ -662,38 +663,21 @@ static BDLVMVDOPooldata* get_vdo_data_from_table (GHashTable *table, gboolean fr
         data->write_policy = BD_LVM_VDO_WRITE_POLICY_UNKNOWN;
     }
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VDO_INDEX_MEMORY_SIZE");
-    if (value)
-        data->index_memory_size = g_ascii_strtoull (value, NULL, 0);
-    else
-        data->index_memory_size = 0;
+    value = json_object_get_string_member_with_default (vdo_obj, "vdo_index_memory_size", "0");
+    data->index_memory_size = g_ascii_strtoull (value, NULL, 0);
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VDO_USED_SIZE");
-    if (value)
-        data->used_size = g_ascii_strtoull (value, NULL, 0);
+    if (json_object_has_member (vdo_obj, "vdo_used_size") && !json_object_get_null_member (vdo_obj, "vdo_used_size"))
+        data->used_size = (guint64) json_object_get_int_member (vdo_obj, "vdo_used_size");
     else
         data->used_size = 0;
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VDO_SAVING_PERCENT");
-    if (value)
-        data->saving_percent = g_ascii_strtoull (value, NULL, 0);
+    if (json_object_has_member (vdo_obj, "vdo_saving_percent") && !json_object_get_null_member (vdo_obj, "vdo_saving_percent"))
+        data->saving_percent = (gint32) json_object_get_double_member (vdo_obj, "vdo_saving_percent");
     else
         data->saving_percent = 0;
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VDO_COMPRESSION");
-    if (value && g_strcmp0 (value, "enabled") == 0)
-        data->compression = TRUE;
-    else
-        data->compression = FALSE;
-
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VDO_DEDUPLICATION");
-    if (value && g_strcmp0 (value, "enabled") == 0)
-        data->deduplication = TRUE;
-    else
-        data->deduplication = FALSE;
-
-    if (free_table)
-        g_hash_table_destroy (table);
+    data->compression = (gboolean) json_object_get_int_member_with_default (vdo_obj, "vdo_compression", 0);
+    data->deduplication = (gboolean) json_object_get_int_member_with_default (vdo_obj, "vdo_deduplication", 0);
 
     return data;
 }
@@ -922,42 +906,30 @@ gboolean bd_lvm_delete_pv_tags (const gchar *device, const gchar **tags, GError 
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
  */
 BDLVMPVdata* bd_lvm_pvinfo (const gchar *device, GError **error) {
-    const gchar *args[10] = {"pvs", "--unit=b", "--nosuffix", "--nameprefixes",
-                       "--unquoted", "--noheadings",
+    const gchar *args[10] = {"pvs", "--units=b", "--nosuffix",
+                       "--reportformat", "json_std",
                        "-o", "pv_name,pv_uuid,pv_free,pv_size,pe_start,vg_name,vg_uuid,vg_size," \
                        "vg_free,vg_extent_size,vg_extent_count,vg_free_count,pv_count,pv_tags,pv_missing",
                        device, NULL};
-    GHashTable *table = NULL;
-    gboolean success = FALSE;
-    gchar *output = NULL;
-    gchar **lines = NULL;
-    gchar **lines_p = NULL;
-    guint num_items;
+    JsonParser *parser = NULL;
+    JsonArray *pv_array = NULL;
+    BDLVMPVdata *ret = NULL;
 
-    success = call_lvm_and_capture_output (args, NULL, &output, error);
-    if (!success)
-        /* the error is already populated from the call */
+    pv_array = call_lvm_and_parse_json_report (args, "pv", &parser, FALSE, error);
+    if (!pv_array)
         return NULL;
 
-    lines = g_strsplit (output, "\n", 0);
-    g_free (output);
-
-    for (lines_p = lines; *lines_p; lines_p++) {
-        table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 15)) {
-            g_clear_error (error);
-            g_strfreev (lines);
-            return get_pv_data_from_table (table, TRUE);
-        } else
-            if (table)
-                g_hash_table_destroy (table);
+    if (json_array_get_length (pv_array) == 0) {
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                             "Failed to parse information about the PV");
+        g_object_unref (parser);
+        return NULL;
     }
-    g_strfreev (lines);
 
-    /* getting here means no usable info was found */
-    g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
-                         "Failed to parse information about the PV");
-    return NULL;
+    ret = get_pv_data_from_json (json_array_get_object_element (pv_array, 0));
+
+    g_object_unref (parser);
+    return ret;
 }
 
 /**
@@ -969,63 +941,38 @@ BDLVMPVdata* bd_lvm_pvinfo (const gchar *device, GError **error) {
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
  */
 BDLVMPVdata** bd_lvm_pvs (GError **error) {
-    const gchar *args[9] = {"pvs", "--unit=b", "--nosuffix", "--nameprefixes",
-                       "--unquoted", "--noheadings",
+    const gchar *args[9] = {"pvs", "--units=b", "--nosuffix",
+                       "--reportformat", "json_std",
                        "-o", "pv_name,pv_uuid,pv_free,pv_size,pe_start,vg_name,vg_uuid,vg_size," \
                        "vg_free,vg_extent_size,vg_extent_count,vg_free_count,pv_count,pv_tags,pv_missing",
                        NULL};
-    GHashTable *table = NULL;
-    gboolean success = FALSE;
-    gchar *output = NULL;
-    gchar **lines = NULL;
-    gchar **lines_p = NULL;
-    guint num_items;
+    JsonParser *parser = NULL;
+    JsonArray *pv_array = NULL;
     GPtrArray *pvs;
-    BDLVMPVdata *pvdata = NULL;
     GError *l_error = NULL;
 
     pvs = g_ptr_array_new ();
 
-    success = call_lvm_and_capture_output (args, NULL, &output, &l_error);
-    if (!success) {
-        if (g_error_matches (l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
-            /* no output => no PVs, not an error */
-            g_clear_error (&l_error);
-            /* return an empty list */
-            g_ptr_array_add (pvs, NULL);
-            return (BDLVMPVdata **) g_ptr_array_free (pvs, FALSE);
-        }
-        else {
-            /* the error is already populated from the call */
-            g_ptr_array_free (pvs, TRUE);
+    pv_array = call_lvm_and_parse_json_report (args, "pv", &parser, TRUE, &l_error);
+    if (!pv_array) {
+        if (l_error) {
             g_propagate_error (error, l_error);
+            g_ptr_array_free (pvs, TRUE);
             return NULL;
         }
+        /* no output => no PVs, not an error */
+        g_ptr_array_add (pvs, NULL);
+        return (BDLVMPVdata **) g_ptr_array_free (pvs, FALSE);
     }
 
-    lines = g_strsplit (output, "\n", 0);
-    g_free (output);
-
-    for (lines_p = lines; *lines_p; lines_p++) {
-        table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 15)) {
-            /* valid line, try to parse and record it */
-            pvdata = get_pv_data_from_table (table, TRUE);
-            if (pvdata)
-                g_ptr_array_add (pvs, pvdata);
-        } else
-            if (table)
-                g_hash_table_destroy (table);
+    for (guint i = 0; i < json_array_get_length (pv_array); i++) {
+        JsonObject *pv_obj = json_array_get_object_element (pv_array, i);
+        BDLVMPVdata *pvdata = get_pv_data_from_json (pv_obj);
+        if (pvdata)
+            g_ptr_array_add (pvs, pvdata);
     }
 
-    g_strfreev (lines);
-
-    if (pvs->len == 0) {
-        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
-                             "Failed to parse information about PVs");
-        g_ptr_array_free (pvs, TRUE);
-        return NULL;
-    }
+    g_object_unref (parser);
 
     /* returning NULL-terminated array of BDLVMPVdata */
     g_ptr_array_add (pvs, NULL);
@@ -1266,41 +1213,29 @@ gboolean bd_lvm_vglock_stop (const gchar *vg_name, const BDExtraArg **extra, GEr
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
  */
 BDLVMVGdata* bd_lvm_vginfo (const gchar *vg_name, GError **error) {
-    const gchar *args[10] = {"vgs", "--noheadings", "--nosuffix", "--nameprefixes",
-                       "--unquoted", "--units=b",
+    const gchar *args[10] = {"vgs", "--nosuffix", "--units=b",
+                       "--reportformat", "json_std",
                        "-o", "name,uuid,size,free,extent_size,extent_count,free_count,pv_count,vg_exported,vg_tags",
                        vg_name, NULL};
+    JsonParser *parser = NULL;
+    JsonArray *vg_array = NULL;
+    BDLVMVGdata *ret = NULL;
 
-    GHashTable *table = NULL;
-    gboolean success = FALSE;
-    gchar *output = NULL;
-    gchar **lines = NULL;
-    gchar **lines_p = NULL;
-    guint num_items;
-
-    success = call_lvm_and_capture_output (args, NULL, &output, error);
-    if (!success)
-        /* the error is already populated from the call */
+    vg_array = call_lvm_and_parse_json_report (args, "vg", &parser, FALSE, error);
+    if (!vg_array)
         return NULL;
 
-    lines = g_strsplit (output, "\n", 0);
-    g_free (output);
-
-    for (lines_p = lines; *lines_p; lines_p++) {
-        table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 10)) {
-            g_strfreev (lines);
-            return get_vg_data_from_table (table, TRUE);
-        } else
-            if (table)
-                g_hash_table_destroy (table);
+    if (json_array_get_length (vg_array) == 0) {
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                             "Failed to parse information about the VG");
+        g_object_unref (parser);
+        return NULL;
     }
-    g_strfreev (lines);
 
-    /* getting here means no usable info was found */
-    g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
-                         "Failed to parse information about the VG");
-    return NULL;
+    ret = get_vg_data_from_json (json_array_get_object_element (vg_array, 0));
+
+    g_object_unref (parser);
+    return ret;
 }
 
 /**
@@ -1312,61 +1247,37 @@ BDLVMVGdata* bd_lvm_vginfo (const gchar *vg_name, GError **error) {
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
  */
 BDLVMVGdata** bd_lvm_vgs (GError **error) {
-    const gchar *args[9] = {"vgs", "--noheadings", "--nosuffix", "--nameprefixes",
-                      "--unquoted", "--units=b",
+    const gchar *args[9] = {"vgs", "--nosuffix", "--units=b",
+                      "--reportformat", "json_std",
                       "-o", "name,uuid,size,free,extent_size,extent_count,free_count,pv_count,vg_exported,vg_tags",
                       NULL};
-    GHashTable *table = NULL;
-    gboolean success = FALSE;
-    gchar *output = NULL;
-    gchar **lines = NULL;
-    gchar **lines_p = NULL;
-    guint num_items;
+    JsonParser *parser = NULL;
+    JsonArray *vg_array = NULL;
     GPtrArray *vgs;
-    BDLVMVGdata *vgdata = NULL;
     GError *l_error = NULL;
 
     vgs = g_ptr_array_new ();
 
-    success = call_lvm_and_capture_output (args, NULL, &output, &l_error);
-    if (!success) {
-        if (g_error_matches (l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
-            /* no output => no VGs, not an error */
-            g_clear_error (&l_error);
-            /* return an empty list */
-            g_ptr_array_add (vgs, NULL);
-            return (BDLVMVGdata **) g_ptr_array_free (vgs, FALSE);
-        } else {
-            /* the error is already populated from the call */
-            g_ptr_array_free (vgs, TRUE);
+    vg_array = call_lvm_and_parse_json_report (args, "vg", &parser, TRUE, &l_error);
+    if (!vg_array) {
+        if (l_error) {
             g_propagate_error (error, l_error);
+            g_ptr_array_free (vgs, TRUE);
             return NULL;
-       }
+        }
+        /* no output => no VGs, not an error */
+        g_ptr_array_add (vgs, NULL);
+        return (BDLVMVGdata **) g_ptr_array_free (vgs, FALSE);
     }
 
-    lines = g_strsplit (output, "\n", 0);
-    g_free (output);
-
-    for (lines_p = lines; *lines_p; lines_p++) {
-        table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 10)) {
-            /* valid line, try to parse and record it */
-            vgdata = get_vg_data_from_table (table, TRUE);
-            if (vgdata)
-                g_ptr_array_add (vgs, vgdata);
-        } else
-            if (table)
-                g_hash_table_destroy (table);
+    for (guint i = 0; i < json_array_get_length (vg_array); i++) {
+        JsonObject *vg_obj = json_array_get_object_element (vg_array, i);
+        BDLVMVGdata *vgdata = get_vg_data_from_json (vg_obj);
+        if (vgdata)
+            g_ptr_array_add (vgs, vgdata);
     }
 
-    g_strfreev (lines);
-
-    if (vgs->len == 0) {
-        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
-                             "Failed to parse information about VGs");
-        g_ptr_array_free (vgs, TRUE);
-        return NULL;
-    }
+    g_object_unref (parser);
 
     /* returning NULL-terminated array of BDLVMVGdata */
     g_ptr_array_add (vgs, NULL);
@@ -1742,92 +1653,87 @@ gboolean bd_lvm_delete_lv_tags (const gchar *vg_name, const gchar *lv_name, cons
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
  */
 BDLVMLVdata* bd_lvm_lvinfo (const gchar *vg_name, const gchar *lv_name, GError **error) {
-    const gchar *args[11] = {"lvs", "--noheadings", "--nosuffix", "--nameprefixes",
-                       "--unquoted", "--units=b", "-a",
-                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype,origin,pool_lv,data_lv,metadata_lv,role,move_pv,data_percent,metadata_percent,copy_percent,lv_tags",
+    const gchar *args[11] = {"lvs", "--nosuffix", "--units=b",
+                       "--reportformat", "json_std", "-a",
+                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype,origin,pool_lv,data_lv,metadata_lv,lv_role,move_pv,data_percent,metadata_percent,copy_percent,lv_tags",
                        NULL, NULL};
+    JsonParser *parser = NULL;
+    JsonArray *lv_array = NULL;
+    BDLVMLVdata *ret = NULL;
 
-    GHashTable *table = NULL;
-    gboolean success = FALSE;
-    gchar *output = NULL;
-    gchar **lines = NULL;
-    gchar **lines_p = NULL;
-    guint num_items;
+    args[8] = g_strdup_printf ("%s/%s", vg_name, lv_name);
 
-    args[9] = g_strdup_printf ("%s/%s", vg_name, lv_name);
+    lv_array = call_lvm_and_parse_json_report (args, "lv", &parser, FALSE, error);
+    g_free ((gchar *) args[8]);
 
-    success = call_lvm_and_capture_output (args, NULL, &output, error);
-    g_free ((gchar *) args[9]);
-
-    if (!success)
-        /* the error is already populated from the call */
+    if (!lv_array)
         return NULL;
 
-    lines = g_strsplit (output, "\n", 0);
-    g_free (output);
-
-    for (lines_p = lines; *lines_p; lines_p++) {
-        table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 16)) {
-            g_strfreev (lines);
-            return get_lv_data_from_table (table, TRUE);
-        } else
-            if (table)
-                g_hash_table_destroy (table);
+    if (json_array_get_length (lv_array) == 0) {
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                             "Failed to parse information about the LV");
+        g_object_unref (parser);
+        return NULL;
     }
-    g_strfreev (lines);
 
-    /* getting here means no usable info was found */
-    g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
-                         "Failed to parse information about the LV");
-    return NULL;
+    ret = get_lv_data_from_json (json_array_get_object_element (lv_array, 0));
+
+    g_object_unref (parser);
+    return ret;
 }
 
+/**
+ * bd_lvm_lvinfo_tree:
+ * @vg_name: name of the VG that contains the LV to get information about
+ * @lv_name: name of the LV to get information about
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * This function will fill out the data_lvs, metadata_lvs, and segs fields as well.
+ *
+ * Returns: (transfer full): information about the @vg_name/@lv_name LV or %NULL in case
+ * of error (the @error) gets populated in those cases)
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
+ */
 BDLVMLVdata* bd_lvm_lvinfo_tree (const gchar *vg_name, const gchar *lv_name, GError **error) {
-    const gchar *args[11] = {"lvs", "--noheadings", "--nosuffix", "--nameprefixes",
-                       "--unquoted", "--units=b", "-a",
-                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype,origin,pool_lv,data_lv,metadata_lv,role,move_pv,data_percent,metadata_percent,copy_percent,lv_tags,devices,metadata_devices,seg_size_pe",
+    const gchar *args[11] = {"lvs", "--nosuffix", "--units=b",
+                       "--reportformat", "json_std", "-a",
+                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype,origin,pool_lv,data_lv,metadata_lv,lv_role,move_pv,data_percent,metadata_percent,copy_percent,lv_tags,devices,metadata_devices,seg_size_pe",
                        NULL, NULL};
-
-    GHashTable *table = NULL;
-    gboolean success = FALSE;
-    gchar *output = NULL;
-    gchar **lines = NULL;
-    gchar **lines_p = NULL;
-    guint num_items;
+    JsonParser *parser = NULL;
+    JsonArray *lv_array = NULL;
     BDLVMLVdata *result = NULL;
 
-    args[9] = g_strdup_printf ("%s/%s", vg_name, lv_name);
+    args[8] = g_strdup_printf ("%s/%s", vg_name, lv_name);
 
-    success = call_lvm_and_capture_output (args, NULL, &output, error);
-    g_free ((gchar *) args[9]);
+    lv_array = call_lvm_and_parse_json_report (args, "lv", &parser, FALSE, error);
+    g_free ((gchar *) args[8]);
 
-    if (!success)
-        /* the error is already populated from the call */
+    if (!lv_array)
         return NULL;
 
-    lines = g_strsplit (output, "\n", 0);
-    g_free (output);
-
-    for (lines_p = lines; *lines_p; lines_p++) {
-        table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 19)) {
-            BDLVMLVdata *lvdata = get_lv_data_from_table (table, TRUE);
-            if (result) {
-                merge_lv_data (result, lvdata);
-                bd_lvm_lvdata_free (lvdata);
-            } else
-                result = lvdata;
-        } else {
-            if (table)
-                g_hash_table_destroy (table);
-        }
+    if (json_array_get_length (lv_array) == 0) {
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                             "Failed to parse information about the LV");
+        g_object_unref (parser);
+        return NULL;
     }
-    g_strfreev (lines);
+
+    for (guint i = 0; i < json_array_get_length (lv_array); i++) {
+        JsonObject *lv_obj = json_array_get_object_element (lv_array, i);
+        BDLVMLVdata *lvdata = get_lv_data_from_json (lv_obj);
+        if (result) {
+            merge_lv_data (result, lvdata);
+            bd_lvm_lvdata_free (lvdata);
+        } else
+            result = lvdata;
+    }
+
+    g_object_unref (parser);
 
     if (result == NULL)
-      g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
-                           "Failed to parse information about the LV");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                             "Failed to parse information about the LV");
     return result;
 }
 
@@ -1842,159 +1748,121 @@ BDLVMLVdata* bd_lvm_lvinfo_tree (const gchar *vg_name, const gchar *lv_name, GEr
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
  */
 BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
-    const gchar *args[11] = {"lvs", "--noheadings", "--nosuffix", "--nameprefixes",
-                       "--unquoted", "--units=b", "-a",
-                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype,origin,pool_lv,data_lv,metadata_lv,role,move_pv,data_percent,metadata_percent,copy_percent,lv_tags",
+    const gchar *args[11] = {"lvs", "--nosuffix", "--units=b",
+                       "--reportformat", "json_std", "-a",
+                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype,origin,pool_lv,data_lv,metadata_lv,lv_role,move_pv,data_percent,metadata_percent,copy_percent,lv_tags",
                        NULL, NULL};
-
-    GHashTable *table = NULL;
-    gboolean success = FALSE;
-    gchar *output = NULL;
-    gchar **lines = NULL;
-    gchar **lines_p = NULL;
-    guint num_items;
+    JsonParser *parser = NULL;
+    JsonArray *lv_array = NULL;
     GPtrArray *lvs;
-    BDLVMLVdata *lvdata = NULL;
     GError *l_error = NULL;
 
     lvs = g_ptr_array_new ();
 
     if (vg_name)
-        args[9] = vg_name;
+        args[8] = vg_name;
 
-    success = call_lvm_and_capture_output (args, NULL, &output, &l_error);
-    if (!success) {
-        if (g_error_matches (l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
-            /* no output => no LVs, not an error */
-            g_clear_error (&l_error);
-            /* return an empty list */
-            g_ptr_array_add (lvs, NULL);
-            return (BDLVMLVdata **) g_ptr_array_free (lvs, FALSE);
-        }
-        else {
-            /* the error is already populated from the call */
-            g_ptr_array_free (lvs, TRUE);
+    lv_array = call_lvm_and_parse_json_report (args, "lv", &parser, TRUE, &l_error);
+    if (!lv_array) {
+        if (l_error) {
             g_propagate_error (error, l_error);
+            g_ptr_array_free (lvs, TRUE);
             return NULL;
         }
+        /* no output => no LVs, not an error */
+        g_ptr_array_add (lvs, NULL);
+        return (BDLVMLVdata **) g_ptr_array_free (lvs, FALSE);
     }
 
-    lines = g_strsplit (output, "\n", 0);
-    g_free (output);
-
-    for (lines_p = lines; *lines_p; lines_p++) {
-        table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 16)) {
-            /* valid line, try to parse and record it */
-            lvdata = get_lv_data_from_table (table, TRUE);
-            if (lvdata) {
-                /* ignore duplicate entries in lvs output, these are caused by multi segments LVs */
-                for (gsize i = 0; i < lvs->len; i++) {
-                    if (g_strcmp0 (((BDLVMLVdata *) g_ptr_array_index (lvs, i))->lv_name, lvdata->lv_name) == 0) {
-                        bd_utils_log_format (BD_UTILS_LOG_DEBUG,
-                                             "Duplicate LV entry for '%s' found in lvs output",
-                                             lvdata->lv_name);
-                        bd_lvm_lvdata_free (lvdata);
-                        lvdata = NULL;
-                        break;
-                    }
+    for (guint i = 0; i < json_array_get_length (lv_array); i++) {
+        JsonObject *lv_obj = json_array_get_object_element (lv_array, i);
+        BDLVMLVdata *lvdata = get_lv_data_from_json (lv_obj);
+        if (lvdata) {
+            /* ignore duplicate entries in lvs output, these are caused by multi segments LVs */
+            gboolean duplicate = FALSE;
+            for (gsize j = 0; j < lvs->len; j++) {
+                if (g_strcmp0 (((BDLVMLVdata *) g_ptr_array_index (lvs, j))->lv_name, lvdata->lv_name) == 0) {
+                    bd_utils_log_format (BD_UTILS_LOG_DEBUG,
+                                         "Duplicate LV entry for '%s' found in lvs output",
+                                         lvdata->lv_name);
+                    bd_lvm_lvdata_free (lvdata);
+                    duplicate = TRUE;
+                    break;
                 }
-
-                if (lvdata)
-                    g_ptr_array_add (lvs, lvdata);
             }
-        } else
-            if (table)
-                g_hash_table_destroy (table);
+
+            if (!duplicate)
+                g_ptr_array_add (lvs, lvdata);
+        }
     }
 
-    g_strfreev (lines);
-
-    if (lvs->len == 0) {
-        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
-                             "Failed to parse information about LVs");
-        g_ptr_array_free (lvs, TRUE);
-        return NULL;
-    }
+    g_object_unref (parser);
 
     /* returning NULL-terminated array of BDLVMLVdata */
     g_ptr_array_add (lvs, NULL);
     return (BDLVMLVdata **) g_ptr_array_free (lvs, FALSE);
 }
 
+/**
+ * bd_lvm_lvs_tree:
+ * @vg_name: (nullable): name of the VG to get information about LVs from
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * This function will fill out the data_lvs, metadata_lvs, and segs fields as well.
+ *
+ * Returns: (array zero-terminated=1): information about LVs found in the given
+ * @vg_name VG or in system if @vg_name is %NULL.
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
+ */
 BDLVMLVdata** bd_lvm_lvs_tree (const gchar *vg_name, GError **error) {
-    const gchar *args[11] = {"lvs", "--noheadings", "--nosuffix", "--nameprefixes",
-                       "--unquoted", "--units=b", "-a",
-                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype,origin,pool_lv,data_lv,metadata_lv,role,move_pv,data_percent,metadata_percent,copy_percent,lv_tags,devices,metadata_devices,seg_size_pe",
+    const gchar *args[11] = {"lvs", "--nosuffix", "--units=b",
+                       "--reportformat", "json_std", "-a",
+                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype,origin,pool_lv,data_lv,metadata_lv,lv_role,move_pv,data_percent,metadata_percent,copy_percent,lv_tags,devices,metadata_devices,seg_size_pe",
                        NULL, NULL};
-
-    GHashTable *table = NULL;
-    gboolean success = FALSE;
-    gchar *output = NULL;
-    gchar **lines = NULL;
-    gchar **lines_p = NULL;
-    guint num_items;
+    JsonParser *parser = NULL;
+    JsonArray *lv_array = NULL;
     GPtrArray *lvs;
-    BDLVMLVdata *lvdata = NULL;
     GError *l_error = NULL;
 
     lvs = g_ptr_array_new ();
 
     if (vg_name)
-        args[9] = vg_name;
+        args[8] = vg_name;
 
-    success = call_lvm_and_capture_output (args, NULL, &output, &l_error);
-    if (!success) {
-        if (g_error_matches (l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
-            /* no output => no LVs, not an error */
-            g_clear_error (&l_error);
-            /* return an empty list */
-            g_ptr_array_add (lvs, NULL);
-            return (BDLVMLVdata **) g_ptr_array_free (lvs, FALSE);
-        }
-        else {
-            /* the error is already populated from the call */
-            g_ptr_array_free (lvs, TRUE);
+    lv_array = call_lvm_and_parse_json_report (args, "lv", &parser, TRUE, &l_error);
+    if (!lv_array) {
+        if (l_error) {
             g_propagate_error (error, l_error);
+            g_ptr_array_free (lvs, TRUE);
             return NULL;
         }
+        /* no output => no LVs, not an error */
+        g_ptr_array_add (lvs, NULL);
+        return (BDLVMLVdata **) g_ptr_array_free (lvs, FALSE);
     }
 
-    lines = g_strsplit (output, "\n", 0);
-    g_free (output);
-
-    for (lines_p = lines; *lines_p; lines_p++) {
-        table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 19)) {
-            /* valid line, try to parse and record it */
-            lvdata = get_lv_data_from_table (table, TRUE);
-            if (lvdata) {
-                for (gsize i = 0; i < lvs->len; i++) {
-                    BDLVMLVdata *other = (BDLVMLVdata *) g_ptr_array_index (lvs, i);
-                    if (g_strcmp0 (other->lv_name, lvdata->lv_name) == 0) {
-                        merge_lv_data (other, lvdata);
-                        bd_lvm_lvdata_free (lvdata);
-                        lvdata = NULL;
-                        break;
-                    }
+    for (guint i = 0; i < json_array_get_length (lv_array); i++) {
+        JsonObject *lv_obj = json_array_get_object_element (lv_array, i);
+        BDLVMLVdata *lvdata = get_lv_data_from_json (lv_obj);
+        if (lvdata) {
+            gboolean merged = FALSE;
+            for (gsize j = 0; j < lvs->len; j++) {
+                BDLVMLVdata *other = (BDLVMLVdata *) g_ptr_array_index (lvs, j);
+                if (g_strcmp0 (other->lv_name, lvdata->lv_name) == 0) {
+                    merge_lv_data (other, lvdata);
+                    bd_lvm_lvdata_free (lvdata);
+                    merged = TRUE;
+                    break;
                 }
-
-                if (lvdata)
-                    g_ptr_array_add (lvs, lvdata);
             }
-        } else
-            if (table)
-                g_hash_table_destroy (table);
+
+            if (!merged)
+                g_ptr_array_add (lvs, lvdata);
+        }
     }
 
-    g_strfreev (lines);
-
-    if (lvs->len == 0) {
-        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
-                             "Failed to parse information about LVs");
-        g_ptr_array_free (lvs, TRUE);
-        return NULL;
-    }
+    g_object_unref (parser);
 
     /* returning NULL-terminated array of BDLVMLVdata */
     g_ptr_array_add (lvs, NULL);
@@ -2782,44 +2650,33 @@ gboolean bd_lvm_vdo_disable_deduplication (const gchar *vg_name, const gchar *po
  * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_QUERY
  */
 BDLVMVDOPooldata* bd_lvm_vdo_info (const gchar *vg_name, const gchar *lv_name, GError **error) {
-    const gchar *args[11] = {"lvs", "--noheadings", "--nosuffix", "--nameprefixes",
-                       "--unquoted", "--units=b", "-a",
+    const gchar *args[10] = {"lvs", "--nosuffix", "--units=b",
+                       "--reportformat", "json_std", "-a",
                        "-o", "vdo_operating_mode,vdo_compression_state,vdo_index_state,vdo_write_policy,vdo_index_memory_size,vdo_used_size,vdo_saving_percent,vdo_compression,vdo_deduplication",
                        NULL, NULL};
+    JsonParser *parser = NULL;
+    JsonArray *lv_array = NULL;
+    BDLVMVDOPooldata *ret = NULL;
 
-    GHashTable *table = NULL;
-    gboolean success = FALSE;
-    gchar *output = NULL;
-    gchar **lines = NULL;
-    gchar **lines_p = NULL;
-    guint num_items;
+    args[8] = g_strdup_printf ("%s/%s", vg_name, lv_name);
 
-    args[9] = g_strdup_printf ("%s/%s", vg_name, lv_name);
+    lv_array = call_lvm_and_parse_json_report (args, "lv", &parser, FALSE, error);
+    g_free ((gchar *) args[8]);
 
-    success = call_lvm_and_capture_output (args, NULL, &output, error);
-    g_free ((gchar *) args[9]);
-
-    if (!success)
-        /* the error is already populated from the call */
+    if (!lv_array)
         return NULL;
 
-    lines = g_strsplit (output, "\n", 0);
-    g_free (output);
-
-    for (lines_p = lines; *lines_p; lines_p++) {
-        table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 9)) {
-            g_strfreev (lines);
-            return get_vdo_data_from_table (table, TRUE);
-        } else if (table)
-            g_hash_table_destroy (table);
+    if (json_array_get_length (lv_array) == 0) {
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                             "Failed to parse information about the VDO LV");
+        g_object_unref (parser);
+        return NULL;
     }
-    g_strfreev (lines);
 
-    /* getting here means no usable info was found */
-    g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
-                         "Failed to parse information about the VDO LV");
-    return NULL;
+    ret = get_vdo_data_from_json (json_array_get_object_element (lv_array, 0));
+
+    g_object_unref (parser);
+    return ret;
 }
 
 /**
