@@ -433,7 +433,7 @@ BDFSExfatInfo* bd_fs_exfat_get_info (const gchar *device, GError **error) {
 
     if (ret->sector_size == 0 || ret->sector_count == 0 || ret->cluster_count == 0) {
         g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                             "Failed to to parse exFAT info.");
+                             "Failed to parse exFAT info.");
         bd_fs_exfat_info_free (ret);
         return NULL;
     }
