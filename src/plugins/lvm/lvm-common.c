@@ -438,8 +438,8 @@ const gchar* bd_lvm_get_vdo_operating_mode_str (BDLVMVDOOperatingMode mode, GErr
     case BD_LVM_VDO_MODE_UNKNOWN:
         return "unknown";
     default:
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
-                     "Invalid LVM VDO operating mode.");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
+                             "Invalid LVM VDO operating mode.");
         return NULL;
     }
 }
@@ -462,8 +462,8 @@ const gchar* bd_lvm_get_vdo_compression_state_str (BDLVMVDOCompressionState stat
     case BD_LVM_VDO_COMPRESSION_UNKNOWN:
         return "unknown";
     default:
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
-                     "Invalid LVM VDO compression state.");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
+                             "Invalid LVM VDO compression state.");
         return NULL;
     }
 }
@@ -494,8 +494,8 @@ const gchar* bd_lvm_get_vdo_index_state_str (BDLVMVDOIndexState state, GError **
     case BD_LVM_VDO_INDEX_UNKNOWN:
         return "unknown";
     default:
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
-                     "Invalid LVM VDO index state.");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
+                             "Invalid LVM VDO index state.");
         return NULL;
     }
 }
@@ -520,8 +520,8 @@ const gchar* bd_lvm_get_vdo_write_policy_str (BDLVMVDOWritePolicy policy, GError
     case BD_LVM_VDO_WRITE_POLICY_UNKNOWN:
         return "unknown";
     default:
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
-                     "Invalid LVM VDO write policy.");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
+                             "Invalid LVM VDO write policy.");
         return NULL;
     }
 }
@@ -688,8 +688,8 @@ gboolean bd_lvm_devices_add (const gchar *device, const gchar *devices_file, con
         return FALSE;
 
     if (!_lvm_devices_enabled ()) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_DEVICES_DISABLED,
-                     "LVM devices file not enabled.");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_DEVICES_DISABLED,
+                             "LVM devices file not enabled.");
         return FALSE;
     }
 
@@ -720,8 +720,8 @@ gboolean bd_lvm_devices_delete (const gchar *device, const gchar *devices_file, 
         return FALSE;
 
     if (!_lvm_devices_enabled ()) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_DEVICES_DISABLED,
-                     "LVM devices file not enabled.");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_DEVICES_DISABLED,
+                             "LVM devices file not enabled.");
         return FALSE;
     }
 
@@ -757,8 +757,8 @@ gchar* bd_lvm_config_get (const gchar *section, const gchar *setting, const gcha
     gboolean success = FALSE;
 
     if (!section && setting) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
-                     "Specifying setting without section is not supported.");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
+                             "Specifying setting without section is not supported.");
         return NULL;
     }
 

@@ -236,8 +236,8 @@ gboolean bd_fs_ntfs_set_label (const gchar *device, const gchar *label, GError *
  */
 gboolean bd_fs_ntfs_check_label (const gchar *label, GError **error) {
     if (strlen (label) > 128) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
-                     "Label for NTFS filesystem must be at most 128 characters long.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                             "Label for NTFS filesystem must be at most 128 characters long.");
         return FALSE;
     }
 
@@ -269,8 +269,8 @@ gboolean bd_fs_ntfs_set_uuid (const gchar *device, const gchar *uuid, GError **e
     else if (strlen (uuid) == 8)
         args[2] = g_strdup_printf ("--new-half-serial=%s", uuid);
     else {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Invalid format of UUID/serial number for NTFS filesystem.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Invalid format of UUID/serial number for NTFS filesystem.");
         return FALSE;
     }
 
@@ -295,15 +295,15 @@ gboolean bd_fs_ntfs_check_uuid (const gchar *uuid, GError **error) {
 
     len = strlen (uuid);
     if (len != 8 && len != 16) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
-                     "UUID for NTFS filesystem must be either 8 or 16 characters long.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
+                             "UUID for NTFS filesystem must be either 8 or 16 characters long.");
         return FALSE;
     }
 
     for (size_t i = 0; i < len; i++) {
         if (!g_ascii_isxdigit (uuid[i])) {
-            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
-                         "UUID for NTFS filesystem must be a hexadecimal number.");
+            g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
+                                 "UUID for NTFS filesystem must be a hexadecimal number.");
             return FALSE;
         }
     }
@@ -406,7 +406,7 @@ BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error) {
     while (line_p && *line_p && !strstr (*line_p, "Cluster Size:"))
         line_p++;
     if (!line_p || !(*line_p)) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse NTFS file system information");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse NTFS file system information");
         g_strfreev (lines);
         bd_fs_ntfs_info_free (ret);
         return NULL;
@@ -420,7 +420,7 @@ BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error) {
     while (line_p && *line_p && !strstr (*line_p, "Volume Size in Clusters:"))
         line_p++;
     if (!line_p || !(*line_p)) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse NTFS file system information");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse NTFS file system information");
         g_strfreev (lines);
         bd_fs_ntfs_info_free (ret);
         return NULL;
@@ -434,7 +434,7 @@ BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error) {
     while (line_p && *line_p && !strstr (*line_p, "Free Clusters:"))
         line_p++;
     if (!line_p || !(*line_p)) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse NTFS file system information");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse NTFS file system information");
         g_strfreev (lines);
         bd_fs_ntfs_info_free (ret);
         return NULL;

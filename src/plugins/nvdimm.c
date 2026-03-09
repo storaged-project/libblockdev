@@ -131,7 +131,7 @@ gboolean bd_nvdimm_is_tech_avail (BDNVDIMMTech tech, guint64 mode, GError **erro
         else
             return TRUE;
     } else {
-        g_set_error (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_TECH_UNAVAIL, "Unknown technology");
+        g_set_error_literal (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_TECH_UNAVAIL, "Unknown technology");
         return FALSE;
     }
 
@@ -234,8 +234,8 @@ gchar* bd_nvdimm_namespace_get_devname (const gchar *device, GError **error) {
 
     success = ndctl_new (&ctx);
     if (success != 0) {
-        g_set_error (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_FAIL,
-                     "Failed to create ndctl context");
+        g_set_error_literal (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_FAIL,
+                             "Failed to create ndctl context");
         return NULL;
     }
 
@@ -291,8 +291,8 @@ gboolean bd_nvdimm_namespace_enable (const gchar *namespace, const BDExtraArg **
 
     ret = ndctl_new (&ctx);
     if (ret != 0) {
-        g_set_error (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_FAIL,
-                     "Failed to create ndctl context");
+        g_set_error_literal (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_FAIL,
+                             "Failed to create ndctl context");
         return FALSE;
     }
 
@@ -334,8 +334,8 @@ gboolean bd_nvdimm_namespace_disable (const gchar *namespace, const BDExtraArg *
 
     ret = ndctl_new (&ctx);
     if (ret != 0) {
-        g_set_error (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_FAIL,
-                     "Failed to create ndctl context");
+        g_set_error_literal (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_FAIL,
+                             "Failed to create ndctl context");
         return FALSE;
     }
 
@@ -389,9 +389,9 @@ static BDNVDIMMNamespaceInfo* get_nvdimm_namespace_info (struct ndctl_namespace 
           break;
         case NDCTL_NS_MODE_DAX:
             if (!dax) {
-                g_set_error (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_FAIL,
-                             "Failed to get information about namespaces: DAX mode "
-                             "detected but no DAX device found.");
+                g_set_error_literal (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_FAIL,
+                                     "Failed to get information about namespaces: DAX mode "
+                                     "detected but no DAX device found.");
                 bd_nvdimm_namespace_info_free (info);
                 return NULL;
             }
@@ -404,9 +404,9 @@ static BDNVDIMMNamespaceInfo* get_nvdimm_namespace_info (struct ndctl_namespace 
             break;
         case NDCTL_NS_MODE_SAFE:
             if (!btt) {
-                g_set_error (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_FAIL,
-                             "Failed to get information about namespaces: Sector mode "
-                             "detected but no BTT device found.");
+                g_set_error_literal (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_FAIL,
+                                     "Failed to get information about namespaces: Sector mode "
+                                     "detected but no BTT device found.");
                 bd_nvdimm_namespace_info_free (info);
                 return NULL;
             }
@@ -418,8 +418,8 @@ static BDNVDIMMNamespaceInfo* get_nvdimm_namespace_info (struct ndctl_namespace 
             info->mode = BD_NVDIMM_NAMESPACE_MODE_RAW;
             break;
         default:
-            g_set_error (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_FAIL,
-                         "Failed to get information about namespaces: Unknown mode.");
+            g_set_error_literal (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_FAIL,
+                                 "Failed to get information about namespaces: Unknown mode.");
             bd_nvdimm_namespace_info_free (info);
             return NULL;
     }
@@ -499,8 +499,8 @@ BDNVDIMMNamespaceInfo* bd_nvdimm_namespace_info (const gchar *namespace, const B
 
     ret = ndctl_new (&ctx);
     if (ret != 0) {
-        g_set_error (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_FAIL,
-                     "Failed to create ndctl context");
+        g_set_error_literal (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_FAIL,
+                             "Failed to create ndctl context");
         return NULL;
     }
 
@@ -545,8 +545,8 @@ BDNVDIMMNamespaceInfo** bd_nvdimm_list_namespaces (const gchar *bus_name, const 
 
     ret = ndctl_new (&ctx);
     if (ret != 0) {
-        g_set_error (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_FAIL,
-                     "Failed to create ndctl context");
+        g_set_error_literal (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_FAIL,
+                             "Failed to create ndctl context");
         return NULL;
     }
 
@@ -658,8 +658,8 @@ const guint64 *bd_nvdimm_namespace_get_supported_sector_sizes (BDNVDIMMNamespace
             return blk_sector_sizes;
 
         default:
-            g_set_error (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_MODE_INVAL,
-                         "Invalid/unknown mode specified.");
+            g_set_error_literal (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_MODE_INVAL,
+                                 "Invalid/unknown mode specified.");
             return NULL;
     }
 }

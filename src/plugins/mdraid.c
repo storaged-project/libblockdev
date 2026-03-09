@@ -958,7 +958,7 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
     g_free (output);
     if (!table || (num_items == 0)) {
         /* something bad happened */
-        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE, "Failed to parse mdexamine data");
+        g_set_error_literal (error, BD_MD_ERROR, BD_MD_ERROR_PARSE, "Failed to parse mdexamine data");
         if (table)
             g_hash_table_destroy (table);
         return NULL;
@@ -966,7 +966,7 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
 
     ret = get_examine_data_from_table (table, TRUE);
     if (!ret) {
-        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE, "Failed to get mdexamine data");
+        g_set_error_literal (error, BD_MD_ERROR, BD_MD_ERROR_PARSE, "Failed to get mdexamine data");
         if (table)
             g_hash_table_destroy (table);
         return NULL;
@@ -1056,8 +1056,8 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
     g_free (output);
     if (!table) {
         /* something bad happened or some expected items were missing  */
-        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE,
-                     "Failed to parse mdexamine metadata");
+        g_set_error_literal (error, BD_MD_ERROR, BD_MD_ERROR_PARSE,
+                             "Failed to parse mdexamine metadata");
         bd_md_examine_data_free (ret);
         return NULL;
     }
@@ -1115,7 +1115,7 @@ BDMDDetailData* bd_md_detail (const gchar *raid_spec, GError **error) {
     g_free (output);
     if (!table || (num_items == 0)) {
         /* something bad happened or some expected items were missing  */
-        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE, "Failed to parse mddetail data");
+        g_set_error_literal (error, BD_MD_ERROR, BD_MD_ERROR_PARSE, "Failed to parse mddetail data");
         if (table)
             g_hash_table_destroy (table);
         return NULL;
@@ -1123,7 +1123,7 @@ BDMDDetailData* bd_md_detail (const gchar *raid_spec, GError **error) {
 
     ret = get_detail_data_from_table (table, TRUE);
     if (!ret) {
-        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE, "Failed to get mddetail data");
+        g_set_error_literal (error, BD_MD_ERROR, BD_MD_ERROR_PARSE, "Failed to get mddetail data");
         return NULL;
     }
 
@@ -1458,8 +1458,8 @@ gboolean bd_md_set_bitmap_location (const gchar *raid_spec, const gchar *locatio
     if ((g_strcmp0 (location, "none") != 0) && (g_strcmp0 (location, "internal") != 0) &&
         !g_str_has_prefix (location , "/")) {
 
-        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_INVAL,
-                     "Bitmap location must start with '/' or be 'internal' or 'none'.");
+        g_set_error_literal (error, BD_MD_ERROR, BD_MD_ERROR_INVAL,
+                             "Bitmap location must start with '/' or be 'internal' or 'none'.");
         g_free (mdadm_spec);
         return FALSE;
     }
@@ -1528,8 +1528,8 @@ gboolean bd_md_request_sync_action (const gchar *raid_spec, const gchar *action,
         (g_strcmp0 (action, "check") != 0) && (g_strcmp0 (action, "repair") != 0) &&
         (g_strcmp0 (action, "idle") != 0)) {
 
-        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_INVAL,
-                     "Action must be one of resync, recovery, check, repair or idle.");
+        g_set_error_literal (error, BD_MD_ERROR, BD_MD_ERROR_INVAL,
+                             "Action must be one of resync, recovery, check, repair or idle.");
         return FALSE;
     }
 

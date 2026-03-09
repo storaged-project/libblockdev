@@ -76,12 +76,12 @@ bd_fs_udf_is_tech_avail (BDFSTech tech G_GNUC_UNUSED, guint64 mode, GError **err
     guint i = 0;
 
     if (mode & BD_FS_TECH_MODE_CHECK || mode & BD_FS_TECH_MODE_REPAIR) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL,
-                     "UDF doesn't support checking and reparing.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL,
+                             "UDF doesn't support checking and reparing.");
         return FALSE;
     } else if (mode & BD_FS_TECH_MODE_RESIZE) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL,
-                     "UDF currently doesn't support resizing.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL,
+                             "UDF currently doesn't support resizing.");
         return FALSE;
     }
 
@@ -335,8 +335,8 @@ gboolean bd_fs_udf_check_label (const gchar *label, GError **error) {
 
     if (g_str_is_ascii (label)) {
         if (strlen (label) > 126) {
-            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
-                         "Label for UDF filesystem can be at most 126 characters long.");
+            g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                                 "Label for UDF filesystem can be at most 126 characters long.");
             return FALSE;
         }
 
@@ -350,8 +350,8 @@ gboolean bd_fs_udf_check_label (const gchar *label, GError **error) {
             return TRUE;
 
         if (len > 126) {
-            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
-                         "Label for UDF filesystem can be at most 126 characters long.");
+            g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                                 "Label for UDF filesystem can be at most 126 characters long.");
             return FALSE;
         }
 
@@ -359,17 +359,17 @@ gboolean bd_fs_udf_check_label (const gchar *label, GError **error) {
         while (next_p && *next_p) {
             unichar = g_utf8_get_char (next_p);
             if (unichar > 0xFF) {
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
-                             "Label for UDF filesystem containing unicode characters above U+FF can "\
-                             "be at most 63 characters long.");
+                g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                                     "Label for UDF filesystem containing unicode characters above U+FF can "\
+                                     "be at most 63 characters long.");
                 return FALSE;
             }
 
             next_p = g_utf8_next_char (next_p);
         }
     } else {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
-                     "Label for UDF filesystem must be a valid UTF-8 string.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                             "Label for UDF filesystem must be a valid UTF-8 string.");
         return FALSE;
     }
 
@@ -420,15 +420,15 @@ gboolean bd_fs_udf_check_uuid (const gchar *uuid, GError **error) {
 
     len = strlen (uuid);
     if (len != 16) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
-                     "UUID for UDF filesystem must be 16 characters long.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
+                             "UUID for UDF filesystem must be 16 characters long.");
         return FALSE;
     }
 
     for (size_t i = 0; i < len; i++) {
         if (!g_ascii_isxdigit (uuid[i]) || (!g_ascii_isdigit (uuid[i]) && !g_ascii_islower (uuid[i]))) {
-            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
-                         "UUID for UDF filesystem must be a lowercase hexadecimal number.");
+            g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
+                                 "UUID for UDF filesystem must be a lowercase hexadecimal number.");
             return FALSE;
         }
     }
@@ -533,7 +533,7 @@ BDFSUdfInfo* bd_fs_udf_get_info (const gchar *device, GError **error) {
     g_free (output);
     if (!table || (num_items == 0)) {
         /* something bad happened or some expected items were missing  */
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse UDF file system information");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse UDF file system information");
         if (table)
             g_hash_table_destroy (table);
         return NULL;
@@ -541,7 +541,7 @@ BDFSUdfInfo* bd_fs_udf_get_info (const gchar *device, GError **error) {
 
     ret = get_udf_data_from_table (table);
     if (!ret) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse UDF file system information");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse UDF file system information");
         return NULL;
     }
 

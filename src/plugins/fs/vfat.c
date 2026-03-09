@@ -325,8 +325,8 @@ gboolean bd_fs_vfat_check_label (const gchar *label, GError **error) {
     guint n;
 
     if (strlen (label) > 11) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
-                     "Label for VFAT filesystem must be at most 11 characters long.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                             "Label for VFAT filesystem must be at most 11 characters long.");
         return FALSE;
     }
 
@@ -394,15 +394,15 @@ gboolean bd_fs_vfat_check_uuid (const gchar *uuid, GError **error) {
 
     vol_id = g_ascii_strtoull (new_uuid, &endptr, 16);
     if ((vol_id == 0 && endptr == new_uuid) || (endptr && *endptr)) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
-                     "UUID for VFAT filesystem must be a hexadecimal number.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
+                             "UUID for VFAT filesystem must be a hexadecimal number.");
         g_free (new_uuid);
         return FALSE;
     }
 
     if (vol_id > G_MAXUINT32) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
-                     "UUID for VFAT filesystem must fit into 32 bits.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
+                             "UUID for VFAT filesystem must fit into 32 bits.");
         g_free (new_uuid);
         return FALSE;
     }

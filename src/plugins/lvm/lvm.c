@@ -340,15 +340,15 @@ gboolean bd_lvm_is_tech_avail (BDLVMTech tech, guint64 mode, GError **error) {
     switch (tech) {
     case BD_LVM_TECH_THIN_CALCS:
         if (mode & ~BD_LVM_TECH_MODE_QUERY) {
-            g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_TECH_UNAVAIL,
-                         "Only 'query' supported for thin calculations");
+            g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_TECH_UNAVAIL,
+                                 "Only 'query' supported for thin calculations");
             return FALSE;
         } else
             return TRUE;
     case BD_LVM_TECH_CALCS:
         if (mode & ~BD_LVM_TECH_MODE_QUERY) {
-            g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_TECH_UNAVAIL,
-                         "Only 'query' supported for calculations");
+            g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_TECH_UNAVAIL,
+                                 "Only 'query' supported for calculations");
             return FALSE;
         } else
             return TRUE;
@@ -1130,8 +1130,8 @@ BDLVMPVdata* bd_lvm_pvinfo (const gchar *device, GError **error) {
     g_strfreev (lines);
 
     /* getting here means no usable info was found */
-    g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
-                 "Failed to parse information about the PV");
+    g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                         "Failed to parse information about the PV");
     return NULL;
 }
 
@@ -1196,8 +1196,8 @@ BDLVMPVdata** bd_lvm_pvs (GError **error) {
     g_strfreev (lines);
 
     if (pvs->len == 0) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
-                     "Failed to parse information about PVs");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                             "Failed to parse information about PVs");
         g_ptr_array_free (pvs, TRUE);
         return NULL;
     }
@@ -1473,8 +1473,8 @@ BDLVMVGdata* bd_lvm_vginfo (const gchar *vg_name, GError **error) {
     g_strfreev (lines);
 
     /* getting here means no usable info was found */
-    g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
-                 "Failed to parse information about the VG");
+    g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                         "Failed to parse information about the VG");
     return NULL;
 }
 
@@ -1537,8 +1537,8 @@ BDLVMVGdata** bd_lvm_vgs (GError **error) {
     g_strfreev (lines);
 
     if (vgs->len == 0) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
-                     "Failed to parse information about VGs");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                             "Failed to parse information about VGs");
         g_ptr_array_free (vgs, TRUE);
         return NULL;
     }
@@ -1953,8 +1953,8 @@ BDLVMLVdata* bd_lvm_lvinfo (const gchar *vg_name, const gchar *lv_name, GError *
     g_strfreev (lines);
 
     /* getting here means no usable info was found */
-    g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
-                 "Failed to parse information about the LV");
+    g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                         "Failed to parse information about the LV");
     return NULL;
 }
 
@@ -2001,8 +2001,8 @@ BDLVMLVdata* bd_lvm_lvinfo_tree (const gchar *vg_name, const gchar *lv_name, GEr
     g_strfreev (lines);
 
     if (result == NULL)
-      g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
-                   "Failed to parse information about the LV");
+      g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                           "Failed to parse information about the LV");
     return result;
 }
 
@@ -2086,8 +2086,8 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
     g_strfreev (lines);
 
     if (lvs->len == 0) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
-                     "Failed to parse information about LVs");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                             "Failed to parse information about LVs");
         g_ptr_array_free (lvs, TRUE);
         return NULL;
     }
@@ -2165,8 +2165,8 @@ BDLVMLVdata** bd_lvm_lvs_tree (const gchar *vg_name, GError **error) {
     g_strfreev (lines);
 
     if (lvs->len == 0) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
-                     "Failed to parse information about LVs");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                             "Failed to parse information about LVs");
         g_ptr_array_free (lvs, TRUE);
         return NULL;
     }
@@ -2992,8 +2992,8 @@ BDLVMVDOPooldata* bd_lvm_vdo_info (const gchar *vg_name, const gchar *lv_name, G
     g_strfreev (lines);
 
     /* getting here means no usable info was found */
-    g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
-                 "Failed to parse information about the VDO LV");
+    g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                         "Failed to parse information about the VDO LV");
     return NULL;
 }
 
@@ -3040,8 +3040,8 @@ gboolean bd_lvm_vdo_pool_resize (const gchar *vg_name, const gchar *pool_name, g
         return FALSE;
 
     if (info->size >= size) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_NOT_SUPPORTED,
-                     "Reducing physical size of the VDO pool LV is not supported.");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_NOT_SUPPORTED,
+                             "Reducing physical size of the VDO pool LV is not supported.");
         bd_lvm_lvdata_free (info);
         return FALSE;
     }

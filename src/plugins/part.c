@@ -194,8 +194,8 @@ static struct fdisk_context* get_device_context (const gchar *disk, gboolean rea
     gint ret = 0;
 
     if (!cxt) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                     "Failed to create a new context");
+        g_set_error_literal (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                             "Failed to create a new context");
         return NULL;
     }
 
@@ -329,7 +329,7 @@ gboolean bd_part_is_tech_avail (BDPartTech tech, guint64 mode G_GNUC_UNUSED, GEr
          * plugin, nothing extra is needed */
         return TRUE;
     default:
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_TECH_UNAVAIL, "Unknown technology");
+        g_set_error_literal (error, BD_PART_ERROR, BD_PART_ERROR_TECH_UNAVAIL, "Unknown technology");
         return FALSE;
     }
 }
@@ -436,8 +436,8 @@ static gchar* get_part_type_guid_and_gpt_flags (const gchar *device, int part_nu
     if (attrs) {
         status = fdisk_gpt_get_partition_attrs (cxt, part_num, attrs);
         if (status < 0) {
-            g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                         "Failed to read GPT attributes");
+            g_set_error_literal (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                                 "Failed to read GPT attributes");
             close_context (cxt);
             return NULL;
         }
@@ -537,8 +537,8 @@ static BDPartSpec* get_part_spec_fdisk (struct fdisk_context *cxt, struct fdisk_
 
     lb = fdisk_get_label (cxt, NULL);
     if (!lb) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                     "Failed to read partition table.");
+        g_set_error_literal (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                             "Failed to read partition table.");
         bd_part_spec_free (ret);
         return NULL;
     }
@@ -559,8 +559,8 @@ static BDPartSpec* get_part_spec_fdisk (struct fdisk_context *cxt, struct fdisk_
         if (ret->type == BD_PART_TYPE_NORMAL || ret->type == BD_PART_TYPE_LOGICAL || ret->type == BD_PART_TYPE_EXTENDED) {
             ptype = fdisk_partition_get_type (pa);
             if (!ptype) {
-                g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                             "Failed to get partition type.");
+                g_set_error_literal (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                                     "Failed to get partition type.");
                 bd_part_spec_free (ret);
                 return NULL;
             }
@@ -637,16 +637,16 @@ static BDPartSpec** get_disk_parts (const gchar *disk, gboolean parts, gboolean 
 
     table = fdisk_new_table ();
     if (!table) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                     "Failed to create a new table");
+        g_set_error_literal (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                             "Failed to create a new table");
         close_context (cxt);
         return NULL;
     }
 
     itr = fdisk_new_iter (FDISK_ITER_FORWARD);
     if (!itr) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                     "Failed to create a new iterator");
+        g_set_error_literal (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                             "Failed to create a new iterator");
         close_context (cxt);
         return NULL;
     }
@@ -654,8 +654,8 @@ static BDPartSpec** get_disk_parts (const gchar *disk, gboolean parts, gboolean 
     if (parts) {
         status = fdisk_get_partitions (cxt, &table);
         if (status != 0) {
-            g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                         "Failed to get partitions");
+            g_set_error_literal (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                                 "Failed to get partitions");
             fdisk_free_iter (itr);
             fdisk_unref_table (table);
             close_context (cxt);
@@ -666,8 +666,8 @@ static BDPartSpec** get_disk_parts (const gchar *disk, gboolean parts, gboolean 
     if (freespaces) {
         status = fdisk_get_freespaces (cxt, &table);
         if (status != 0) {
-            g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                         "Failed to get free spaces");
+            g_set_error_literal (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                                 "Failed to get free spaces");
             fdisk_free_iter (itr);
             fdisk_unref_table (table);
             close_context (cxt);
@@ -678,8 +678,8 @@ static BDPartSpec** get_disk_parts (const gchar *disk, gboolean parts, gboolean 
     /* sort partitions by start */
     status = fdisk_table_sort_partitions (table, fdisk_partition_cmp_start);
     if (status != 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                     "Failed to sort partitions");
+        g_set_error_literal (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                             "Failed to sort partitions");
         fdisk_free_iter (itr);
         fdisk_unref_table (table);
         close_context (cxt);
@@ -1000,8 +1000,8 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
 
     npa = fdisk_new_partition ();
     if (!npa) {
-        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                     "Failed to create new partition object");
+        g_set_error_literal (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                             "Failed to create new partition object");
         fdisk_unref_table (table);
         close_context (cxt);
         bd_utils_report_finished (progress_id, l_error->message);
@@ -1020,8 +1020,8 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
 
     status = fdisk_save_user_grain (cxt, grain_size);
     if (status != 0) {
-        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                     "Failed to setup alignment");
+        g_set_error_literal (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                             "Failed to setup alignment");
         fdisk_unref_table (table);
         close_context (cxt);
         bd_utils_report_finished (progress_id, l_error->message);
@@ -1033,8 +1033,8 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
      * effective */
     status = fdisk_reset_device_properties (cxt);
     if (status != 0) {
-        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                     "Failed to setup alignment");
+        g_set_error_literal (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                             "Failed to setup alignment");
         fdisk_unref_table (table);
         close_context (cxt);
         bd_utils_report_finished (progress_id, l_error->message);
@@ -1074,8 +1074,8 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
         size = end - start;
 
         if (fdisk_partition_set_size (npa, size) != 0) {
-            g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                         "Failed to set partition size");
+            g_set_error_literal (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                                 "Failed to set partition size");
             fdisk_unref_table (table);
             fdisk_unref_partition (npa);
             close_context (cxt);
@@ -1094,8 +1094,8 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
       type = BD_PART_TYPE_REQ_NORMAL;
 
     if (on_gpt && type != BD_PART_TYPE_REQ_NORMAL) {
-        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                     "Only normal partitions are supported on GPT.");
+        g_set_error_literal (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                             "Only normal partitions are supported on GPT.");
         fdisk_unref_table (table);
         fdisk_unref_partition (npa);
         close_context (cxt);
@@ -1125,8 +1125,8 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
             else {
                 /* trying to create a partition inside an existing one, but not
                    an extended one -> error */
-                g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                             "Cannot create a partition inside an existing non-extended one");
+                g_set_error_literal (&l_error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                                     "Cannot create a partition inside an existing non-extended one");
                 fdisk_unref_partition (npa);
                 fdisk_free_iter (iter);
                 fdisk_unref_table (table);
@@ -1146,8 +1146,8 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
             new_extended = TRUE;
             n_epa = fdisk_new_partition ();
             if (!n_epa) {
-                g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                             "Failed to create new partition object");
+                g_set_error_literal (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                                     "Failed to create new partition object");
                 fdisk_unref_partition (npa);
                 close_context (cxt);
                 bd_utils_report_finished (progress_id, l_error->message);
@@ -1155,8 +1155,8 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
                 return NULL;
             }
             if (fdisk_partition_set_start (n_epa, start) != 0) {
-                g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                             "Failed to set partition start");
+                g_set_error_literal (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                                     "Failed to set partition start");
                 fdisk_unref_partition (n_epa);
                 fdisk_unref_partition (npa);
                 fdisk_free_iter (iter);
@@ -1171,8 +1171,8 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
 
             status = fdisk_partition_next_partno (npa, cxt, &partno);
             if (status != 0) {
-                g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                             "Failed to get new extended partition number");
+                g_set_error_literal (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                                     "Failed to get new extended partition number");
                 fdisk_unref_partition (npa);
                 close_context (cxt);
                 bd_utils_report_finished (progress_id, l_error->message);
@@ -1182,8 +1182,8 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
 
             status = fdisk_partition_set_partno (npa, partno);
             if (status != 0) {
-                g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                             "Failed to set new extended partition number");
+                g_set_error_literal (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                                     "Failed to set new extended partition number");
                 fdisk_unref_partition (npa);
                 close_context (cxt);
                 bd_utils_report_finished (progress_id, l_error->message);
@@ -1197,8 +1197,8 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
             /* "05" for extended partition */
             ptype = fdisk_label_parse_parttype (fdisk_get_label (cxt, NULL), "05");
             if (fdisk_partition_set_type (n_epa, ptype) != 0) {
-                g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                             "Failed to set partition type");
+                g_set_error_literal (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                                     "Failed to set partition type");
                 fdisk_unref_partition (n_epa);
                 fdisk_unref_partition (npa);
                 fdisk_free_iter (iter);
@@ -1240,8 +1240,8 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
         /* "05" for extended partition */
         ptype = fdisk_label_parse_parttype (fdisk_get_label (cxt, NULL), "05");
         if (fdisk_partition_set_type (npa, ptype) != 0) {
-            g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                         "Failed to set partition type");
+            g_set_error_literal (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                                 "Failed to set partition type");
             fdisk_unref_table (table);
             fdisk_unref_partition (npa);
             close_context (cxt);
@@ -1254,8 +1254,8 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
     }
 
     if (fdisk_partition_set_start (npa, start) != 0) {
-        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                     "Failed to set partition start");
+        g_set_error_literal (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                             "Failed to set partition start");
         fdisk_unref_table (table);
         fdisk_unref_partition (npa);
         close_context (cxt);
@@ -1273,8 +1273,8 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
     } else {
         status = fdisk_partition_next_partno (npa, cxt, &partno);
         if (status != 0) {
-            g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                         "Failed to get new partition number");
+            g_set_error_literal (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                                 "Failed to get new partition number");
             fdisk_unref_table (table);
             fdisk_unref_partition (npa);
             close_context (cxt);
@@ -1286,8 +1286,8 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
 
     status = fdisk_partition_set_partno (npa, partno);
     if (status != 0) {
-        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                     "Failed to set new partition number");
+        g_set_error_literal (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                             "Failed to set new partition number");
         fdisk_unref_table (table);
         fdisk_unref_partition (npa);
         close_context (cxt);
@@ -1432,8 +1432,8 @@ static gboolean get_max_part_size (struct fdisk_table *tb, guint partno, guint64
 
     itr = fdisk_new_iter (FDISK_ITER_FORWARD);
     if (!itr) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                     "Failed to create a new iterator");
+        g_set_error_literal (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                             "Failed to create a new iterator");
         return FALSE;
     }
 
@@ -1678,8 +1678,8 @@ gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size
         }
 
         if (fdisk_partition_set_size (pa, size) != 0) {
-            g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                         "Failed to set partition size");
+            g_set_error_literal (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                                 "Failed to set partition size");
             fdisk_unref_table (table);
             fdisk_unref_partition (pa);
             close_context (cxt);
@@ -1741,16 +1741,16 @@ static gboolean set_part_type (struct fdisk_context *cxt, gint part_num, const g
         }
 
         if (part_id_int == 0x05 || part_id_int == 0x0f || part_id_int == 0x85) {
-            g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                         "Cannot change partition id to extended.");
+            g_set_error_literal (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                                 "Cannot change partition id to extended.");
             return FALSE;
         }
     }
 
     lb = fdisk_get_label (cxt, NULL);
     if (!lb) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                     "Failed to read partition table.");
+        g_set_error_literal (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                             "Failed to read partition table.");
         return FALSE;
     }
 
@@ -1770,8 +1770,8 @@ static gboolean set_part_type (struct fdisk_context *cxt, gint part_num, const g
 
     ptype = fdisk_label_parse_parttype (lb, type_str);
     if (!ptype) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Failed to parse partition type.");
+        g_set_error_literal (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                             "Failed to parse partition type.");
         fdisk_unref_partition (pa);
         return FALSE;
     }
@@ -2281,8 +2281,8 @@ gboolean bd_part_set_part_attributes (const gchar *disk, const gchar *part, guin
  */
 const gchar* bd_part_get_part_table_type_str (BDPartTableType type, GError **error) {
     if (type >= BD_PART_TABLE_UNDEF) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Invalid partition table type given");
+        g_set_error_literal (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                             "Invalid partition table type given");
         return NULL;
     }
 
@@ -2303,7 +2303,7 @@ static const gchar* const part_types[6] = { "primary", "logical", "extended", "f
  */
 const gchar* bd_part_get_type_str (BDPartType type, GError **error) {
     if (type > BD_PART_TYPE_PROTECTED) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL, "Invalid partition type given");
+        g_set_error_literal (error, BD_PART_ERROR, BD_PART_ERROR_INVAL, "Invalid partition type given");
         return NULL;
     }
 

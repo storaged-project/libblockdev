@@ -153,43 +153,43 @@ vdo_get_stats_full (const gchar *name, GError **error) {
 
     dmt = dm_task_create (DM_DEVICE_TARGET_MSG);
     if (!dmt) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_DM_ERROR,
-                     "Failed to create DM task");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_DM_ERROR,
+                             "Failed to create DM task");
         return NULL;
     }
 
     if (!dm_task_set_name (dmt, name)) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_DM_ERROR,
-                     "Failed to set name for DM task");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_DM_ERROR,
+                             "Failed to set name for DM task");
         dm_task_destroy (dmt);
         return NULL;
     }
 
     if (!dm_task_set_message (dmt, "stats")) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_DM_ERROR,
-                     "Failed to set message for DM task");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_DM_ERROR,
+                             "Failed to set message for DM task");
         dm_task_destroy (dmt);
         return NULL;
     }
 
     if (!dm_task_run (dmt)) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_DM_ERROR,
-                     "Failed to run DM task");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_DM_ERROR,
+                             "Failed to run DM task");
         dm_task_destroy (dmt);
         return NULL;
     }
 
     response = dm_task_get_message_response (dmt);
     if (!response) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_DM_ERROR,
-                     "Failed to get response from the DM task");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_DM_ERROR,
+                             "Failed to get response from the DM task");
         dm_task_destroy (dmt);
         return NULL;
     }
 
     if (!yaml_parser_initialize (&parser)) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_DM_ERROR,
-                     "Failed to get initialize YAML parser");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_DM_ERROR,
+                             "Failed to get initialize YAML parser");
         dm_task_destroy (dmt);
         return NULL;
     }

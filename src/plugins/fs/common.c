@@ -139,16 +139,16 @@ check_uuid (const gchar *uuid, GError **error) {
     uuid_t uu;
 
     if (!g_str_is_ascii (uuid)) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
-                     "Provided UUID is not a valid RFC-4122 UUID.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
+                             "Provided UUID is not a valid RFC-4122 UUID.");
         return FALSE;
     }
 
     lowercase = g_ascii_strdown (uuid, -1);
     ret = uuid_parse (lowercase, uu);
     if (ret < 0){
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
-                     "Provided UUID is not a valid RFC-4122 UUID.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
+                             "Provided UUID is not a valid RFC-4122 UUID.");
         return FALSE;
     }
 

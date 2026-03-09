@@ -114,14 +114,14 @@ bd_fs_f2fs_is_tech_avail (BDFSTech tech G_GNUC_UNUSED, guint64 mode, GError **er
     guint i = 0;
 
     if (mode & BD_FS_TECH_MODE_SET_LABEL) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL,
-                     "F2FS doesn't support setting label for an existing device.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL,
+                             "F2FS doesn't support setting label for an existing device.");
         return FALSE;
     }
 
     if (mode & BD_FS_TECH_MODE_SET_UUID) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL,
-                     "F2FS doesn't support setting UUID for an existing device.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL,
+                             "F2FS doesn't support setting UUID for an existing device.");
         return FALSE;
     }
 
@@ -323,7 +323,7 @@ BDFSF2FSInfo* bd_fs_f2fs_get_info (const gchar *device, GError **error) {
     while (line_p && *line_p && !g_str_has_prefix (*line_p, "Info: total FS sectors"))
         line_p++;
     if (!line_p || !(*line_p)) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse F2FS file system information");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse F2FS file system information");
         g_strfreev (lines);
         bd_fs_f2fs_info_free (ret);
         return NULL;
@@ -338,7 +338,7 @@ BDFSF2FSInfo* bd_fs_f2fs_get_info (const gchar *device, GError **error) {
     while (line_p && *line_p && !g_str_has_prefix (*line_p, "Info: superblock features"))
         line_p++;
     if (!line_p || !(*line_p)) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse F2FS file system information");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse F2FS file system information");
         g_strfreev (lines);
         bd_fs_f2fs_info_free (ret);
         return NULL;
@@ -395,8 +395,8 @@ gboolean bd_fs_f2fs_resize (const gchar *device, guint64 new_size, gboolean safe
 
     if (new_size != 0 && new_size < info->sector_count && !safe) {
         /* resize.f2fs prints error and returns 0 in this case */
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_INVAL,
-                     "F2FS filesystem doesn't support shrinking without using the 'safe' option");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_INVAL,
+                             "F2FS filesystem doesn't support shrinking without using the 'safe' option");
         bd_fs_f2fs_info_free (info);
         return FALSE;
     }
@@ -435,8 +435,8 @@ gboolean bd_fs_f2fs_check_label (const gchar *label, GError **error) {
 
     len = strlen (label);
     if (len > 512) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
-                     "Label for F2FS filesystem must be at most 512 characters long.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                             "Label for F2FS filesystem must be at most 512 characters long.");
         return FALSE;
     }
 

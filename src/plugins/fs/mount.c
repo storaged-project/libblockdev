@@ -67,16 +67,16 @@ static gboolean get_unmount_error_old (struct libmnt_context *cxt, int rc, const
             case 0:
                 return TRUE;
             case EBUSY:
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                             "Target busy.");
+                g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                     "Target busy.");
                 break;
             case EINVAL:
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                             "Not a mount point.");
+                g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                     "Not a mount point.");
                 break;
             case EPERM:
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
-                             "Operation not permitted.");
+                g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
+                                     "Operation not permitted.");
                 break;
             default:
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
@@ -96,11 +96,11 @@ static gboolean get_unmount_error_old (struct libmnt_context *cxt, int rc, const
             return TRUE;
         else if (rc == -EPERM) {
             if (mnt_context_tab_applied (cxt))
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
-                             "Operation not permitted.");
+                g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
+                                     "Operation not permitted.");
             else
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                             "Not mounted.");
+                g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                     "Not mounted.");
         } else {
             g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                          "Failed to unmount %s.", spec);
@@ -125,8 +125,8 @@ static gboolean get_unmount_error_new (struct libmnt_context *cxt, int rc, const
             permission = ret == MNT_EX_USAGE && mnt_context_tab_applied (cxt);
 
         if (permission)
-            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
-                         "Operation not permitted.");
+            g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
+                                 "Operation not permitted.");
         else {
             if (*buf == '\0')
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
@@ -206,8 +206,8 @@ static gboolean get_mount_error_old (struct libmnt_context *cxt, int rc, MountAr
             case 0:
                 return TRUE;
             case EBUSY:
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                             "Source is already mounted or target is busy.");
+                g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                     "Source is already mounted or target is busy.");
                 break;
             case EINVAL:
                 if (mflags & MS_REMOUNT)
@@ -221,8 +221,8 @@ static gboolean get_mount_error_old (struct libmnt_context *cxt, int rc, MountAr
                                  "Wrong fs type, %s has an invalid superblock or missing helper program.", args->device);
                 break;
             case EPERM:
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
-                             "Operation not permitted.");
+                g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
+                                     "Operation not permitted.");
                 break;
             case ENOTBLK:
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
@@ -234,8 +234,8 @@ static gboolean get_mount_error_old (struct libmnt_context *cxt, int rc, MountAr
                 break;
             case ENODEV:
                 if (args->fstype == NULL || strlen (args->fstype) == 0)
-                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                 "Filesystem type not specified");
+                    g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                         "Filesystem type not specified");
                 else
                     g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UNKNOWN_FS,
                                  "Filesystem type %s not configured in kernel.", args->fstype);
@@ -305,24 +305,24 @@ static gboolean get_mount_error_old (struct libmnt_context *cxt, int rc, MountAr
                              "Can't find %s in %s.", args->device ? args->device : args->mountpoint, mnt_get_fstab_path ());
                 break;
             case -MNT_ERR_MOUNTOPT:
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                             "Failed to parse mount options");
+                g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                     "Failed to parse mount options");
                 break;
             case -MNT_ERR_NOSOURCE:
                 if (args->device)
                     g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                                  "Can't find %s.", args->device);
                 else
-                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                 "Mount source not defined.");
+                    g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                         "Mount source not defined.");
                 break;
             case -MNT_ERR_LOOPDEV:
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                             "Failed to setup loop device");
+                g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                     "Failed to setup loop device");
                 break;
             case -MNT_ERR_NOFSTYPE:
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                             "Filesystem type not specified");
+                g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                     "Filesystem type not specified");
                 break;
             default:
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
@@ -351,8 +351,8 @@ static gboolean get_mount_error_new (struct libmnt_context *cxt, int rc, MountAr
             permission = ret == MNT_EX_USAGE && mnt_context_tab_applied (cxt);
 
         if (permission)
-            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
-                         "Operation not permitted.");
+            g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
+                                 "Operation not permitted.");
         else if (syscall_errno == ENODEV)
             g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UNKNOWN_FS,
                          "Filesystem type %s not configured in kernel.", args->fstype);
@@ -380,8 +380,8 @@ static gboolean do_mount (MountArgs *args, GError **error) {
     cxt = mnt_new_context ();
 
     if (!args->mountpoint && !args->device) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "You must specify at least one of: mount point, device.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "You must specify at least one of: mount point, device.");
         mnt_free_context (cxt);
         return FALSE;
     }
@@ -496,22 +496,22 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
     current_gid = getgid ();
 
     if (geteuid () != 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Not running as root, cannot change the UID/GID.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Not running as root, cannot change the UID/GID.");
         return FALSE;
     }
 
     if (pipe(pipefd) == -1) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Error creating pipe.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Error creating pipe.");
         return FALSE;
     }
 
     pid = fork ();
 
     if (pid == -1) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Error forking.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Error forking.");
         return FALSE;
     } else if (pid == 0) {
         close (pipefd[0]);
@@ -549,8 +549,8 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
         do {
             wpid = waitpid (pid, &status, WUNTRACED | WCONTINUED);
             if (wpid == -1) {
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                             "Error while waiting for process.");
+                g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                     "Error while waiting for process.");
                 close (pipefd[0]);
                 return FALSE;
             }
@@ -558,8 +558,8 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
             if (WIFEXITED (status)) {
               if (WEXITSTATUS (status) != EXIT_SUCCESS) {
                   if (WEXITSTATUS (status) == BD_FS_ERROR_PIPE) {
-                      g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                   "Error while reading error.");
+                      g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                           "Error while reading error.");
                       close (pipefd[0]);
                       return FALSE;
                   }
@@ -572,8 +572,8 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
                                        local_error->message, local_error->code);
                           g_clear_error (&local_error);
                       } else
-                          g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                       "Unknown error while reading error.");
+                          g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                               "Unknown error while reading error.");
                       g_io_channel_unref (channel);
                       close (pipefd[0]);
                       g_free (error_msg);
@@ -808,8 +808,8 @@ gchar* bd_fs_get_mountpoint (const gchar *device, GError **error) {
 
     ret = mnt_table_set_cache (table, cache);
     if (ret != 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to set cache for mount info table.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Failed to set cache for mount info table.");
         mnt_free_table (table);
         mnt_free_cache (cache);
         return NULL;
@@ -817,8 +817,8 @@ gchar* bd_fs_get_mountpoint (const gchar *device, GError **error) {
 
     ret = mnt_table_parse_mtab (table, NULL);
     if (ret != 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to parse mount info.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Failed to parse mount info.");
         mnt_free_table (table);
         mnt_free_cache (cache);
         return NULL;
@@ -865,8 +865,8 @@ gboolean bd_fs_is_mountpoint (const gchar *path, GError **error) {
 
     ret = mnt_table_set_cache (table, cache);
     if (ret != 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to set cache for mount info table.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Failed to set cache for mount info table.");
         mnt_free_table (table);
         mnt_free_cache (cache);
         return FALSE;
@@ -874,8 +874,8 @@ gboolean bd_fs_is_mountpoint (const gchar *path, GError **error) {
 
     ret = mnt_table_parse_mtab (table, NULL);
     if (ret != 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to parse mount info.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Failed to parse mount info.");
         mnt_free_table (table);
         mnt_free_cache (cache);
         return FALSE;

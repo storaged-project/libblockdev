@@ -179,14 +179,14 @@ gchar* bd_dm_name_from_node (const gchar *dm_node, GError **error) {
     g_autofree gchar *sys_path = g_strdup_printf ("/sys/class/block/%s/dm/name", dm_node);
 
     if (!dm_node || strlen (dm_node) == 0) {
-        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_DEVICE_NOEXIST,
-                     "No DM node specified");
+        g_set_error_literal (error, BD_DM_ERROR, BD_DM_ERROR_DEVICE_NOEXIST,
+                             "No DM node specified");
         return NULL;
     }
 
     if (access (sys_path, R_OK) != 0) {
-        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_SYS,
-                     "Failed to access dm node's parameters under /sys");
+        g_set_error_literal (error, BD_DM_ERROR, BD_DM_ERROR_SYS,
+                             "Failed to access dm node's parameters under /sys");
         return NULL;
     }
 
@@ -215,8 +215,8 @@ gchar* bd_dm_node_from_name (const gchar *map_name, GError **error) {
     g_autofree gchar *dev_mapper_path = g_strdup_printf ("/dev/mapper/%s", map_name);
 
     if (!map_name || strlen (map_name) == 0) {
-        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_DEVICE_NOEXIST,
-                     "No DM name specified");
+        g_set_error_literal (error, BD_DM_ERROR, BD_DM_ERROR_DEVICE_NOEXIST,
+                             "No DM name specified");
         return NULL;
     }
 
@@ -246,28 +246,28 @@ gchar* bd_dm_get_subsystem_from_name (const gchar *device_name, GError **error) 
 
     task = dm_task_create (DM_DEVICE_INFO);
     if (!task) {
-        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
-                     "Failed to create DM task");
+        g_set_error_literal (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
+                             "Failed to create DM task");
         return NULL;
     }
 
     if (!dm_task_set_name (task, device_name)) {
-        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
-                     "Failed to set device name for DM task");
+        g_set_error_literal (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
+                             "Failed to set device name for DM task");
         dm_task_destroy (task);
         return NULL;
     }
 
     if (!dm_task_run (task)) {
-        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
-                     "Failed to run DM task");
+        g_set_error_literal (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
+                             "Failed to run DM task");
         dm_task_destroy (task);
         return NULL;
     }
 
     if (!dm_task_get_info (task, &info)) {
-        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
-                     "Failed to get info from DM task");
+        g_set_error_literal (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
+                             "Failed to get info from DM task");
         dm_task_destroy (task);
         return NULL;
     }
@@ -317,15 +317,15 @@ gboolean bd_dm_map_exists (const gchar *map_name, gboolean live_only, gboolean a
     gboolean ret = FALSE;
 
     if (geteuid () != 0) {
-        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_NOT_ROOT,
-                     "Not running as root, cannot query DM maps");
+        g_set_error_literal (error, BD_DM_ERROR, BD_DM_ERROR_NOT_ROOT,
+                             "Not running as root, cannot query DM maps");
         return FALSE;
     }
 
     task_list = dm_task_create (DM_DEVICE_LIST);
     if (!task_list) {
-        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
-                     "Failed to create DM task");
+        g_set_error_literal (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
+                             "Failed to create DM task");
         return FALSE;
     }
 
@@ -348,8 +348,8 @@ gboolean bd_dm_map_exists (const gchar *map_name, gboolean live_only, gboolean a
         /* get device info */
         task_info = dm_task_create (DM_DEVICE_INFO);
         if (!task_info) {
-            g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
-                         "Failed to create DM task");
+            g_set_error_literal (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
+                                 "Failed to create DM task");
             break;
         }
 

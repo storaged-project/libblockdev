@@ -442,8 +442,8 @@ gboolean bd_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GErro
     }
 
     if (!load_plugins (require_plugins, FALSE, &num_loaded)) {
-        g_set_error (error, BD_INIT_ERROR, BD_INIT_ERROR_PLUGINS_FAILED,
-                     "Failed to load plugins");
+        g_set_error_literal (error, BD_INIT_ERROR, BD_INIT_ERROR_PLUGINS_FAILED,
+                             "Failed to load plugins");
         success = FALSE;
     }
 
@@ -518,8 +518,8 @@ gboolean bd_ensure_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func
     }
 
     if (!load_plugins (require_plugins, FALSE, &num_loaded)) {
-        g_set_error (error, BD_INIT_ERROR, BD_INIT_ERROR_PLUGINS_FAILED,
-                     "Failed to load plugins");
+        g_set_error_literal (error, BD_INIT_ERROR, BD_INIT_ERROR_PLUGINS_FAILED,
+                             "Failed to load plugins");
         success = FALSE;
     }
 
@@ -622,8 +622,8 @@ gboolean bd_reinit (BDPluginSpec **require_plugins, gboolean reload, BDUtilsLogF
     }
 
     if (!load_plugins (require_plugins, reload, &num_loaded)) {
-        g_set_error (error, BD_INIT_ERROR, BD_INIT_ERROR_PLUGINS_FAILED,
-                     "Failed to load plugins");
+        g_set_error_literal (error, BD_INIT_ERROR, BD_INIT_ERROR_PLUGINS_FAILED,
+                             "Failed to load plugins");
         success = FALSE;
     } else
         if (require_plugins && (*require_plugins == NULL) && reload)

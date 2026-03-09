@@ -285,7 +285,7 @@ gboolean bd_btrfs_create_volume (const gchar **devices, const gchar *label, cons
         return FALSE;
 
     if (!devices || (g_strv_length ((gchar **) devices) < 1)) {
-        g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_DEVICE, "No devices given");
+        g_set_error_literal (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_DEVICE, "No devices given");
         return FALSE;
     }
 
@@ -480,7 +480,7 @@ guint64 bd_btrfs_get_default_subvolume_id (const gchar *mountpoint, GError **err
 
     success = g_regex_match (regex, output, 0, &match_info);
     if (!success) {
-        g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_PARSE, "Failed to parse subvolume's ID");
+        g_set_error_literal (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_PARSE, "Failed to parse subvolume's ID");
         g_regex_unref (regex);
         g_match_info_free (match_info);
         g_free (output);
@@ -619,7 +619,7 @@ BDBtrfsDeviceInfo** bd_btrfs_list_devices (const gchar *device, GError **error) 
     g_regex_unref (regex);
 
     if (dev_infos->len == 0) {
-        g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_PARSE, "Failed to parse information about devices");
+        g_set_error_literal (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_PARSE, "Failed to parse information about devices");
         g_ptr_array_free (dev_infos, TRUE);
         return NULL;
     }
@@ -712,7 +712,7 @@ BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (const gchar *mountpoint, gboole
     g_regex_unref (regex);
 
     if (subvol_infos->len == 0) {
-        g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_PARSE, "Failed to parse information about subvolumes");
+        g_set_error_literal (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_PARSE, "Failed to parse information about subvolumes");
         g_ptr_array_free (subvol_infos, TRUE);
         return NULL;
     }

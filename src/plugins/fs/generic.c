@@ -398,8 +398,8 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, gboolean force, GError *
 
     probe = blkid_new_probe ();
     if (!probe) {
-        g_set_error (&l_error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to create a new probe");
+        g_set_error_literal (&l_error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Failed to create a new probe");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
@@ -563,8 +563,8 @@ gchar* bd_fs_get_fstype (const gchar *device,  GError **error) {
 
     probe = blkid_new_probe ();
     if (!probe) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to create a new probe");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Failed to create a new probe");
         return NULL;
     }
 
@@ -1306,8 +1306,8 @@ gboolean bd_fs_check (const gchar *device, const gchar *fstype, GError **error) 
  */
 gboolean bd_fs_check_label (const gchar *fstype, const gchar *label, GError **error) {
     if (!fstype || strlen (fstype) == 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
-                     "Filesystem type must be specified to check label format");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
+                             "Filesystem type must be specified to check label format");
         return FALSE;
     }
     return device_operation (NULL, fstype, BD_FS_LABEL_CHECK, 0, label, NULL, error);
@@ -1353,8 +1353,8 @@ gboolean bd_fs_set_label (const gchar *device, const gchar *label, const gchar *
  */
 gboolean bd_fs_check_uuid (const gchar *fstype, const gchar *uuid, GError **error) {
     if (!fstype || strlen (fstype) == 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
-                     "Filesystem type must be specified to check UUID format");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
+                             "Filesystem type must be specified to check UUID format");
         return FALSE;
     }
     return device_operation (NULL, fstype, BD_FS_UUID_CHECK, 0, NULL, uuid, error);
