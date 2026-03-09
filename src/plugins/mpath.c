@@ -99,18 +99,18 @@ gboolean bd_mpath_is_tech_avail (BDMpathTech tech, guint64 mode, GError **error)
         return check_deps (&avail_deps, DEPS_MPATH_MASK, deps, DEPS_LAST, &deps_check_lock, error);
     case BD_MPATH_TECH_FRIENDLY_NAMES:
         if (mode & ~BD_MPATH_TECH_MODE_MODIFY) {
-            g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_TECH_UNAVAIL,
-                         "Only 'modify' (setting) supported for friendly names");
+            g_set_error_literal (error, BD_MPATH_ERROR, BD_MPATH_ERROR_TECH_UNAVAIL,
+                                 "Only 'modify' (setting) supported for friendly names");
             return FALSE;
         } else if (mode & BD_MPATH_TECH_MODE_MODIFY)
             return check_deps (&avail_deps, DEPS_MPATHCONF_MASK, deps, DEPS_LAST, &deps_check_lock, error);
         else {
-            g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_TECH_UNAVAIL,
-                         "Unknown mode");
+            g_set_error_literal (error, BD_MPATH_ERROR, BD_MPATH_ERROR_TECH_UNAVAIL,
+                                 "Unknown mode");
             return FALSE;
         }
     default:
-        g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_TECH_UNAVAIL, "Unknown technology");
+        g_set_error_literal (error, BD_MPATH_ERROR, BD_MPATH_ERROR_TECH_UNAVAIL, "Unknown technology");
         return FALSE;
     }
 }
@@ -199,28 +199,28 @@ static gboolean map_is_multipath (const gchar *map_name, GError **error) {
     task = dm_task_create (DM_DEVICE_STATUS);
     if (!task) {
         bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to create DM task");
-        g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
-                     "Failed to create DM task");
+        g_set_error_literal (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
+                             "Failed to create DM task");
         return FALSE;
     }
 
     if (dm_task_set_name (task, map_name) == 0) {
-        g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
-                     "Failed to create DM task");
+        g_set_error_literal (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
+                             "Failed to create DM task");
         dm_task_destroy (task);
         return FALSE;
     }
 
     if (dm_task_run (task) == 0) {
-        g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
-                     "Failed to run DM task");
+        g_set_error_literal (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
+                             "Failed to run DM task");
         dm_task_destroy (task);
         return FALSE;
     }
 
     if (dm_task_get_info (task, &info) == 0) {
-        g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
-                     "Failed to get task info");
+        g_set_error_literal (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
+                             "Failed to get task info");
         dm_task_destroy (task);
         return FALSE;
     }
@@ -248,29 +248,29 @@ static gchar** get_map_deps (const gchar *map_name, guint64 *n_deps, GError **er
     task = dm_task_create (DM_DEVICE_DEPS);
     if (!task) {
         bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to create DM task");
-        g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
-                     "Failed to create DM task");
+        g_set_error_literal (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
+                             "Failed to create DM task");
         return NULL;
     }
 
     if (dm_task_set_name (task, map_name) == 0) {
-        g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
-                     "Failed to create DM task");
+        g_set_error_literal (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
+                             "Failed to create DM task");
         dm_task_destroy (task);
         return NULL;
     }
 
     if (dm_task_run (task) == 0) {
-        g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
-                     "Failed to run DM task");
+        g_set_error_literal (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
+                             "Failed to run DM task");
         dm_task_destroy (task);
         return NULL;
     }
 
     deps = dm_task_get_deps (task);
     if (!deps) {
-        g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
-                     "Failed to device dependencies");
+        g_set_error_literal (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
+                             "Failed to device dependencies");
         dm_task_destroy (task);
         return NULL;
     }
@@ -325,8 +325,8 @@ gboolean bd_mpath_is_mpath_member (const gchar *device, GError **error) {
     task_names = dm_task_create (DM_DEVICE_LIST);
     if (!task_names) {
         bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to create DM task");
-        g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
-                     "Failed to create DM task");
+        g_set_error_literal (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
+                             "Failed to create DM task");
         return FALSE;
     }
 
@@ -422,8 +422,8 @@ gchar** bd_mpath_get_mpath_members (GError **error) {
     task_names = dm_task_create (DM_DEVICE_LIST);
     if (!task_names) {
         bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to create DM task");
-        g_set_error (&l_error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
-                     "Failed to create DM task");
+        g_set_error_literal (&l_error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
+                             "Failed to create DM task");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return NULL;

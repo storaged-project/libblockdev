@@ -79,8 +79,8 @@ bd_fs_exfat_is_tech_avail (BDFSTech tech G_GNUC_UNUSED, guint64 mode, GError **e
     guint i = 0;
 
     if (mode & BD_FS_TECH_MODE_RESIZE) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL,
-                     "exFAT currently doesn't support resizing.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL,
+                             "exFAT currently doesn't support resizing.");
         return FALSE;
     }
 
@@ -259,14 +259,14 @@ gboolean bd_fs_exfat_check_label (const gchar *label, GError **error) {
     }
 
     if (!str) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
-                     "Label for exFAT filesystem must be a valid UTF-8 string.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                             "Label for exFAT filesystem must be a valid UTF-8 string.");
         return FALSE;
     }
 
     if (bytes_written > 22) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
-                     "Label for exFAT filesystem is too long.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                             "Label for exFAT filesystem is too long.");
         return FALSE;
     }
 
@@ -349,15 +349,15 @@ gboolean bd_fs_exfat_check_uuid (const gchar *uuid, GError **error) {
 
     vol_id = g_ascii_strtoull (new_uuid, &endptr, 16);
     if ((vol_id == 0 && endptr == new_uuid) || (endptr && *endptr)) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
-                     "UUID for exFAT filesystem must be a hexadecimal number.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
+                             "UUID for exFAT filesystem must be a hexadecimal number.");
         g_free (new_uuid);
         return FALSE;
     }
 
     if (vol_id > G_MAXUINT32) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
-                     "UUID for exFAT filesystem must fit into 32 bits.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
+                             "UUID for exFAT filesystem must fit into 32 bits.");
         g_free (new_uuid);
         return FALSE;
     }
@@ -432,8 +432,8 @@ BDFSExfatInfo* bd_fs_exfat_get_info (const gchar *device, GError **error) {
     g_strfreev (lines);
 
     if (ret->sector_size == 0 || ret->sector_count == 0 || ret->cluster_count == 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to to parse exFAT info.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Failed to to parse exFAT info.");
         bd_fs_exfat_info_free (ret);
         return NULL;
     }

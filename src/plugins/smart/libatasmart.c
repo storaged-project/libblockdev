@@ -58,10 +58,10 @@ gboolean bd_smart_is_tech_avail (BDSmartTech tech, G_GNUC_UNUSED guint64 mode, G
         case BD_SMART_TECH_ATA:
             return TRUE;
         case BD_SMART_TECH_SCSI:
-            g_set_error (error, BD_SMART_ERROR, BD_SMART_ERROR_TECH_UNAVAIL, "SCSI SMART is unavailable with libatasmart");
+            g_set_error_literal (error, BD_SMART_ERROR, BD_SMART_ERROR_TECH_UNAVAIL, "SCSI SMART is unavailable with libatasmart");
             return FALSE;
         default:
-            g_set_error (error, BD_SMART_ERROR, BD_SMART_ERROR_TECH_UNAVAIL, "Unknown technology");
+            g_set_error_literal (error, BD_SMART_ERROR, BD_SMART_ERROR_TECH_UNAVAIL, "Unknown technology");
             return FALSE;
     }
 }
@@ -479,7 +479,7 @@ BDSmartATA * bd_smart_ata_get_info_from_data (const guint8 *data, gsize data_len
  * Tech category: %BD_SMART_TECH_SCSI-%BD_SMART_TECH_MODE_INFO
  */
 BDSmartSCSI * bd_smart_scsi_get_info (G_GNUC_UNUSED const gchar *device, G_GNUC_UNUSED const BDExtraArg **extra, GError **error) {
-    g_set_error (error, BD_SMART_ERROR, BD_SMART_ERROR_TECH_UNAVAIL, "SCSI SMART is unavailable with libatasmart");
+    g_set_error_literal (error, BD_SMART_ERROR, BD_SMART_ERROR_TECH_UNAVAIL, "SCSI SMART is unavailable with libatasmart");
     return FALSE;
 }
 
@@ -498,7 +498,7 @@ BDSmartSCSI * bd_smart_scsi_get_info (G_GNUC_UNUSED const gchar *device, G_GNUC_
  * Tech category: %BD_SMART_TECH_ATA-%BD_SMART_TECH_MODE_INFO
  */
 gboolean bd_smart_set_enabled (G_GNUC_UNUSED const gchar *device, G_GNUC_UNUSED gboolean enabled, G_GNUC_UNUSED const BDExtraArg **extra, GError **error) {
-    g_set_error (error, BD_SMART_ERROR, BD_SMART_ERROR_TECH_UNAVAIL, "Enabling/disabling ATA SMART functionality is unavailable with libatasmart");
+    g_set_error_literal (error, BD_SMART_ERROR, BD_SMART_ERROR_TECH_UNAVAIL, "Enabling/disabling ATA SMART functionality is unavailable with libatasmart");
     return FALSE;
 }
 

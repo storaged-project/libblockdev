@@ -184,8 +184,8 @@ gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error) {
     /* check the device if it is an activatable swap */
     probe = blkid_new_probe ();
     if (!probe) {
-        g_set_error (&l_error, BD_SWAP_ERROR, BD_SWAP_ERROR_UNKNOWN_STATE,
-                     "Failed to create a new probe");
+        g_set_error_literal (&l_error, BD_SWAP_ERROR, BD_SWAP_ERROR_UNKNOWN_STATE,
+                             "Failed to create a new probe");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
@@ -281,24 +281,24 @@ gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error) {
     }
 
     if (g_strcmp0 (value, "SWAP-SPACE") == 0) {
-        g_set_error (&l_error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE_OLD,
-                     "Old swap format, cannot activate.");
+        g_set_error_literal (&l_error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE_OLD,
+                             "Old swap format, cannot activate.");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         blkid_free_probe (probe);
         close (fd);
         return FALSE;
     } else if (g_strcmp0 (value, "S1SUSPEND") == 0 || g_strcmp0 (value, "S2SUSPEND") == 0) {
-        g_set_error (&l_error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE_SUSPEND,
-                     "Suspended system on the swap device, cannot activate.");
+        g_set_error_literal (&l_error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE_SUSPEND,
+                             "Suspended system on the swap device, cannot activate.");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         blkid_free_probe (probe);
         close (fd);
         return FALSE;
     } else if (g_strcmp0 (value, "SWAPSPACE2") != 0) {
-        g_set_error (&l_error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE_UNKNOWN,
-                     "Unknown swap space format, cannot activate.");
+        g_set_error_literal (&l_error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE_UNKNOWN,
+                             "Unknown swap space format, cannot activate.");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         blkid_free_probe (probe);
@@ -455,8 +455,8 @@ gboolean bd_swap_swapstatus (const gchar *device, GError **error) {
  */
 gboolean bd_swap_check_label (const gchar *label, GError **error) {
     if (strlen (label) > 16) {
-        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_LABEL_INVALID,
-                     "Label for swap must be at most 16 characters long.");
+        g_set_error_literal (error, BD_SWAP_ERROR, BD_SWAP_ERROR_LABEL_INVALID,
+                             "Label for swap must be at most 16 characters long.");
         return FALSE;
     }
 
@@ -498,16 +498,16 @@ gboolean bd_swap_check_uuid (const gchar *uuid, GError **error) {
     uuid_t uu;
 
     if (!g_str_is_ascii (uuid)) {
-        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_UUID_INVALID,
-                     "Provided UUID is not a valid RFC-4122 UUID.");
+        g_set_error_literal (error, BD_SWAP_ERROR, BD_SWAP_ERROR_UUID_INVALID,
+                             "Provided UUID is not a valid RFC-4122 UUID.");
         return FALSE;
     }
 
     lowercase = g_ascii_strdown (uuid, -1);
     ret = uuid_parse (lowercase, uu);
     if (ret < 0){
-        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_UUID_INVALID,
-                     "Provided UUID is not a valid RFC-4122 UUID.");
+        g_set_error_literal (error, BD_SWAP_ERROR, BD_SWAP_ERROR_UUID_INVALID,
+                             "Provided UUID is not a valid RFC-4122 UUID.");
         return FALSE;
     }
 

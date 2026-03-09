@@ -558,8 +558,8 @@ gboolean bd_fs_ext4_set_label (const gchar *device, const gchar *label, GError *
  */
 gboolean bd_fs_ext2_check_label (const gchar *label, GError **error) {
     if (strlen (label) > 16) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
-                     "Label for ext filesystem must be at most 16 characters long.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                             "Label for ext filesystem must be at most 16 characters long.");
         return FALSE;
     }
 
@@ -735,7 +735,7 @@ static BDFSExtInfo* ext_get_info (const gchar *device, GError **error) {
                           unix_io_manager,
                           &fs);
     if (retval) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL, "Failed to open ext4 file system");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL, "Failed to open ext4 file system");
         return NULL;
     }
 

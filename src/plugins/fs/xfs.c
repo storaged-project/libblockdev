@@ -268,14 +268,14 @@ gboolean bd_fs_xfs_check_label (const gchar *label, GError **error) {
 
     len = strlen (label);
     if (len > 12) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
-                     "Label for XFS filesystem must be at most 12 characters long.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                             "Label for XFS filesystem must be at most 12 characters long.");
         return FALSE;
     }
 
     if (strchr (label, ' ') != NULL) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
-                     "Label for XFS filesystem cannot contain spaces.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                             "Label for XFS filesystem cannot contain spaces.");
         return FALSE;
     }
 
@@ -390,7 +390,7 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
     while (line_p && *line_p && !g_str_has_prefix (*line_p, "data"))
         line_p++;
     if (!line_p || !(*line_p)) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
         g_strfreev (lines);
         bd_fs_xfs_info_free (ret);
         return NULL;
@@ -399,7 +399,7 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
     /* extract data from something like this: "data     =      bsize=4096   blocks=262400, imaxpct=25" */
     val_start = strchr (*line_p, '=');
     if (!val_start) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
         g_strfreev (lines);
         bd_fs_xfs_info_free (ret);
         return NULL;
@@ -410,7 +410,7 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
     if (g_str_has_prefix (val_start, "bsize")) {
         val_start = strchr (val_start, '=');
         if (!val_start) {
-            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
+            g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
             g_strfreev (lines);
             bd_fs_xfs_info_free (ret);
             return NULL;
@@ -418,7 +418,7 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
         val_start++;
         ret->block_size = g_ascii_strtoull (val_start, NULL, 0);
     } else {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
         g_strfreev (lines);
         bd_fs_xfs_info_free (ret);
         return NULL;
@@ -428,7 +428,7 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
     if (g_str_has_prefix (val_start, "blocks")) {
         val_start = strchr (val_start, '=');
         if (!val_start) {
-            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
+            g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
             g_strfreev (lines);
             bd_fs_xfs_info_free (ret);
             return NULL;
@@ -436,7 +436,7 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
         val_start++;
         ret->block_count = g_ascii_strtoull (val_start, NULL, 0);
     } else {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
         g_strfreev (lines);
         bd_fs_xfs_info_free (ret);
         return NULL;

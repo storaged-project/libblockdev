@@ -105,7 +105,7 @@ gboolean bd_s390_is_tech_avail (BDS390Tech tech, guint64 mode, GError **error) {
         else
             return TRUE;
     default:
-        g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_TECH_UNAVAIL, "Unknown technology");
+        g_set_error_literal (error, BD_S390_ERROR, BD_S390_ERROR_TECH_UNAVAIL, "Unknown technology");
         return FALSE;
     }
 }
@@ -400,8 +400,8 @@ gchar* bd_s390_sanitize_dev_input (const gchar *dev, GError **error) {
 
     /* first make sure we're not being played */
     if ((dev == NULL) || (!*dev)) {
-        g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
-                     "Device number not specified or invalid");
+        g_set_error_literal (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
+                             "Device number not specified or invalid");
         return NULL;
     }
 
@@ -451,8 +451,8 @@ gchar* bd_s390_zfcp_sanitize_wwpn_input (const gchar *wwpn, GError **error) {
 
     /* first make sure we're not being played */
     if ((wwpn == NULL) || (!*wwpn) || (strlen (wwpn) < 2)) {
-        g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
-                     "WWPN not specified or invalid");
+        g_set_error_literal (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
+                             "WWPN not specified or invalid");
         return NULL;
     }
 
@@ -488,8 +488,8 @@ gchar* bd_s390_zfcp_sanitize_lun_input (const gchar *lun, GError **error) {
 
     /* first make sure we're not being played */
     if ((lun == NULL) || (!*lun) || (strlen (lun) > 18)) {
-        g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
-                     "LUN not specified or invalid");
+        g_set_error_literal (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
+                             "LUN not specified or invalid");
         return NULL;
     }
 
@@ -1028,8 +1028,8 @@ gboolean bd_s390_zfcp_offline (const gchar *devno, const gchar *wwpn, const gcha
     }
     /* check if we have any matches found; if so, bail */
     if (luns.gl_pathc > 0) {
-        g_set_error (&l_error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
-                     "Not setting zFCP device offline since it still has other LUNs");
+        g_set_error_literal (&l_error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
+                             "Not setting zFCP device offline since it still has other LUNs");
         globfree (&luns);
         g_free (pattern);
         bd_utils_report_finished (progress_id, l_error->message);

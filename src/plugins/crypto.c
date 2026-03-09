@@ -383,84 +383,84 @@ gboolean bd_crypto_is_tech_avail (BDCryptoTech tech, guint64 mode, GError **erro
                           BD_CRYPTO_TECH_MODE_ADD_KEY|BD_CRYPTO_TECH_MODE_REMOVE_KEY|BD_CRYPTO_TECH_MODE_RESIZE|
                           BD_CRYPTO_TECH_MODE_SUSPEND_RESUME|BD_CRYPTO_TECH_MODE_BACKUP_RESTORE);
             if (ret != mode) {
-                g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                             "Only 'create', 'open', 'query', 'add-key', 'remove-key', 'resize', 'suspend-resume', 'backup-restore' supported for LUKS");
+                g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                                     "Only 'create', 'open', 'query', 'add-key', 'remove-key', 'resize', 'suspend-resume', 'backup-restore' supported for LUKS");
                 return FALSE;
             } else
                 return TRUE;
         case BD_CRYPTO_TECH_TRUECRYPT:
             ret = mode & BD_CRYPTO_TECH_MODE_OPEN_CLOSE;
             if (ret != mode) {
-                g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                             "Only 'open' supported for TrueCrypt");
+                g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                                     "Only 'open' supported for TrueCrypt");
                 return FALSE;
             } else
                 return TRUE;
         case BD_CRYPTO_TECH_ESCROW:
 #ifndef WITH_BD_ESCROW
-            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                         "Escrow technology is not available, libblockdev has been compiled without escrow support.");
+            g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                                 "Escrow technology is not available, libblockdev has been compiled without escrow support.");
             return FALSE;
 #endif
             ret = mode & BD_CRYPTO_TECH_MODE_CREATE;
             if (ret != mode) {
-                g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                             "Only 'create' supported for device escrow");
+                g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                                     "Only 'create' supported for device escrow");
                 return FALSE;
             } else
                 return TRUE;
         case BD_CRYPTO_TECH_INTEGRITY:
             ret = mode & (BD_CRYPTO_TECH_MODE_CREATE|BD_CRYPTO_TECH_MODE_OPEN_CLOSE|BD_CRYPTO_TECH_MODE_QUERY);
             if (ret != mode) {
-                g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                             "Only 'create', 'open' and 'query' supported for Integrity");
+                g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                                     "Only 'create', 'open' and 'query' supported for Integrity");
                 return FALSE;
             } else
                 return TRUE;
         case BD_CRYPTO_TECH_BITLK:
             ret = mode & (BD_CRYPTO_TECH_MODE_OPEN_CLOSE|BD_CRYPTO_TECH_MODE_QUERY);
             if (ret != mode) {
-                g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                             "Only 'open' and 'query' supported for BITLK");
+                g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                                     "Only 'open' and 'query' supported for BITLK");
                 return FALSE;
             } else
                 return TRUE;
         case BD_CRYPTO_TECH_KEYRING:
             ret = mode & BD_CRYPTO_TECH_MODE_ADD_KEY;
             if (ret != mode) {
-                g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                             "Only 'add key' supported for kernel keyring");
+                g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                                     "Only 'add key' supported for kernel keyring");
                 return FALSE;
             } else
                 return TRUE;
         case BD_CRYPTO_TECH_FVAULT2:
 #ifndef LIBCRYPTSETUP_26
-            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                         "FVAULT2 technology requires libcryptsetup >= 2.6.0");
+            g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                                 "FVAULT2 technology requires libcryptsetup >= 2.6.0");
             return FALSE;
 #endif
             ret = mode & BD_CRYPTO_TECH_MODE_OPEN_CLOSE;
             if (ret != mode) {
-                g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                             "Only 'open' supported for FVAULT2");
+                g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                                     "Only 'open' supported for FVAULT2");
                 return FALSE;
             } else
                 return TRUE;
         case BD_CRYPTO_TECH_SED_OPAL:
 #if !defined(LIBCRYPTSETUP_27) || !defined(HAVE_LINUX_OPAL)
-            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                         "OPAL technology requires libcryptsetup >= 2.7.0 and kernel with SED OPAL support");
+            g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                                 "OPAL technology requires libcryptsetup >= 2.7.0 and kernel with SED OPAL support");
             return FALSE;
 #endif
             ret = mode & (BD_CRYPTO_TECH_MODE_CREATE|BD_CRYPTO_TECH_MODE_QUERY|BD_CRYPTO_TECH_MODE_MODIFY);
             if (ret != mode) {
-                g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                             "Only 'create', 'query' and 'modify' supported for OPAL");
+                g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                                     "Only 'create', 'query' and 'modify' supported for OPAL");
                 return FALSE;
             } else
                 return TRUE;
         default:
-            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL, "Unknown technology");
+            g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL, "Unknown technology");
             return FALSE;
     }
 
@@ -525,8 +525,8 @@ gboolean bd_crypto_device_is_luks (const gchar *device, GError **error) {
 
     probe = blkid_new_probe ();
     if (!probe) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to create a new probe");
+        g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                             "Failed to create a new probe");
         return FALSE;
     }
 
@@ -656,8 +656,8 @@ const gchar* bd_crypto_luks_status (const gchar *luks_device, GError **error) {
         break;
     default:
         ret = NULL;
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_STATE,
-                     "Unknown device's state");
+        g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_STATE,
+                             "Unknown device's state");
     }
 
     crypt_free (cd);
@@ -680,8 +680,8 @@ static struct crypt_pbkdf_type *get_pbkdf_params (BDCryptoLUKSPBKDF *user_pbkdf,
      */
     default_pbkdf = crypt_get_pbkdf_default (CRYPT_LUKS2);
     if (!default_pbkdf) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_FORMAT_FAILED,
-                     "Failed to get default values for pbkdf.");
+        g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_FORMAT_FAILED,
+                             "Failed to get default values for pbkdf.");
         return NULL;
     }
 
@@ -827,8 +827,8 @@ BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_passphrase (const guint8 *
     BDCryptoKeyslotContext *context = NULL;
 
     if (!pass_data || data_len == 0) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NO_KEY,
-                     "No passphrase specified.");
+        g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NO_KEY,
+                             "No passphrase specified.");
         return NULL;
     }
 
@@ -910,8 +910,8 @@ BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_volume_key (const guint8 *
     BDCryptoKeyslotContext *context = NULL;
 
     if (!volume_key || volume_key_size == 0) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NO_KEY,
-                     "No volume key specified.");
+        g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NO_KEY,
+                             "No volume key specified.");
         return NULL;
     }
 
@@ -973,8 +973,8 @@ gboolean _crypto_luks_format (const gchar *device,
     else if (luks_version == BD_CRYPTO_LUKS_VERSION_LUKS2)
         crypt_version = CRYPT_LUKS2;
     else {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                     "Unknown or unsupported LUKS version specified");
+        g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                             "Unknown or unsupported LUKS version specified");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
@@ -1031,8 +1031,8 @@ gboolean _crypto_luks_format (const gchar *device,
             }
             close (dev_random_fd);
         } else {
-            g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_FORMAT_FAILED,
-                         "Failed to check random data entropy level");
+            g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_FORMAT_FAILED,
+                                 "Failed to check random data entropy level");
             crypt_free (cd);
             g_strfreev (cipher_specs);
             bd_utils_report_finished (progress_id, l_error->message);
@@ -1047,8 +1047,8 @@ gboolean _crypto_luks_format (const gchar *device,
             opal_params.admin_key = (char *) opal_context->u.passphrase.pass_data;
             opal_params.admin_key_size = opal_context->u.passphrase.data_len;
         } else {
-            g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
-                         "Only 'passphrase' context type is valid for OPAL format.");
+            g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                                 "Only 'passphrase' context type is valid for OPAL format.");
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
             crypt_free (cd);
@@ -1074,9 +1074,9 @@ gboolean _crypto_luks_format (const gchar *device,
         if (luks_version == BD_CRYPTO_LUKS_VERSION_LUKS1) {
 
             if (extra->integrity || extra->sector_size || extra->label || extra->subsystem) {
-                g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_PARAMS,
-                             "Invalid extra arguments specified. Only `data_alignment`"
-                             "and `data_device` are valid for LUKS 1.");
+                g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_PARAMS,
+                                     "Invalid extra arguments specified. Only `data_alignment`"
+                                     "and `data_device` are valid for LUKS 1.");
                 crypt_free (cd);
                 g_strfreev (cipher_specs);
                 bd_utils_report_finished (progress_id, l_error->message);
@@ -1086,8 +1086,8 @@ gboolean _crypto_luks_format (const gchar *device,
 
             if (extra->pbkdf) {
                 if (g_strcmp0 (extra->pbkdf->type, "pbkdf2") != 0) {
-                    g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_PARAMS,
-                                 "Invalid pbkdf specified. Only `pbkdf2` is valid for LUKS 1.");
+                    g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_PARAMS,
+                                         "Invalid pbkdf specified. Only `pbkdf2` is valid for LUKS 1.");
                 crypt_free (cd);
                 g_strfreev (cipher_specs);
                 bd_utils_report_finished (progress_id, l_error->message);
@@ -1208,8 +1208,8 @@ gboolean _crypto_luks_format (const gchar *device,
         }
         bd_utils_report_progress (progress_id, 100, "Added key");
     } else {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
-                     "Only 'passphrase' and 'key file' context types are valid for LUKS format.");
+        g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                             "Only 'passphrase' and 'key file' context types are valid for LUKS format.");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         crypt_free (cd);
@@ -1251,14 +1251,14 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
 
 static gboolean _is_dm_name_valid (const gchar *name, GError **error) {
     if (strlen (name) >= 128) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_PARAMS,
-                     "Device name can be at most 127 characters long.");
+        g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_PARAMS,
+                             "Device name can be at most 127 characters long.");
         return FALSE;
     }
 
     if (strchr (name, '/')) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_PARAMS,
-                     "Device name cannot contain '/' character.");
+        g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_PARAMS,
+                             "Device name cannot contain '/' character.");
         return FALSE;
     }
 
@@ -1350,8 +1350,8 @@ gboolean bd_crypto_luks_open_flags (const gchar *device, const gchar *name, BDCr
     } else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYRING)
         ret = crypt_activate_by_keyring (cd, name, context->u.keyring.key_desc, CRYPT_ANY_SLOT, crypt_flags);
     else {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
-                     "Only 'passphrase', 'key file' and 'keyring' context types are valid for LUKS open.");
+        g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                             "Only 'passphrase', 'key file' and 'keyring' context types are valid for LUKS open.");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         crypt_free (cd);
@@ -1360,11 +1360,11 @@ gboolean bd_crypto_luks_open_flags (const gchar *device, const gchar *name, BDCr
 
     if (ret < 0) {
         if (ret == -EPERM)
-          g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                       "Failed to activate device: Incorrect passphrase.");
+          g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                               "Failed to activate device: Incorrect passphrase.");
         else if (ret == -ETXTBSY)
-          g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                       "Failed to activate device: Unknown or unsupported LUKS2 requirements detected.");
+          g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                               "Failed to activate device: Unknown or unsupported LUKS2 requirements detected.");
         else
           g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                        "Failed to activate device: %s", strerror_l (-ret, c_locale));
@@ -1519,8 +1519,8 @@ gboolean bd_crypto_luks_add_key (const gchar *device, BDCryptoKeyslotContext *co
         key_buf = (char *) context->u.passphrase.pass_data;
         buf_len = context->u.passphrase.data_len;
     } else {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
-                     "Only 'passphrase' and 'key file' context types are valid for LUKS add key.");
+        g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                             "Only 'passphrase' and 'key file' context types are valid for LUKS add key.");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         crypt_free (cd);
@@ -1545,8 +1545,8 @@ gboolean bd_crypto_luks_add_key (const gchar *device, BDCryptoKeyslotContext *co
         nkey_buf = (char *) ncontext->u.passphrase.pass_data;
         nbuf_len = ncontext->u.passphrase.data_len;
     } else {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
-                     "Only 'passphrase' and 'key file' context types are valid for LUKS add key.");
+        g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                             "Only 'passphrase' and 'key file' context types are valid for LUKS add key.");
         if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE)
             crypt_safe_free (key_buf);
         bd_utils_report_finished (progress_id, l_error->message);
@@ -1637,8 +1637,8 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, BDCryptoKeyslotContext 
         ret = crypt_activate_by_passphrase (cd, NULL, CRYPT_ANY_SLOT, key_buf, buf_len, 0);
         crypt_safe_free (key_buf);
     } else {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
-                     "Only 'passphrase' and 'key file' context types are valid for LUKS remove key.");
+        g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                             "Only 'passphrase' and 'key file' context types are valid for LUKS remove key.");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         crypt_free (cd);
@@ -1732,8 +1732,8 @@ gboolean bd_crypto_luks_change_key (const gchar *device, BDCryptoKeyslotContext 
         key_buf = (char *) context->u.passphrase.pass_data;
         buf_len = context->u.passphrase.data_len;
     } else {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
-                     "Only 'passphrase' and 'key file' context types are valid for LUKS change key.");
+        g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                             "Only 'passphrase' and 'key file' context types are valid for LUKS change key.");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         crypt_free (cd);
@@ -1758,8 +1758,8 @@ gboolean bd_crypto_luks_change_key (const gchar *device, BDCryptoKeyslotContext 
         nkey_buf = (char *) ncontext->u.passphrase.pass_data;
         nbuf_len = ncontext->u.passphrase.data_len;
     } else {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
-                     "Only 'passphrase' and 'key file' context types are valid for LUKS change key.");
+        g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                             "Only 'passphrase' and 'key file' context types are valid for LUKS change key.");
         if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE)
             crypt_safe_free (key_buf);
         bd_utils_report_finished (progress_id, l_error->message);
@@ -1779,8 +1779,8 @@ gboolean bd_crypto_luks_change_key (const gchar *device, BDCryptoKeyslotContext 
 
     if (ret < 0) {
         if (ret == -EPERM)
-            g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                         "Failed to change the passphrase: No keyslot with given passphrase found.");
+            g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                                 "Failed to change the passphrase: No keyslot with given passphrase found.");
         else
             g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_ADD_KEY,
                          "Failed to change the passphrase: %s", strerror_l (-ret, c_locale));
@@ -1865,8 +1865,8 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, BDCrypto
                                                 cad.flags & CRYPT_ACTIVATE_KEYRING_KEY);
             crypt_safe_free (key_buffer);
         } else {
-            g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
-                        "Only 'passphrase' and 'key file' context types are valid for LUKS resize.");
+            g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                                 "Only 'passphrase' and 'key file' context types are valid for LUKS resize.");
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
             crypt_free (cd);
@@ -1875,8 +1875,8 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, BDCrypto
 
         if (ret < 0) {
             if (ret == -EPERM)
-              g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                           "Failed to activate device: Incorrect passphrase.");
+              g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                                   "Failed to activate device: Incorrect passphrase.");
             else
               g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                            "Failed to activate device: %s", strerror_l (-ret, c_locale));
@@ -1890,10 +1890,10 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, BDCrypto
     ret = crypt_resize (cd, luks_device, size);
     if (ret != 0) {
         if (ret == -EPERM && g_strcmp0 (crypt_get_type (cd), CRYPT_LUKS2) == 0) {
-            g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_RESIZE_PERM,
-                         "Insufficient permissions to resize device. You need to specify"
-                         " passphrase or keyfile to resize LUKS 2 devices that don't"
-                         " have verified key loaded in kernel.");
+            g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_RESIZE_PERM,
+                                 "Insufficient permissions to resize device. You need to specify"
+                                 " passphrase or keyfile to resize LUKS 2 devices that don't"
+                                 " have verified key loaded in kernel.");
             crypt_free (cd);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
@@ -2019,8 +2019,8 @@ gboolean bd_crypto_luks_resume (const gchar *luks_device, BDCryptoKeyslotContext
         ret = crypt_resume_by_passphrase (cd, luks_device, CRYPT_ANY_SLOT, key_buffer, buf_len);
         crypt_safe_free (key_buffer);
     } else {
-            g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
-                        "Only 'passphrase' and 'key file' context types are valid for LUKS resume.");
+            g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                                 "Only 'passphrase' and 'key file' context types are valid for LUKS resume.");
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
             crypt_free (cd);
@@ -2215,14 +2215,14 @@ gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup
  */
 gboolean bd_crypto_luks_check_label (const gchar *label, const gchar *subsystem, GError **error) {
     if (label && strlen (label) > 47) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_PARAMS,
-                     "Label for LUKS must be at most 47 characters long");
+        g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_PARAMS,
+                             "Label for LUKS must be at most 47 characters long");
         return FALSE;
     }
 
     if (subsystem && strlen (subsystem) > 47) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_PARAMS,
-                     "Subsystem for LUKS must be at most 47 characters long");
+        g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_PARAMS,
+                             "Subsystem for LUKS must be at most 47 characters long");
         return FALSE;
     }
 
@@ -2260,8 +2260,8 @@ gboolean bd_crypto_luks_set_label (const gchar *device, const gchar *label, cons
     }
 
     if (g_strcmp0 (crypt_get_type (cd), CRYPT_LUKS2) != 0) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                     "Label can be set only on LUKS 2 devices.");
+        g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                             "Label can be set only on LUKS 2 devices.");
         crypt_free (cd);
         return FALSE;
     }
@@ -2417,8 +2417,8 @@ gboolean bd_crypto_luks_set_persistent_flags (const gchar *device, BDCryptoLUKSP
     }
 
     if (g_strcmp0 (crypt_get_type (cd), CRYPT_LUKS2) != 0) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Persistent flags can be set only on LUKS v2");
+        g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                             "Persistent flags can be set only on LUKS v2");
         crypt_free (cd);
         return FALSE;
     }
@@ -2439,8 +2439,8 @@ gboolean bd_crypto_luks_set_persistent_flags (const gchar *device, BDCryptoLUKSP
 #ifdef LIBCRYPTSETUP_28
         crypt_flags |= CRYPT_ACTIVATE_HIGH_PRIORITY;
 #else
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                     "Libcryptsetup 2.8 or newer is needed for 'high priority' flag support");
+        g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                             "Libcryptsetup 2.8 or newer is needed for 'high priority' flag support");
         crypt_free (cd);
         return FALSE;
 #endif
@@ -2598,8 +2598,8 @@ BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *device, GError **error) {
     else if (g_strcmp0 (version, CRYPT_LUKS2) == 0)
         info->version = BD_CRYPTO_LUKS_VERSION_LUKS2;
     else {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                     "Unknown or unsupported LUKS version");
+        g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                             "Unknown or unsupported LUKS version");
         bd_crypto_luks_info_free (info);
         crypt_free (cd);
         return NULL;
@@ -2891,8 +2891,8 @@ gboolean bd_crypto_integrity_format (const gchar *device, const gchar *algorithm
     g_free (msg);
 
     if (context && context->type != BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_VOLUME_KEY) {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
-                    "Only 'volume key' context type is valid for integrity format.");
+        g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                             "Only 'volume key' context type is valid for integrity format.");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
@@ -3008,8 +3008,8 @@ gboolean bd_crypto_integrity_open (const gchar *device, const gchar *name, const
     GError *l_error = NULL;
 
     if (context && context->type != BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_VOLUME_KEY) {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
-                     "Only 'volume key' context type is valid for integrity format.");
+        g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                             "Only 'volume key' context type is valid for integrity format.");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
@@ -3174,14 +3174,14 @@ gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error) 
 
     fd = open (device, O_RDONLY);
     if (fd == -1) {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE, "Failed to open device");
+        g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE, "Failed to open device");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
     }
 
     if (read (fd, buf, sizeof (buf)) != sizeof (buf)) {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE, "Failed to read device");
+        g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE, "Failed to read device");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         close (fd);
@@ -3245,8 +3245,8 @@ gboolean bd_crypto_tc_open_flags (const gchar *device, const gchar *name, BDCryp
     }
 
     if (context && context->type != BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE) {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
-                     "Only 'passphrase' context type is valid for TC open.");
+        g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                             "Only 'passphrase' context type is valid for TC open.");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         crypt_free (cd);
@@ -3254,8 +3254,8 @@ gboolean bd_crypto_tc_open_flags (const gchar *device, const gchar *name, BDCryp
     }
 
     if ((context == NULL) && (keyfiles_count == 0)) {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NO_KEY,
-                     "No passphrase nor key file specified, cannot open.");
+        g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NO_KEY,
+                             "No passphrase nor key file specified, cannot open.");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
@@ -3483,8 +3483,8 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
 
     if (!NSS_IsInitialized ())
         if (NSS_NoDB_Init (NULL) != SECSuccess) {
-            g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NSS_INIT_FAILED,
-                         "Failed to initialize NSS");
+            g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NSS_INIT_FAILED,
+                                 "Failed to initialize NSS");
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
             return FALSE;
@@ -3519,8 +3519,8 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
     cert_data_copy = g_strdup (cert_data);
     cert = CERT_DecodeCertFromPackage (cert_data_copy, strlen (cert_data_copy));
     if (!cert) {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_CERT_DECODE,
-                     "Failed to decode the certificate data");
+        g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_CERT_DECODE,
+                             "Failed to decode the certificate data");
         libvk_volume_free (volume);
         libvk_ui_free (ui);
         g_free (cert_data_copy);
@@ -3671,8 +3671,8 @@ gboolean bd_crypto_bitlk_open_flags (const gchar *device, const gchar *name, BDC
         ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT, key_buffer, buf_len, crypt_flags);
         crypt_safe_free (key_buffer);
     } else {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
-                     "Only 'passphrase' and 'key file' context types are valid for BITLK open.");
+        g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                             "Only 'passphrase' and 'key file' context types are valid for BITLK open.");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         crypt_free (cd);
@@ -3681,8 +3681,8 @@ gboolean bd_crypto_bitlk_open_flags (const gchar *device, const gchar *name, BDC
 
     if (ret < 0) {
         if (ret == -EPERM)
-          g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                       "Failed to activate device: Incorrect passphrase.");
+          g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                               "Failed to activate device: Incorrect passphrase.");
         else
           g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                        "Failed to activate device: %s", strerror_l (-ret, c_locale));
@@ -3809,8 +3809,8 @@ gboolean bd_crypto_fvault2_open_flags (const gchar *device, const gchar *name, B
         ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT, key_buffer, buf_len, crypt_flags);
         crypt_safe_free (key_buffer);
     } else {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
-                     "Only 'passphrase' and 'key file' context types are valid for FVAULT2 open.");
+        g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                             "Only 'passphrase' and 'key file' context types are valid for FVAULT2 open.");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         crypt_free (cd);
@@ -3819,8 +3819,8 @@ gboolean bd_crypto_fvault2_open_flags (const gchar *device, const gchar *name, B
 
     if (ret < 0) {
         if (ret == -EPERM)
-          g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                       "Failed to activate device: Incorrect passphrase.");
+          g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                               "Failed to activate device: Incorrect passphrase.");
         else
           g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                        "Failed to activate device: %s", strerror_l (-ret, c_locale));
@@ -3995,8 +3995,8 @@ gboolean bd_crypto_opal_wipe_device (const gchar *device, BDCryptoKeyslotContext
         key_buf = (char *) context->u.passphrase.pass_data;
         buf_len = context->u.passphrase.data_len;
     } else {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
-                     "Only 'passphrase' context type is valid for OPAL wipe.");
+        g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                             "Only 'passphrase' context type is valid for OPAL wipe.");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         crypt_free (cd);
@@ -4058,14 +4058,14 @@ gboolean bd_crypto_opal_format (const gchar *device, const gchar *cipher, guint6
     gboolean ret = FALSE;
 
     if (hw_encryption != BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_AND_SW && hw_encryption != BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_ONLY) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_FORMAT_FAILED,
-                     "Either hardware and software encryption or hardware encryption only must be selected for OPAL format");
+        g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_FORMAT_FAILED,
+                             "Either hardware and software encryption or hardware encryption only must be selected for OPAL format");
         return FALSE;
     }
 
     if (hw_encryption == BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_ONLY && cipher != NULL) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_FORMAT_FAILED,
-                     "Cipher cannot be specified for hardware encryption only OPAL devices");
+        g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_FORMAT_FAILED,
+                             "Cipher cannot be specified for hardware encryption only OPAL devices");
         return FALSE;
     }
 
@@ -4145,8 +4145,8 @@ gboolean bd_crypto_opal_reset_device (const gchar *device, BDCryptoKeyslotContex
             return FALSE;
         }
     } else {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
-                     "Only 'passphrase' and 'key file' context types are valid for OPAL PSID reset.");
+        g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                             "Only 'passphrase' and 'key file' context types are valid for OPAL PSID reset.");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         crypt_free (cd);

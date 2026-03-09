@@ -238,14 +238,14 @@ gboolean bd_fs_btrfs_set_label (const gchar *mpoint, const gchar *label, GError 
  */
 gboolean bd_fs_btrfs_check_label (const gchar *label, GError **error) {
     if (strlen (label) > 256) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
-                     "Label for btrfs filesystem must be at most 256 characters long.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                             "Label for btrfs filesystem must be at most 256 characters long.");
         return FALSE;
     }
 
     if (strchr (label, '\n') != NULL) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
-                     "Label for btrfs filesystem cannot contain new lines.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                             "Label for btrfs filesystem cannot contain new lines.");
         return FALSE;
     }
 
@@ -351,8 +351,8 @@ BDFSBtrfsInfo* bd_fs_btrfs_get_info (const gchar *mpoint, GError **error) {
 
     success = g_regex_match (regex, output, 0, &match_info);
     if (!success) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE,
-                     "Failed to parse btrfs filesystem information");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_PARSE,
+                             "Failed to parse btrfs filesystem information");
         g_regex_unref (regex);
         g_match_info_free (match_info);
         return NULL;
@@ -401,8 +401,8 @@ BDFSBtrfsInfo* bd_fs_btrfs_get_info (const gchar *mpoint, GError **error) {
     /* 114032640 bytes (108.75MiB) */
     scanned = sscanf (output, " %" G_GUINT64_FORMAT " bytes", &min_size);
     if (scanned != 1) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE,
-                     "Failed to parse btrfs filesystem min size.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_PARSE,
+                             "Failed to parse btrfs filesystem min size.");
         bd_fs_btrfs_info_free (ret);
         return NULL;
     }

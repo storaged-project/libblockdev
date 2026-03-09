@@ -235,8 +235,8 @@ static gboolean setup_dbus_connection (GError **error) {
     }
 
     if (g_dbus_connection_is_closed (bus)) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
-                     "Connection is closed");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
+                             "Connection is closed");
         return FALSE;
     }
 
@@ -359,15 +359,15 @@ gboolean bd_lvm_is_tech_avail (BDLVMTech tech, guint64 mode, GError **error) {
     switch (tech) {
     case BD_LVM_TECH_THIN_CALCS:
         if (mode & ~BD_LVM_TECH_MODE_QUERY) {
-            g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_TECH_UNAVAIL,
-                         "Only 'query' supported for thin calculations");
+            g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_TECH_UNAVAIL,
+                                 "Only 'query' supported for thin calculations");
             return FALSE;
         } else
             return TRUE;
     case BD_LVM_TECH_CALCS:
         if (mode & ~BD_LVM_TECH_MODE_QUERY) {
-            g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_TECH_UNAVAIL,
-                         "Only 'query' supported for calculations");
+            g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_TECH_UNAVAIL,
+                                 "Only 'query' supported for calculations");
             return FALSE;
         } else
             return TRUE;
@@ -439,8 +439,8 @@ static gchar* get_object_path (const gchar *obj_id, GError **error) {
     gchar *obj_path = NULL;
 
     if (!obj_id || g_strcmp0 (obj_id, "") == 0) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_NOEXIST,
-                     "Invalid LVM ID specified");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_NOEXIST,
+                             "Invalid LVM ID specified");
         return NULL;
     }
 
@@ -762,8 +762,8 @@ static gboolean call_lvm_method_sync (const gchar *obj, const gchar *intf, const
     } else {
         g_variant_unref (ret);
         bd_utils_log_task_status (log_task_id, "Failed to parse the returned value!");
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
-                     "Failed to parse the returned value!");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                             "Failed to parse the returned value!");
         bd_utils_report_finished (prog_id, "Failed to parse the returned value!");
         return FALSE;
     }
@@ -931,8 +931,8 @@ static GVariant* get_lvm_object_properties (const gchar *obj_id, const gchar *if
     gchar *obj_path = NULL;
 
     if (!obj_id || g_strcmp0 (obj_id, "") == 0) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_NOEXIST,
-                     "Invalid LVM ID specified");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_NOEXIST,
+                             "Invalid LVM ID specified");
         return NULL;
     }
 
@@ -962,8 +962,8 @@ static GVariant* get_pv_properties (const gchar *pv_name, GError **error) {
     GVariant *ret = NULL;
 
     if (!pv_name || g_strcmp0 (pv_name, "") == 0) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_NOEXIST,
-                     "Invalid LVM ID specified");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_NOEXIST,
+                             "Invalid LVM ID specified");
         return NULL;
     }
 
@@ -1536,8 +1536,8 @@ gboolean bd_lvm_pvcreate (const gchar *device, guint64 data_alignment, guint64 m
     GVariant *extra_params = NULL;
 
     if (!device || g_strcmp0 (device, "") == 0) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_NOEXIST,
-                     "Invalid LVM ID specified");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_NOEXIST,
+                             "Invalid LVM ID specified");
         return FALSE;
     }
 
@@ -1605,8 +1605,8 @@ gboolean bd_lvm_pvremove (const gchar *device, const BDExtraArg **extra, GError 
     gboolean ret = FALSE;
 
     if (!device || g_strcmp0 (device, "") == 0) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_NOEXIST,
-                     "Invalid LVM ID specified");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_NOEXIST,
+                             "Invalid LVM ID specified");
         return FALSE;
     }
 
@@ -1812,8 +1812,8 @@ gboolean bd_lvm_add_pv_tags (const gchar *device, const gchar **tags, GError **e
         return FALSE;
 
     if (!pvinfo->vg_name) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
-                     "Tags can't be added to PVs without a VG");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
+                             "Tags can't be added to PVs without a VG");
         bd_lvm_pvdata_free (pvinfo);
         return FALSE;
     }
@@ -1850,8 +1850,8 @@ gboolean bd_lvm_delete_pv_tags (const gchar *device, const gchar **tags, GError 
         return FALSE;
 
     if (!pvinfo->vg_name) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
-                     "Tags can't be removed from PVs without a VG");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
+                             "Tags can't be removed from PVs without a VG");
         bd_lvm_pvdata_free (pvinfo);
         return FALSE;
     }
@@ -4028,8 +4028,8 @@ gboolean bd_lvm_vdo_pool_resize (const gchar *vg_name, const gchar *pool_name, g
         return FALSE;
 
     if (info->size >= size) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_NOT_SUPPORTED,
-                     "Reducing physical size of the VDO pool LV is not supported.");
+        g_set_error_literal (error, BD_LVM_ERROR, BD_LVM_ERROR_NOT_SUPPORTED,
+                             "Reducing physical size of the VDO pool LV is not supported.");
         bd_lvm_lvdata_free (info);
         return FALSE;
     }

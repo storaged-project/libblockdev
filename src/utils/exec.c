@@ -530,8 +530,8 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
                 g_propagate_error (error, l_error);
                 success = FALSE;
             } else if (WIFSIGNALED (status)) {
-                g_set_error (&l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
-                             "Process killed with a signal");
+                g_set_error_literal (&l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
+                                     "Process killed with a signal");
                 bd_utils_report_finished (progress_id, l_error->message);
                 g_propagate_error (error, l_error);
                 success = FALSE;
@@ -539,8 +539,8 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
         } else if (child_ret == -1) {
             if (errno != ECHILD) {
                 errno = 0;
-                g_set_error (&l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
-                             "Failed to wait for the process");
+                g_set_error_literal (&l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
+                                     "Failed to wait for the process");
                 bd_utils_report_finished (progress_id, l_error->message);
                 g_propagate_error (error, l_error);
                 success = FALSE;

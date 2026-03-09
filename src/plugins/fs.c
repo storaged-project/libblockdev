@@ -91,7 +91,7 @@ gboolean bd_fs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error) {
         return TRUE;
 
     if (tech > BD_FS_LAST_FS) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL, "Unknown technology");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL, "Unknown technology");
         return FALSE;
     }
 
@@ -120,7 +120,7 @@ gboolean bd_fs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error) {
         default:
             /* this should never be reached (see the comparison with LAST_FS
                above), but better safe than sorry */
-            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL, "Unknown technology");
+            g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL, "Unknown technology");
             return FALSE;
     }
 }

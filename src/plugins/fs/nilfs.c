@@ -76,14 +76,14 @@ bd_fs_nilfs2_is_tech_avail (BDFSTech tech G_GNUC_UNUSED, guint64 mode, GError **
     guint i = 0;
 
     if (mode & BD_FS_TECH_MODE_CHECK) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL,
-                     "NILFS2 doesn't support filesystem check.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL,
+                             "NILFS2 doesn't support filesystem check.");
         return FALSE;
     }
 
     if (mode & BD_FS_TECH_MODE_REPAIR) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL,
-                     "NILFS2 doesn't support filesystem repair.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL,
+                             "NILFS2 doesn't support filesystem repair.");
         return FALSE;
     }
 
@@ -207,8 +207,8 @@ gboolean bd_fs_nilfs2_set_label (const gchar *device, const gchar *label, GError
  */
 gboolean bd_fs_nilfs2_check_label (const gchar *label, GError **error) {
     if (strlen (label) > 80) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
-                     "Label for nilfs2 filesystem must be at most 80 characters long.");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                             "Label for nilfs2 filesystem must be at most 80 characters long.");
         return FALSE;
     }
 
@@ -302,7 +302,7 @@ BDFSNILFS2Info* bd_fs_nilfs2_get_info (const gchar *device, GError **error) {
     while (line_p && *line_p && !g_str_has_prefix (*line_p, "Block size:"))
         line_p++;
     if (!line_p || !(*line_p)) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse NILFS2 file system information");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse NILFS2 file system information");
         g_strfreev (lines);
         bd_fs_nilfs2_info_free (ret);
         return NULL;
@@ -317,7 +317,7 @@ BDFSNILFS2Info* bd_fs_nilfs2_get_info (const gchar *device, GError **error) {
     while (line_p && *line_p && !g_str_has_prefix (*line_p, "Device size"))
         line_p++;
     if (!line_p || !(*line_p)) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse NILFS2 file system information");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse NILFS2 file system information");
         g_strfreev (lines);
         bd_fs_nilfs2_info_free (ret);
         return NULL;
@@ -332,7 +332,7 @@ BDFSNILFS2Info* bd_fs_nilfs2_get_info (const gchar *device, GError **error) {
     while (line_p && *line_p && !g_str_has_prefix (*line_p, "Free blocks count"))
         line_p++;
     if (!line_p || !(*line_p)) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse NILFS2 file system information");
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse NILFS2 file system information");
         g_strfreev (lines);
         bd_fs_nilfs2_info_free (ret);
         return NULL;

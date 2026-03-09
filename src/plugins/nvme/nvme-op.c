@@ -237,7 +237,7 @@ gboolean bd_nvme_format (const gchar *device, guint16 lba_data_size, guint16 met
             /* tell user that it would format other namespaces and that bd_nvme_format()
              * should be called on a controller device instead */
             g_set_error_literal (error, BD_NVME_ERROR, BD_NVME_ERROR_WOULD_FORMAT_ALL_NS,
-                         "The NVMe controller indicates it would format all namespaces.");
+                                 "The NVMe controller indicates it would format all namespaces.");
             close (args.fd);
             free (ctrl_id);
             return FALSE;

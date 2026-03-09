@@ -94,8 +94,8 @@ gboolean bd_utils_have_kernel_module (const gchar *module_name, GError **error) 
 
     ctx = kmod_new (NULL, (const gchar * const*) &null_config);
     if (!ctx) {
-        g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_KMOD_INIT_FAIL,
-                     "Failed to initialize kmod context");
+        g_set_error_literal (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_KMOD_INIT_FAIL,
+                             "Failed to initialize kmod context");
         freelocale (c_locale);
         return FALSE;
     }
@@ -148,8 +148,8 @@ gboolean bd_utils_load_kernel_module (const gchar *module_name, const gchar *opt
 
     ctx = kmod_new (NULL, (const gchar * const*) &null_config);
     if (!ctx) {
-        g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_KMOD_INIT_FAIL,
-                     "Failed to initialize kmod context");
+        g_set_error_literal (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_KMOD_INIT_FAIL,
+                             "Failed to initialize kmod context");
         freelocale (c_locale);
         return FALSE;
     }
@@ -217,8 +217,8 @@ gboolean bd_utils_unload_kernel_module (const gchar *module_name, GError **error
 
     ctx = kmod_new (NULL, (const gchar * const*) &null_config);
     if (!ctx) {
-        g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_KMOD_INIT_FAIL,
-                     "Failed to initialize kmod context");
+        g_set_error_literal (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_KMOD_INIT_FAIL,
+                             "Failed to initialize kmod context");
         freelocale (c_locale);
         return FALSE;
     }
