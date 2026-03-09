@@ -270,7 +270,7 @@ static gchar** get_map_deps (const gchar *map_name, guint64 *n_deps, GError **er
     deps = dm_task_get_deps (task);
     if (!deps) {
         g_set_error_literal (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
-                             "Failed to device dependencies");
+                             "Failed to get device dependencies");
         dm_task_destroy (task);
         return NULL;
     }
