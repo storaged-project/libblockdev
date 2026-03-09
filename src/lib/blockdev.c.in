@@ -142,8 +142,10 @@ static gboolean process_config_file (const gchar *config_file, GSList **plugins_
     gsize n_sonames = 0;
 
     config = g_key_file_new ();
-    if (!g_key_file_load_from_file (config, config_file, G_KEY_FILE_NONE, error))
+    if (!g_key_file_load_from_file (config, config_file, G_KEY_FILE_NONE, error)) {
+        g_key_file_free (config);
         return FALSE;
+    }
 
     /* get sonames for each plugin (if specified) */
     for (i=0; (i < BD_PLUGIN_UNDEF); i++) {
@@ -330,15 +332,19 @@ static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload, g
         unload_plugins ();
         /* clean all so names and populate back those that are requested or the
            defaults */
-        for (i=0; i < BD_PLUGIN_UNDEF; i++)
+        for (i=0; i < BD_PLUGIN_UNDEF; i++) {
+            g_free ((gchar *) plugins[i].spec.so_name);
             plugins[i].spec.so_name = NULL;
+        }
     }
 
     if (require_plugins) {
         /* set requested sonames */
         for (i=0; *(require_plugins + i); i++) {
             plugin_name = require_plugins[i]->name;
-            required_plugins_mask |= (1 << plugin_name);
+            if (plugin_name >= BD_PLUGIN_UNDEF)
+                continue;
+            required_plugins_mask |= ((guint64) 1 << plugin_name);
             if (require_plugins[i]->so_name) {
                 g_slist_free_full (plugins_sonames[plugin_name], (GDestroyNotify) g_free);
                 plugins_sonames[plugin_name] = NULL;
@@ -348,7 +354,7 @@ static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload, g
 
         /* now remove the defaults for plugins that are not required */
         for (i=0; (i < BD_PLUGIN_UNDEF); i++)
-            if (!(required_plugins_mask & (1 << i))) {
+            if (!(required_plugins_mask & ((guint64) 1 << i))) {
                 /* plugin not required */
                 g_slist_free_full (plugins_sonames[i], (GDestroyNotify) g_free);
                 plugins_sonames[i] = NULL;
@@ -361,7 +367,7 @@ static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload, g
     for (i=0; (i < BD_PLUGIN_UNDEF); i++) {
         /* if this plugin was required or all plugins were required, check if it
            was successfully loaded or not */
-        if (!require_plugins || (required_plugins_mask & (1 << i))) {
+        if (!require_plugins || (required_plugins_mask & ((guint64) 1 << i))) {
 #if !defined(__s390__) && !defined(__s390x__)
             if (!require_plugins && (i == BD_PLUGIN_S390))
                 /* do not check the s390 plugin on different archs unless
@@ -496,7 +502,7 @@ gboolean bd_ensure_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func
                 missing = !bd_is_plugin_available((*check_plugin)->name);
         else
             /* all plugins requested */
-            for (plugin=BD_PLUGIN_LVM; plugin != BD_PLUGIN_UNDEF; plugin++)
+            for (plugin=BD_PLUGIN_LVM; !missing && plugin != BD_PLUGIN_UNDEF; plugin++)
                 missing = !bd_is_plugin_available(plugin);
 
         if (!missing) {
@@ -757,6 +763,9 @@ gboolean bd_is_plugin_available (BDPlugin plugin) {
  * %NULL if none is loaded
  */
 gchar* bd_get_plugin_soname (BDPlugin plugin) {
+    if (plugin >= BD_PLUGIN_UNDEF)
+        return NULL;
+
     if (plugins[plugin].handle)
         return g_strdup (plugins[plugin].spec.so_name);
 
@@ -770,5 +779,8 @@ gchar* bd_get_plugin_soname (BDPlugin plugin) {
  * Returns: (transfer none): name of the plugin
  */
 gchar* bd_get_plugin_name (BDPlugin plugin) {
+    if (plugin >= BD_PLUGIN_UNDEF)
+        return NULL;
+
     return plugin_names[plugin];
 }

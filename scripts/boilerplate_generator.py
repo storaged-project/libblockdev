@@ -219,8 +219,10 @@ def get_loading_func(fn_infos, module_name):
         # clear any previous error and load the function
         ret += '    dlerror();\n'
         ret += '    * (void**) (&_{0.name}) = dlsym(handle, "{0.name}");\n'.format(info)
-        ret += '    if ((error = dlerror()) != NULL)\n'
-        ret += '        bd_utils_log_format (BD_UTILS_LOG_WARNING, "failed to load {0.name}: %s", error);\n\n'.format(info)
+        ret += '    if ((error = dlerror()) != NULL) {\n'
+        ret += '        bd_utils_log_format (BD_UTILS_LOG_WARNING, "failed to load {0.name}: %s", error);\n'.format(info)
+        ret += '        _{0.name} = {0.name}_stub;\n'.format(info)
+        ret += '    }\n\n'
 
     ret += '    return handle;\n'
     ret += '}\n\n'

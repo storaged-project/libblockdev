@@ -286,7 +286,7 @@ static gchar** get_map_deps (const gchar *map_name, guint64 *n_deps, GError **er
         if (l_error) {
             g_propagate_prefixed_error (error, l_error, "Failed to resolve '%s' to device name",
                                         major_minor);
-            g_free (dep_devs);
+            g_strfreev (dep_devs);
             g_free (major_minor);
             return NULL;
         }
@@ -333,8 +333,10 @@ gboolean bd_mpath_is_mpath_member (const gchar *device, GError **error) {
     dm_task_run (task_names);
     names = dm_task_get_names (task_names);
 
-    if (!names || !names->dev)
+    if (!names || !names->dev) {
+        dm_task_destroy (task_names);
         return FALSE;
+    }
 
     /* in case the device is dev_path, we need to resolve it because maps's deps
        are devices and not their dev_paths */
@@ -431,6 +433,7 @@ gchar** bd_mpath_get_mpath_members (GError **error) {
     names = dm_task_get_names (task_names);
 
     if (!names || !names->dev) {
+        dm_task_destroy (task_names);
         bd_utils_report_finished (progress_id, "Completed");
         return NULL;
     }

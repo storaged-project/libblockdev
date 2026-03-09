@@ -281,7 +281,7 @@ static const UtilDep deps[DEPS_LAST] = {
 
 #define FEATURES_VDO 0
 #define FEATURES_VDO_MASK (1 << FEATURES_VDO)
-#define FEATURES_WRITECACHE 0
+#define FEATURES_WRITECACHE 1
 #define FEATURES_WRITECACHE_MASK (1 << FEATURES_WRITECACHE)
 #define FEATURES_LAST 2
 
@@ -1157,14 +1157,15 @@ BDLVMPVdata** bd_lvm_pvs (GError **error) {
     guint num_items;
     GPtrArray *pvs;
     BDLVMPVdata *pvdata = NULL;
+    GError *l_error = NULL;
 
     pvs = g_ptr_array_new ();
 
-    success = call_lvm_and_capture_output (args, NULL, &output, error);
+    success = call_lvm_and_capture_output (args, NULL, &output, &l_error);
     if (!success) {
-        if (g_error_matches (*error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
-            /* no output => no VGs, not an error */
-            g_clear_error (error);
+        if (g_error_matches (l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
+            /* no output => no PVs, not an error */
+            g_clear_error (&l_error);
             /* return an empty list */
             g_ptr_array_add (pvs, NULL);
             return (BDLVMPVdata **) g_ptr_array_free (pvs, FALSE);
@@ -1172,6 +1173,7 @@ BDLVMPVdata** bd_lvm_pvs (GError **error) {
         else {
             /* the error is already populated from the call */
             g_ptr_array_free (pvs, TRUE);
+            g_propagate_error (error, l_error);
             return NULL;
         }
     }
@@ -1487,7 +1489,7 @@ BDLVMVGdata* bd_lvm_vginfo (const gchar *vg_name, GError **error) {
 BDLVMVGdata** bd_lvm_vgs (GError **error) {
     const gchar *args[9] = {"vgs", "--noheadings", "--nosuffix", "--nameprefixes",
                       "--unquoted", "--units=b",
-                      "-o", "name,uuid,size,free,extent_size,extent_count,free_count,pv_count,vg_tags",
+                      "-o", "name,uuid,size,free,extent_size,extent_count,free_count,pv_count,vg_exported,vg_tags",
                       NULL};
     GHashTable *table = NULL;
     gboolean success = FALSE;
@@ -1522,7 +1524,7 @@ BDLVMVGdata** bd_lvm_vgs (GError **error) {
 
     for (lines_p = lines; *lines_p; lines_p++) {
         table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 9)) {
+        if (table && (num_items == 10)) {
             /* valid line, try to parse and record it */
             vgdata = get_vg_data_from_table (table, TRUE);
             if (vgdata)
@@ -1590,7 +1592,7 @@ gchar* bd_lvm_lvorigin (const gchar *vg_name, const gchar *lv_name, GError **err
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_CREATE
  */
 gboolean bd_lvm_lvcreate (const gchar *vg_name, const gchar *lv_name, guint64 size, const gchar *type, const gchar **pv_list, const BDExtraArg **extra, GError **error) {
-    guint8 pv_list_len = pv_list ? g_strv_length ((gchar **) pv_list) : 0;
+    guint pv_list_len = pv_list ? g_strv_length ((gchar **) pv_list) : 0;
     const gchar **args = g_new0 (const gchar*, pv_list_len + 10);
     gboolean success = FALSE;
     guint64 i = 0;
@@ -2560,7 +2562,7 @@ gboolean bd_lvm_cache_create_cached_lv (const gchar *vg_name, const gchar *lv_na
 
     success = bd_lvm_cache_attach (vg_name, lv_name, name, NULL, &l_error);
     if (!success) {
-        g_prefix_error (error, "Failed to attach the cache pool '%s' to the data LV: ", name);
+        g_prefix_error (&l_error, "Failed to attach the cache pool '%s' to the data LV: ", name);
         g_free (name);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
@@ -3078,7 +3080,7 @@ gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name, const gchar *pool_lv, co
                              "--deduplication", deduplication ? "y" : "n",
                              NULL, NULL, NULL, NULL, NULL, NULL};
     gboolean success = FALSE;
-    guint next_arg = 4;
+    guint next_arg = 8;
     gchar *size_str = NULL;
     gchar *lv_spec = NULL;
     gchar *old_config = NULL;

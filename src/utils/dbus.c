@@ -62,14 +62,14 @@ gboolean bd_utils_dbus_service_available (GDBusConnection *connection, GBusType 
             g_prefix_error (error, "Failed to get system bus: ");
             return FALSE;
         }
+    }
 
-        ret = g_dbus_connection_call_sync (bus, DBUS_TOP_IFACE, DBUS_TOP_OBJ, DBUS_TOP_IFACE,
-                                           "ListNames", NULL, NULL, G_DBUS_CALL_FLAGS_NONE,
-                                           -1, NULL, error);
-        if (!ret) {
-            g_object_unref (bus);
-            return FALSE;
-        }
+    ret = g_dbus_connection_call_sync (bus, DBUS_TOP_IFACE, DBUS_TOP_OBJ, DBUS_TOP_IFACE,
+                                       "ListNames", NULL, NULL, G_DBUS_CALL_FLAGS_NONE,
+                                       -1, NULL, error);
+    if (!ret) {
+        g_object_unref (bus);
+        return FALSE;
     }
 
     real_ret = g_variant_get_child_value (ret, 0);

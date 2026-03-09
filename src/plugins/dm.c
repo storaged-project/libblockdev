@@ -126,7 +126,7 @@ gboolean bd_dm_is_tech_avail (BDDMTech tech, guint64 mode G_GNUC_UNUSED, GError 
  */
 gboolean bd_dm_create_linear (const gchar *map_name, const gchar *device, guint64 length, const gchar *uuid, GError **error) {
     gboolean success = FALSE;
-    const gchar *argv[9] = {"dmsetup", "create", map_name, "--table", NULL, NULL, NULL, NULL, NULL};
+    const gchar *argv[8] = {"dmsetup", "create", map_name, "--table", NULL, NULL, NULL, NULL};
 
     if (!check_deps (&avail_deps, DEPS_DMSETUP_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
@@ -137,9 +137,7 @@ gboolean bd_dm_create_linear (const gchar *map_name, const gchar *device, guint6
     if (uuid) {
         argv[5] = "-u";
         argv[6] = uuid;
-        argv[7] = device;
-    } else
-        argv[5] = device;
+    }
 
     success = bd_utils_exec_and_report_error (argv, NULL, error);
     g_free (table);
