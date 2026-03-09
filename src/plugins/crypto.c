@@ -3007,9 +3007,13 @@ gboolean bd_crypto_integrity_open (const gchar *device, const gchar *name, const
     guint32 activate_flags = 0;
     GError *l_error = NULL;
 
+    msg = g_strdup_printf ("Started opening '%s' integrity device", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
     if (context && context->type != BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_VOLUME_KEY) {
         g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
-                             "Only 'volume key' context type is valid for integrity format.");
+                             "Only 'volume key' context type is valid for integrity open.");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
@@ -3052,12 +3056,11 @@ gboolean bd_crypto_integrity_open (const gchar *device, const gchar *name, const
 #endif
     }
 
-    if (!_is_dm_name_valid (name, error))
+    if (!_is_dm_name_valid (name, &l_error)) {
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
-
-    msg = g_strdup_printf ("Started opening '%s' integrity device", device);
-    progress_id = bd_utils_report_started (msg);
-    g_free (msg);
+    }
 
     ret = crypt_init (&cd, device);
     if (ret != 0) {
