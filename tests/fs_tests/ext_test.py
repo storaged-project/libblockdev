@@ -236,10 +236,10 @@ class ExtTestRepair(ExtTestCase):
 
 class ExtGetInfo(ExtTestCase):
     def _test_ext_get_info(self, mkfs_function, info_function):
-        succ = BlockDev.fs_ext4_mkfs(self.loop_devs[0], None)
+        succ = mkfs_function(self.loop_devs[0])
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_ext4_get_info(self.loop_devs[0])
+        fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
         self.assertEqual(fi.block_count, self.loop_size / 1024)
