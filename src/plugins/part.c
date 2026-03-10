@@ -135,6 +135,7 @@ static gint log2i (guint x) {
 static gint get_part_num (const gchar *part, GError **error) {
     const gchar *part_num_str = NULL;
     gint part_num = -1;
+    gsize i = 0;
 
     if (!part || *part == '\0') {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
@@ -142,11 +143,10 @@ static gint get_part_num (const gchar *part, GError **error) {
         return -1;
     }
 
-    part_num_str = part + (strlen (part) - 1);
-    while (isdigit (*part_num_str) || (*part_num_str == '-')) {
-        part_num_str--;
-    }
-    part_num_str++;
+    i = strlen (part);
+    while (i > 0 && (isdigit ((unsigned char) part[i - 1]) || part[i - 1] == '-'))
+        i--;
+    part_num_str = part + i;
 
     part_num = atoi (part_num_str);
     if (part_num == 0) {
