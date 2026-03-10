@@ -821,6 +821,15 @@ static gboolean call_lvm_method_sync (const gchar *obj, const gchar *intf, const
                 g_free (log_msg);
             } else {
                 ret = get_object_property (task_path, JOB_INTF, "GetError", &l_error);
+                if (!ret) {
+                    if (!l_error)
+                        g_set_error (&l_error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
+                                     "Failed to get error from '%s' method of the '%s' object",
+                                     method, obj);
+                    bd_utils_report_finished (prog_id, l_error->message);
+                    g_propagate_error (error, l_error);
+                    return FALSE;
+                }
                 g_variant_get (ret, "(is)", &error_code, &error_msg);
                 if (error_code != 0) {
                     if (error_msg) {
@@ -941,6 +950,8 @@ static GVariant* get_lvm_object_properties (const gchar *obj_id, const gchar *if
     ret = g_dbus_connection_call_sync (bus, LVM_BUS_NAME, MANAGER_OBJ, MANAGER_INTF,
                                        "LookUpByLvmId", args, NULL, G_DBUS_CALL_FLAGS_NONE,
                                        -1, NULL, error);
+    if (!ret)
+        return NULL;
     g_variant_get (ret, "(o)", &obj_path);
     g_variant_unref (ret);
 
