@@ -100,6 +100,7 @@ BDLVMVGdata* bd_lvm_vgdata_copy (BDLVMVGdata *data) {
     new_data->free_count = data->free_count;
     new_data->pv_count = data->pv_count;
     new_data->vg_tags = g_strdupv (data->vg_tags);
+    new_data->exported = data->exported;
     return new_data;
 }
 
