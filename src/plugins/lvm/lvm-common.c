@@ -789,7 +789,7 @@ gchar* bd_lvm_config_get (const gchar *section, const gchar *setting, const gcha
 }
 
 gboolean _vgcfgbackup_restore (const gchar *command, const gchar *vg_name, const gchar *file, const BDExtraArg **extra, GError **error) {
-    const gchar *args[6] = {"lvm", NULL, NULL, NULL, NULL, NULL};
+    const gchar *args[7] = {"lvm", NULL, NULL, NULL, NULL, NULL, NULL};
     guint next_arg = 1;
     g_autofree gchar *config_arg = NULL;
 
