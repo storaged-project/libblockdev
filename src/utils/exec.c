@@ -467,6 +467,9 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
             g_propagate_error (error, l_error);
             /* would overwrite errno, need to close as a last step */
             close (in_fd);
+            close (out_fd);
+            close (err_fd);
+            waitpid (pid, NULL, 0);
             return FALSE;
         }
         close (in_fd);
