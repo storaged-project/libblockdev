@@ -696,8 +696,6 @@ gboolean bd_fs_unmount (const gchar *spec, gboolean lazy, gboolean force, const 
         return ret;
     } else
         return do_unmount (&args, error);
-
-    return TRUE;
 }
 
 /**
@@ -779,8 +777,6 @@ gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar 
         return ret;
     } else
        return do_mount (&args, error);
-
-    return TRUE;
 }
 
 /**
