@@ -1023,11 +1023,31 @@ gboolean _crypto_luks_format (const gchar *device,
     if (min_entropy > 0) {
         dev_random_fd = open ("/dev/random", O_RDONLY);
         if (dev_random_fd >= 0) {
-            ioctl (dev_random_fd, RNDGETENTCNT, &current_entropy);
+            if (ioctl (dev_random_fd, RNDGETENTCNT, &current_entropy) < 0) {
+                g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_FORMAT_FAILED,
+                             "Failed to get random data entropy level: %s",
+                             strerror_l (errno, c_locale));
+                close (dev_random_fd);
+                crypt_free (cd);
+                g_strfreev (cipher_specs);
+                bd_utils_report_finished (progress_id, l_error->message);
+                g_propagate_error (error, l_error);
+                return FALSE;
+            }
             while (current_entropy < min_entropy) {
                 bd_utils_report_progress (progress_id, 0, "Waiting for enough random data entropy");
                 sleep (1);
-                ioctl (dev_random_fd, RNDGETENTCNT, &current_entropy);
+                if (ioctl (dev_random_fd, RNDGETENTCNT, &current_entropy) < 0) {
+                    g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_FORMAT_FAILED,
+                                 "Failed to get random data entropy level: %s",
+                                 strerror_l (errno, c_locale));
+                    close (dev_random_fd);
+                    crypt_free (cd);
+                    g_strfreev (cipher_specs);
+                    bd_utils_report_finished (progress_id, l_error->message);
+                    g_propagate_error (error, l_error);
+                    return FALSE;
+                }
             }
             close (dev_random_fd);
         } else {
