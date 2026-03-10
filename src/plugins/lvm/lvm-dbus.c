@@ -166,6 +166,9 @@ BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
     new_data->metadata_percent = data->metadata_percent;
     new_data->copy_percent = data->copy_percent;
     new_data->lv_tags = g_strdupv (data->lv_tags);
+    new_data->data_lvs = g_strdupv (data->data_lvs);
+    new_data->metadata_lvs = g_strdupv (data->metadata_lvs);
+    new_data->segs = copy_segs (data->segs);
     return new_data;
 }
 
@@ -185,6 +188,9 @@ void bd_lvm_lvdata_free (BDLVMLVdata *data) {
     g_free (data->roles);
     g_free (data->move_pv);
     g_strfreev (data->lv_tags);
+    g_strfreev (data->data_lvs);
+    g_strfreev (data->metadata_lvs);
+    free_segs (data->segs);
     g_free (data);
 }
 
