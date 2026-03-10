@@ -445,6 +445,43 @@ static gboolean call_lvm_and_capture_output (const gchar **args, const BDExtraAr
     return success;
 }
 
+static gboolean call_lvm_and_report_progress (const gchar **args, const BDExtraArg **extra, BDUtilsProgExtract prog_extract, gint *proc_status, GError **error) {
+    gboolean success = FALSE;
+    guint i = 0;
+    guint args_length = g_strv_length ((gchar **) args);
+    g_autofree gchar *config_arg = NULL;
+    g_autofree gchar *devices_arg = NULL;
+
+    if (!check_deps (&avail_deps, DEPS_LVM_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
+    /* don't allow global config string changes during the run */
+    g_mutex_lock (&global_config_lock);
+
+    /* allocate enough space for the args plus "lvm", "--config", "--devices" and NULL */
+    const gchar **argv = g_new0 (const gchar*, args_length + 4);
+
+    /* construct argv from args with "lvm" prepended */
+    argv[0] = "lvm";
+    for (i=0; i < args_length; i++)
+        argv[i+1] = args[i];
+    if (global_config_str) {
+        config_arg = g_strdup_printf ("--config=%s", global_config_str);
+        argv[++args_length] = config_arg;
+    }
+    if (global_devices_str) {
+        devices_arg = g_strdup_printf ("--devices=%s", global_devices_str);
+        argv[++args_length] = devices_arg;
+    }
+    argv[++args_length] = NULL;
+
+    success = bd_utils_exec_and_report_progress (argv, extra, prog_extract, proc_status, error);
+    g_mutex_unlock (&global_config_lock);
+    g_free (argv);
+
+    return success;
+}
+
 /**
  * parse_lvm_vars:
  * @str: string to parse
@@ -1008,7 +1045,7 @@ gboolean bd_lvm_pvmove (const gchar *src, const gchar *dest, const BDExtraArg **
     if (dest)
         args[4] = dest;
 
-    return bd_utils_exec_and_report_progress (args, extra, extract_pvmove_progress, &status, error);
+    return call_lvm_and_report_progress (args, extra, extract_pvmove_progress, &status, error);
 }
 
 /**
