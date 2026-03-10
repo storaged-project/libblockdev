@@ -231,6 +231,7 @@ gboolean bd_utils_exec_and_capture_output_no_progress (const gchar **argv, const
         /* error is already populated from the call */
         g_free (stdout_data);
         g_free (stderr_data);
+        g_free (args);
         return FALSE;
     }
 
@@ -247,6 +248,7 @@ gboolean bd_utils_exec_and_capture_output_no_progress (const gchar **argv, const
             /* process was terminated abnormally (e.g. using a signal) */
             g_free (stdout_data);
             g_free (stderr_data);
+            g_free (args);
             g_propagate_error (error, l_error);
             return FALSE;
         }
