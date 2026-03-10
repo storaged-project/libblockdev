@@ -176,13 +176,15 @@ gboolean bd_dm_remove (const gchar *map_name, GError **error) {
 gchar* bd_dm_name_from_node (const gchar *dm_node, GError **error) {
     gchar *ret = NULL;
     gboolean success = FALSE;
-    g_autofree gchar *sys_path = g_strdup_printf ("/sys/class/block/%s/dm/name", dm_node);
+    g_autofree gchar *sys_path = NULL;
 
     if (!dm_node || strlen (dm_node) == 0) {
         g_set_error_literal (error, BD_DM_ERROR, BD_DM_ERROR_DEVICE_NOEXIST,
                              "No DM node specified");
         return NULL;
     }
+
+    sys_path = g_strdup_printf ("/sys/class/block/%s/dm/name", dm_node);
 
     if (access (sys_path, R_OK) != 0) {
         g_set_error_literal (error, BD_DM_ERROR, BD_DM_ERROR_SYS,
