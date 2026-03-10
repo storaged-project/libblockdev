@@ -1385,14 +1385,18 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error G_GN
     g_variant_dict_lookup (&dict, "Vg", "o", &path);
     name = get_object_property (path, VG_INTF, "Name", NULL);
     g_free (path);
-    g_variant_get (name, "s", &(data->vg_name));
-    g_variant_unref (name);
+    if (name) {
+        g_variant_get (name, "s", &(data->vg_name));
+        g_variant_unref (name);
+    }
 
     g_variant_dict_lookup (&dict, "OriginLv", "o", &path);
     if (g_strcmp0 (path, "/") != 0) {
         name = get_object_property (path, LV_CMN_INTF, "Name", NULL);
-        g_variant_get (name, "s", &(data->origin));
-        g_variant_unref (name);
+        if (name) {
+            g_variant_get (name, "s", &(data->origin));
+            g_variant_unref (name);
+        }
     }
     g_free (path);
     path = NULL;
@@ -1400,8 +1404,10 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error G_GN
     g_variant_dict_lookup (&dict, "PoolLv", "o", &path);
     if (g_strcmp0 (path, "/") != 0) {
         name = get_object_property (path, LV_CMN_INTF, "Name", NULL);
-        g_variant_get (name, "s", &(data->pool_lv));
-        g_variant_unref (name);
+        if (name) {
+            g_variant_get (name, "s", &(data->pool_lv));
+            g_variant_unref (name);
+        }
     }
     g_free (path);
     path = NULL;
@@ -1409,8 +1415,10 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error G_GN
     g_variant_dict_lookup (&dict, "MovePv", "o", &path);
     if (path && g_strcmp0 (path, "/") != 0) {
         name = get_object_property (path, PV_INTF, "Name", NULL);
-        g_variant_get (name, "s", &(data->move_pv));
-        g_variant_unref (name);
+        if (name) {
+            g_variant_get (name, "s", &(data->move_pv));
+            g_variant_unref (name);
+        }
     }
     g_free (path);
     path = NULL;
