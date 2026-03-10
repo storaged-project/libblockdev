@@ -510,6 +510,8 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
     pid = fork ();
 
     if (pid == -1) {
+        close (pipefd[0]);
+        close (pipefd[1]);
         g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                              "Error forking.");
         return FALSE;
