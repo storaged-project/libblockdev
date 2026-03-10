@@ -1991,6 +1991,7 @@ gboolean bd_lvm_vgcreate (const gchar *name, const gchar **pv_list, guint64 pe_s
             return FALSE;
         }
         g_variant_builder_add_value (&builder, g_variant_new ("o", path));
+        g_free (path);
     }
     pvs = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
@@ -2394,6 +2395,7 @@ gboolean bd_lvm_lvcreate (const gchar *vg_name, const gchar *lv_name, guint64 si
                 return FALSE;
             }
             g_variant_builder_add_value (&builder, g_variant_new ("(ott)", path, (guint64) 0, (guint64) 0));
+            g_free (path);
         }
         pvs = g_variant_builder_end (&builder);
         g_variant_builder_clear (&builder);
@@ -2548,6 +2550,7 @@ gboolean bd_lvm_lvrepair (const gchar *vg_name, const gchar *lv_name, const gcha
             return FALSE;
         }
         g_variant_builder_add_value (&builder, g_variant_new ("o", path));
+        g_free (path);
     }
     pvs = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
@@ -2558,8 +2561,6 @@ gboolean bd_lvm_lvrepair (const gchar *vg_name, const gchar *lv_name, const gcha
     g_variant_builder_clear (&builder);
 
     return call_lv_method_sync (vg_name, lv_name, "RepairRaidLv", params, NULL, extra, TRUE, error);
-
-  return FALSE;
 }
 
 /**
@@ -2656,7 +2657,7 @@ gboolean bd_lvm_lvsnapshotcreate (const gchar *vg_name, const gchar *origin_name
  */
 gboolean bd_lvm_lvsnapshotmerge (const gchar *vg_name, const gchar *snapshot_name, const BDExtraArg **extra, GError **error) {
     gchar *obj_id = NULL;
-    gchar *obj_path = NULL;
+    g_autofree gchar *obj_path = NULL;
 
     /* get object path for vg_name/snapshot_name and call SNAP_INTF, "Merge" */
     obj_id = g_strdup_printf ("%s/%s", vg_name, snapshot_name);
@@ -3712,6 +3713,7 @@ gchar* bd_lvm_cache_pool_name (const gchar *vg_name, const gchar *cached_lv, GEr
     if (!prop)
         return NULL;
     g_variant_get (prop, "o", &pool_obj_path);
+    g_variant_unref (prop);
     prop = get_object_property (pool_obj_path, LV_CMN_INTF, "Name", error);
     g_free (pool_obj_path);
     if (!prop)
@@ -3764,8 +3766,8 @@ gboolean bd_lvm_thpool_convert (const gchar *vg_name, const gchar *data_lv, cons
     GVariantBuilder builder;
     GVariant *params = NULL;
     gchar *obj_id = NULL;
-    gchar *data_lv_path = NULL;
-    gchar *metadata_lv_path = NULL;
+    g_autofree gchar *data_lv_path = NULL;
+    g_autofree gchar *metadata_lv_path = NULL;
     gboolean ret = FALSE;
 
     obj_id = g_strdup_printf ("%s/%s", vg_name, data_lv);
@@ -3814,8 +3816,8 @@ gboolean bd_lvm_cache_pool_convert (const gchar *vg_name, const gchar *data_lv, 
     GVariantBuilder builder;
     GVariant *params = NULL;
     gchar *obj_id = NULL;
-    gchar *data_lv_path = NULL;
-    gchar *metadata_lv_path = NULL;
+    g_autofree gchar *data_lv_path = NULL;
+    g_autofree gchar *metadata_lv_path = NULL;
     gboolean ret = FALSE;
 
     obj_id = g_strdup_printf ("%s/%s", vg_name, data_lv);
