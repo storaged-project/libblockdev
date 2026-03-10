@@ -1442,6 +1442,7 @@ static gboolean _crypto_close (const gchar *device, const gchar *tech_name, GErr
     if (ret != 0) {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
@@ -1848,6 +1849,7 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, BDCrypto
     if (ret != 0) {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
@@ -1957,6 +1959,7 @@ gboolean bd_crypto_luks_suspend (const gchar *luks_device, GError **error) {
     if (ret != 0) {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
@@ -2006,6 +2009,7 @@ gboolean bd_crypto_luks_resume (const gchar *luks_device, BDCryptoKeyslotContext
     if (ret != 0) {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
@@ -2607,6 +2611,7 @@ BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *device, GError **error) {
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
         return NULL;
     }
 
@@ -2762,6 +2767,7 @@ BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **e
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
         return NULL;
     }
 
@@ -2831,6 +2837,7 @@ BDCryptoLUKSTokenInfo** bd_crypto_luks_token_info (const gchar *device, GError *
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
         return NULL;
     }
 
