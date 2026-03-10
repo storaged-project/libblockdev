@@ -261,7 +261,7 @@ def clean_scsi_debug(scsi_debug_dev):
         if os.path.exists('/sys/block/' + device):
             write_file('/sys/block/%s/device/delete' % device, '1')
         n_tries = 0
-        while os.path.exists(device) and n_tries < 5:
+        while os.path.exists('/dev/' + device) and n_tries < 5:
             time.sleep(0.5)
             n_tries += 1
         n_tries = 0
