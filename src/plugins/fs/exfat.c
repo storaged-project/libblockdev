@@ -27,6 +27,11 @@
 static volatile guint avail_deps = 0;
 static GMutex deps_check_lock;
 
+G_GNUC_INTERNAL
+void _fs_exfat_reset_avail_deps (void) {
+    g_atomic_int_set (&avail_deps, 0);
+}
+
 #define DEPS_MKEXFAT 0
 #define DEPS_MKEXFAT_MASK (1 << DEPS_MKEXFAT)
 #define DEPS_FSCKEXFAT 1

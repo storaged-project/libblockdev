@@ -96,6 +96,9 @@ static const struct WellKnownAttrInfo well_known_attrs[256] = {
 
 
 G_GNUC_INTERNAL
+void _smart_close_plugin (void);
+
+G_GNUC_INTERNAL
 DriveDBAttr** drivedb_lookup_drive (const gchar *model, const gchar *fw, gboolean include_defaults);
 
 G_GNUC_INTERNAL

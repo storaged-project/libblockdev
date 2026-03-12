@@ -22,6 +22,7 @@
 
 #include <check_deps.h>
 #include "fs.h"
+#include "fs/common.h"
 
 /**
  * SECTION: fs
@@ -72,7 +73,15 @@ gboolean bd_fs_init (void) {
  *
  */
 void bd_fs_close (void) {
-    /* nothing to do here */
+    _fs_ext_reset_avail_deps ();
+    _fs_xfs_reset_avail_deps ();
+    _fs_vfat_reset_avail_deps ();
+    _fs_ntfs_reset_avail_deps ();
+    _fs_exfat_reset_avail_deps ();
+    _fs_btrfs_reset_avail_deps ();
+    _fs_udf_reset_avail_deps ();
+    _fs_f2fs_reset_avail_deps ();
+    _fs_nilfs_reset_avail_deps ();
 }
 
 /**

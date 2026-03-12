@@ -195,7 +195,7 @@ gboolean bd_smart_init (void) {
  *
  */
 void bd_smart_close (void) {
-    /* nothing to do here */
+    _smart_close_plugin ();
 }
 
 /**

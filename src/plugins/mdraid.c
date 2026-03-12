@@ -176,7 +176,7 @@ gboolean bd_md_init (void) {
  *
  */
 void bd_md_close (void) {
-    /* nothing to do here */
+    g_atomic_int_set (&avail_deps, 0);
 }
 
 

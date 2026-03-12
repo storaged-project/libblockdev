@@ -89,6 +89,7 @@ gboolean bd_dm_init (void) {
 void bd_dm_close (void) {
     dm_log_with_errno_init (NULL);
     dm_log_init_verbose (0);
+    g_atomic_int_set (&avail_deps, 0);
 }
 
 /**

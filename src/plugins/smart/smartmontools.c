@@ -37,6 +37,11 @@
 static volatile guint avail_deps = 0;
 static GMutex deps_check_lock;
 
+G_GNUC_INTERNAL
+void _smart_close_plugin (void) {
+    g_atomic_int_set (&avail_deps, 0);
+}
+
 #define DEPS_SMART 0
 #define DEPS_SMART_MASK (1 << DEPS_SMART)
 #define DEPS_LAST 1
