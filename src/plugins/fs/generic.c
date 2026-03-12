@@ -820,9 +820,18 @@ static gboolean xfs_resize_device (const gchar *device, guint64 new_size, const 
         return FALSE;
     }
 
-    mountpoint = fs_mount (device, "xfs", FALSE, &unmount, error);
-    if (!mountpoint)
+    if (xfs_info->block_size == 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to get block size for device '%s'", device);
+        bd_fs_xfs_info_free (xfs_info);
         return FALSE;
+    }
+
+    mountpoint = fs_mount (device, "xfs", FALSE, &unmount, error);
+    if (!mountpoint) {
+        bd_fs_xfs_info_free (xfs_info);
+        return FALSE;
+    }
 
     new_size = (new_size + xfs_info->block_size - 1) / xfs_info->block_size;
     bd_fs_xfs_info_free (xfs_info);
@@ -854,6 +863,13 @@ static gboolean f2fs_resize_device (const gchar *device, guint64 new_size, GErro
     info = bd_fs_f2fs_get_info (device, error);
     if (!info) {
         /* error is already populated */
+        return FALSE;
+    }
+
+    if (info->sector_size == 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to get sector size for device '%s'", device);
+        bd_fs_f2fs_info_free (info);
         return FALSE;
     }
 

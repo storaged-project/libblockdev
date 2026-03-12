@@ -1279,7 +1279,7 @@ class ErrorProxy(object):
                             raise xrule.new_exc(msg)
 
                 # try to find exact type match
-                transform = next((tr_t for tr_t in self._tr_excs if self._tr_excs == e_type), None)
+                transform = next((tr_t for tr_t in self._tr_excs if tr_t[0] == e_type), None)
                 if not transform:
                     # no exact match, but we still caught the exception -> must be some child class
                     transform = next(tr_t for tr_t in self._tr_excs if isinstance(e, tr_t[0]))

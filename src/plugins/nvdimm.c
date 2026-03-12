@@ -300,6 +300,7 @@ gboolean bd_nvdimm_namespace_enable (const gchar *namespace, const BDExtraArg **
     if (!ndns) {
         g_set_error (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_NOEXIST,
                      "Failed to enable namespace: namespace '%s' not found.", namespace);
+        ndctl_unref (ctx);
         return FALSE;
     }
 
@@ -343,6 +344,7 @@ gboolean bd_nvdimm_namespace_disable (const gchar *namespace, const BDExtraArg *
     if (!ndns) {
         g_set_error (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_NOEXIST,
                      "Failed to disable namespace: namespace '%s' not found.", namespace);
+        ndctl_unref (ctx);
         return FALSE;
     }
 

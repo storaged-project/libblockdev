@@ -381,10 +381,10 @@ gboolean bd_crypto_is_tech_avail (BDCryptoTech tech, guint64 mode, GError **erro
         case BD_CRYPTO_TECH_LUKS:
             ret = mode & (BD_CRYPTO_TECH_MODE_CREATE|BD_CRYPTO_TECH_MODE_OPEN_CLOSE|BD_CRYPTO_TECH_MODE_QUERY|
                           BD_CRYPTO_TECH_MODE_ADD_KEY|BD_CRYPTO_TECH_MODE_REMOVE_KEY|BD_CRYPTO_TECH_MODE_RESIZE|
-                          BD_CRYPTO_TECH_MODE_SUSPEND_RESUME|BD_CRYPTO_TECH_MODE_BACKUP_RESTORE);
+                          BD_CRYPTO_TECH_MODE_SUSPEND_RESUME|BD_CRYPTO_TECH_MODE_BACKUP_RESTORE|BD_CRYPTO_TECH_MODE_MODIFY);
             if (ret != mode) {
                 g_set_error_literal (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                                     "Only 'create', 'open', 'query', 'add-key', 'remove-key', 'resize', 'suspend-resume', 'backup-restore' supported for LUKS");
+                                     "Only 'create', 'open', 'query', 'add-key', 'remove-key', 'resize', 'suspend-resume', 'backup-restore', 'modify' supported for LUKS");
                 return FALSE;
             } else
                 return TRUE;
@@ -1023,11 +1023,31 @@ gboolean _crypto_luks_format (const gchar *device,
     if (min_entropy > 0) {
         dev_random_fd = open ("/dev/random", O_RDONLY);
         if (dev_random_fd >= 0) {
-            ioctl (dev_random_fd, RNDGETENTCNT, &current_entropy);
+            if (ioctl (dev_random_fd, RNDGETENTCNT, &current_entropy) < 0) {
+                g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_FORMAT_FAILED,
+                             "Failed to get random data entropy level: %s",
+                             strerror_l (errno, c_locale));
+                close (dev_random_fd);
+                crypt_free (cd);
+                g_strfreev (cipher_specs);
+                bd_utils_report_finished (progress_id, l_error->message);
+                g_propagate_error (error, l_error);
+                return FALSE;
+            }
             while (current_entropy < min_entropy) {
                 bd_utils_report_progress (progress_id, 0, "Waiting for enough random data entropy");
                 sleep (1);
-                ioctl (dev_random_fd, RNDGETENTCNT, &current_entropy);
+                if (ioctl (dev_random_fd, RNDGETENTCNT, &current_entropy) < 0) {
+                    g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_FORMAT_FAILED,
+                                 "Failed to get random data entropy level: %s",
+                                 strerror_l (errno, c_locale));
+                    close (dev_random_fd);
+                    crypt_free (cd);
+                    g_strfreev (cipher_specs);
+                    bd_utils_report_finished (progress_id, l_error->message);
+                    g_propagate_error (error, l_error);
+                    return FALSE;
+                }
             }
             close (dev_random_fd);
         } else {
@@ -1422,6 +1442,7 @@ static gboolean _crypto_close (const gchar *device, const gchar *tech_name, GErr
     if (ret != 0) {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
@@ -1828,6 +1849,7 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, BDCrypto
     if (ret != 0) {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
@@ -1937,6 +1959,7 @@ gboolean bd_crypto_luks_suspend (const gchar *luks_device, GError **error) {
     if (ret != 0) {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
@@ -1986,6 +2009,7 @@ gboolean bd_crypto_luks_resume (const gchar *luks_device, BDCryptoKeyslotContext
     if (ret != 0) {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
@@ -2587,6 +2611,7 @@ BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *device, GError **error) {
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
         return NULL;
     }
 
@@ -2742,6 +2767,7 @@ BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **e
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
         return NULL;
     }
 
@@ -2811,6 +2837,7 @@ BDCryptoLUKSTokenInfo** bd_crypto_luks_token_info (const gchar *device, GError *
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
         return NULL;
     }
 

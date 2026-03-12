@@ -510,6 +510,8 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
     pid = fork ();
 
     if (pid == -1) {
+        close (pipefd[0]);
+        close (pipefd[1]);
         g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                              "Error forking.");
         return FALSE;
@@ -694,8 +696,6 @@ gboolean bd_fs_unmount (const gchar *spec, gboolean lazy, gboolean force, const 
         return ret;
     } else
         return do_unmount (&args, error);
-
-    return TRUE;
 }
 
 /**
@@ -777,8 +777,6 @@ gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar 
         return ret;
     } else
        return do_mount (&args, error);
-
-    return TRUE;
 }
 
 /**

@@ -231,6 +231,7 @@ gboolean bd_utils_exec_and_capture_output_no_progress (const gchar **argv, const
         /* error is already populated from the call */
         g_free (stdout_data);
         g_free (stderr_data);
+        g_free (args);
         return FALSE;
     }
 
@@ -247,6 +248,7 @@ gboolean bd_utils_exec_and_capture_output_no_progress (const gchar **argv, const
             /* process was terminated abnormally (e.g. using a signal) */
             g_free (stdout_data);
             g_free (stderr_data);
+            g_free (args);
             g_propagate_error (error, l_error);
             return FALSE;
         }
@@ -465,6 +467,9 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
             g_propagate_error (error, l_error);
             /* would overwrite errno, need to close as a last step */
             close (in_fd);
+            close (out_fd);
+            close (err_fd);
+            waitpid (pid, NULL, 0);
             return FALSE;
         }
         close (in_fd);
@@ -519,22 +524,25 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
     close (err_fd);
 
     child_ret = waitpid (pid, &status, 0);
-    *proc_status = WEXITSTATUS (status);
     if (success) {
         if (child_ret > 0) {
-            if (*proc_status != 0) {
+            if (WIFSIGNALED (status)) {
+                *proc_status = 128 + WTERMSIG (status);
+                g_set_error (&l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
+                             "Process killed with a signal");
+                bd_utils_report_finished (progress_id, l_error->message);
+                g_propagate_error (error, l_error);
+                success = FALSE;
+            } else if (WIFEXITED (status) && WEXITSTATUS (status) != 0) {
+                *proc_status = WEXITSTATUS (status);
                 msg = stderr_data->len > 0 ? stderr_data->str : stdout_data->str;
                 g_set_error (&l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
                              "Process reported exit code %d: %s", *proc_status, msg);
                 bd_utils_report_finished (progress_id, l_error->message);
                 g_propagate_error (error, l_error);
                 success = FALSE;
-            } else if (WIFSIGNALED (status)) {
-                g_set_error_literal (&l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
-                                     "Process killed with a signal");
-                bd_utils_report_finished (progress_id, l_error->message);
-                g_propagate_error (error, l_error);
-                success = FALSE;
+            } else {
+                *proc_status = WIFEXITED (status) ? WEXITSTATUS (status) : 0;
             }
         } else if (child_ret == -1) {
             if (errno != ECHILD) {

@@ -297,9 +297,7 @@ static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload, g
     gboolean requested_loaded = TRUE;
     GError *error = NULL;
     GSequence *config_files = NULL;
-    GSList *plugins_sonames[BD_PLUGIN_UNDEF] = {NULL, NULL, NULL, NULL, NULL,
-                                                NULL, NULL, NULL, NULL, NULL,
-                                                NULL, NULL};
+    GSList *plugins_sonames[BD_PLUGIN_UNDEF] = {0};
     BDPlugin plugin_name = BD_PLUGIN_UNDEF;
     guint64 required_plugins_mask = 0;
 

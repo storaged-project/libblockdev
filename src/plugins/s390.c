@@ -1003,6 +1003,7 @@ gboolean bd_s390_zfcp_offline (const gchar *devno, const gchar *wwpn, const gcha
     }
     rc = fputs (lun, fd);
     if (rc == EOF) {
+        fclose (fd);
         g_set_error (&l_error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "Could not remove LUN %s at WWPN %s on zFCP device %s", lun, wwpn, devno);
         g_free (unitrm);

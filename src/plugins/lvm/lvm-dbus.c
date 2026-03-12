@@ -80,139 +80,6 @@ GQuark bd_lvm_error_quark (void)
     return g_quark_from_static_string ("g-bd-lvm-error-quark");
 }
 
-BDLVMPVdata* bd_lvm_pvdata_copy (BDLVMPVdata *data) {
-    if (data == NULL)
-        return NULL;
-
-    BDLVMPVdata *new_data = g_new0 (BDLVMPVdata, 1);
-
-    new_data->pv_name = g_strdup (data->pv_name);
-    new_data->pv_uuid = g_strdup (data->pv_uuid);
-    new_data->pv_free = data->pv_free;
-    new_data->pv_size = data->pv_size;
-    new_data->pe_start = data->pe_start;
-    new_data->vg_name = g_strdup (data->vg_name);
-    new_data->vg_uuid = g_strdup (data->vg_uuid);
-    new_data->vg_size = data->vg_size;
-    new_data->vg_free = data->vg_free;
-    new_data->vg_extent_size = data->vg_extent_size;
-    new_data->vg_extent_count = data->vg_extent_count;
-    new_data->vg_free_count = data->vg_free_count;
-    new_data->vg_pv_count = data->vg_pv_count;
-    new_data->pv_tags = g_strdupv (data->pv_tags);
-
-    return new_data;
-}
-
-void bd_lvm_pvdata_free (BDLVMPVdata *data) {
-    if (data == NULL)
-        return;
-
-    g_free (data->pv_name);
-    g_free (data->pv_uuid);
-    g_free (data->vg_name);
-    g_free (data->vg_uuid);
-    g_strfreev (data->pv_tags);
-    g_free (data);
-}
-
-BDLVMVGdata* bd_lvm_vgdata_copy (BDLVMVGdata *data) {
-    if (data == NULL)
-        return NULL;
-
-    BDLVMVGdata *new_data = g_new0 (BDLVMVGdata, 1);
-
-    new_data->name = g_strdup (data->name);
-    new_data->uuid = g_strdup (data->uuid);
-    new_data->size = data->size;
-    new_data->free = data->free;
-    new_data->extent_size = data->extent_size;
-    new_data->extent_count = data->extent_count;
-    new_data->free_count = data->free_count;
-    new_data->pv_count = data->pv_count;
-    new_data->vg_tags = g_strdupv (data->vg_tags);
-    return new_data;
-}
-
-void bd_lvm_vgdata_free (BDLVMVGdata *data) {
-    if (data == NULL)
-        return;
-
-    g_free (data->name);
-    g_free (data->uuid);
-    g_strfreev (data->vg_tags);
-    g_free (data);
-}
-
-BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
-    if (data == NULL)
-        return NULL;
-
-    BDLVMLVdata *new_data = g_new0 (BDLVMLVdata, 1);
-
-    new_data->lv_name = g_strdup (data->lv_name);
-    new_data->vg_name = g_strdup (data->vg_name);
-    new_data->uuid = g_strdup (data->uuid);
-    new_data->size = data->size;
-    new_data->attr = g_strdup (data->attr);
-    new_data->segtype = g_strdup (data->segtype);
-    new_data->origin = g_strdup (data->origin);
-    new_data->pool_lv = g_strdup (data->pool_lv);
-    new_data->data_lv = g_strdup (data->data_lv);
-    new_data->metadata_lv = g_strdup (data->metadata_lv);
-    new_data->roles = g_strdup (data->roles);
-    new_data->move_pv = g_strdup (data->move_pv);
-    new_data->data_percent = data->data_percent;
-    new_data->metadata_percent = data->metadata_percent;
-    new_data->copy_percent = data->copy_percent;
-    new_data->lv_tags = g_strdupv (data->lv_tags);
-    return new_data;
-}
-
-void bd_lvm_lvdata_free (BDLVMLVdata *data) {
-    if (data == NULL)
-        return;
-
-    g_free (data->lv_name);
-    g_free (data->vg_name);
-    g_free (data->uuid);
-    g_free (data->attr);
-    g_free (data->segtype);
-    g_free (data->origin);
-    g_free (data->pool_lv);
-    g_free (data->data_lv);
-    g_free (data->metadata_lv);
-    g_free (data->roles);
-    g_free (data->move_pv);
-    g_strfreev (data->lv_tags);
-    g_free (data);
-}
-
-BDLVMCacheStats* bd_lvm_cache_stats_copy (BDLVMCacheStats *data) {
-    if (data == NULL)
-        return NULL;
-
-    BDLVMCacheStats *new = g_new0 (BDLVMCacheStats, 1);
-
-    new->block_size = data->block_size;
-    new->cache_size = data->cache_size;
-    new->cache_used = data->cache_used;
-    new->md_block_size = data->md_block_size;
-    new->md_size = data->md_size;
-    new->md_used = data->md_used;
-    new->read_hits = data->read_hits;
-    new->read_misses = data->read_misses;
-    new->write_hits = data->write_hits;
-    new->write_misses = data->write_misses;
-    new->mode = data->mode;
-
-    return new;
-}
-
-void bd_lvm_cache_stats_free (BDLVMCacheStats *data) {
-    g_free (data);
-}
-
 static gboolean setup_dbus_connection (GError **error) {
     gchar *addr = NULL;
 
@@ -278,7 +145,7 @@ static const DBusDep dbus_deps[DBUS_DEPS_LAST] = {
 
 #define FEATURES_VDO 0
 #define FEATURES_VDO_MASK (1 << FEATURES_VDO)
-#define FEATURES_WRITECACHE 0
+#define FEATURES_WRITECACHE 1
 #define FEATURES_WRITECACHE_MASK (1 << FEATURES_WRITECACHE)
 #define FEATURES_LAST 2
 
@@ -821,6 +688,15 @@ static gboolean call_lvm_method_sync (const gchar *obj, const gchar *intf, const
                 g_free (log_msg);
             } else {
                 ret = get_object_property (task_path, JOB_INTF, "GetError", &l_error);
+                if (!ret) {
+                    if (!l_error)
+                        g_set_error (&l_error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
+                                     "Failed to get error from '%s' method of the '%s' object",
+                                     method, obj);
+                    bd_utils_report_finished (prog_id, l_error->message);
+                    g_propagate_error (error, l_error);
+                    return FALSE;
+                }
                 g_variant_get (ret, "(is)", &error_code, &error_msg);
                 if (error_code != 0) {
                     if (error_msg) {
@@ -941,6 +817,8 @@ static GVariant* get_lvm_object_properties (const gchar *obj_id, const gchar *if
     ret = g_dbus_connection_call_sync (bus, LVM_BUS_NAME, MANAGER_OBJ, MANAGER_INTF,
                                        "LookUpByLvmId", args, NULL, G_DBUS_CALL_FLAGS_NONE,
                                        -1, NULL, error);
+    if (!ret)
+        return NULL;
     g_variant_get (ret, "(o)", &obj_path);
     g_variant_unref (ret);
 
@@ -1366,14 +1244,18 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error G_GN
     g_variant_dict_lookup (&dict, "Vg", "o", &path);
     name = get_object_property (path, VG_INTF, "Name", NULL);
     g_free (path);
-    g_variant_get (name, "s", &(data->vg_name));
-    g_variant_unref (name);
+    if (name) {
+        g_variant_get (name, "s", &(data->vg_name));
+        g_variant_unref (name);
+    }
 
     g_variant_dict_lookup (&dict, "OriginLv", "o", &path);
     if (g_strcmp0 (path, "/") != 0) {
         name = get_object_property (path, LV_CMN_INTF, "Name", NULL);
-        g_variant_get (name, "s", &(data->origin));
-        g_variant_unref (name);
+        if (name) {
+            g_variant_get (name, "s", &(data->origin));
+            g_variant_unref (name);
+        }
     }
     g_free (path);
     path = NULL;
@@ -1381,8 +1263,10 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error G_GN
     g_variant_dict_lookup (&dict, "PoolLv", "o", &path);
     if (g_strcmp0 (path, "/") != 0) {
         name = get_object_property (path, LV_CMN_INTF, "Name", NULL);
-        g_variant_get (name, "s", &(data->pool_lv));
-        g_variant_unref (name);
+        if (name) {
+            g_variant_get (name, "s", &(data->pool_lv));
+            g_variant_unref (name);
+        }
     }
     g_free (path);
     path = NULL;
@@ -1390,8 +1274,10 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error G_GN
     g_variant_dict_lookup (&dict, "MovePv", "o", &path);
     if (path && g_strcmp0 (path, "/") != 0) {
         name = get_object_property (path, PV_INTF, "Name", NULL);
-        g_variant_get (name, "s", &(data->move_pv));
-        g_variant_unref (name);
+        if (name) {
+            g_variant_get (name, "s", &(data->move_pv));
+            g_variant_unref (name);
+        }
     }
     g_free (path);
     path = NULL;
@@ -1972,6 +1858,7 @@ gboolean bd_lvm_vgcreate (const gchar *name, const gchar **pv_list, guint64 pe_s
             return FALSE;
         }
         g_variant_builder_add_value (&builder, g_variant_new ("o", path));
+        g_free (path);
     }
     pvs = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
@@ -2375,6 +2262,7 @@ gboolean bd_lvm_lvcreate (const gchar *vg_name, const gchar *lv_name, guint64 si
                 return FALSE;
             }
             g_variant_builder_add_value (&builder, g_variant_new ("(ott)", path, (guint64) 0, (guint64) 0));
+            g_free (path);
         }
         pvs = g_variant_builder_end (&builder);
         g_variant_builder_clear (&builder);
@@ -2529,6 +2417,7 @@ gboolean bd_lvm_lvrepair (const gchar *vg_name, const gchar *lv_name, const gcha
             return FALSE;
         }
         g_variant_builder_add_value (&builder, g_variant_new ("o", path));
+        g_free (path);
     }
     pvs = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
@@ -2539,8 +2428,6 @@ gboolean bd_lvm_lvrepair (const gchar *vg_name, const gchar *lv_name, const gcha
     g_variant_builder_clear (&builder);
 
     return call_lv_method_sync (vg_name, lv_name, "RepairRaidLv", params, NULL, extra, TRUE, error);
-
-  return FALSE;
 }
 
 /**
@@ -2637,7 +2524,7 @@ gboolean bd_lvm_lvsnapshotcreate (const gchar *vg_name, const gchar *origin_name
  */
 gboolean bd_lvm_lvsnapshotmerge (const gchar *vg_name, const gchar *snapshot_name, const BDExtraArg **extra, GError **error) {
     gchar *obj_id = NULL;
-    gchar *obj_path = NULL;
+    g_autofree gchar *obj_path = NULL;
 
     /* get object path for vg_name/snapshot_name and call SNAP_INTF, "Merge" */
     obj_id = g_strdup_printf ("%s/%s", vg_name, snapshot_name);
@@ -3693,6 +3580,7 @@ gchar* bd_lvm_cache_pool_name (const gchar *vg_name, const gchar *cached_lv, GEr
     if (!prop)
         return NULL;
     g_variant_get (prop, "o", &pool_obj_path);
+    g_variant_unref (prop);
     prop = get_object_property (pool_obj_path, LV_CMN_INTF, "Name", error);
     g_free (pool_obj_path);
     if (!prop)
@@ -3745,8 +3633,8 @@ gboolean bd_lvm_thpool_convert (const gchar *vg_name, const gchar *data_lv, cons
     GVariantBuilder builder;
     GVariant *params = NULL;
     gchar *obj_id = NULL;
-    gchar *data_lv_path = NULL;
-    gchar *metadata_lv_path = NULL;
+    g_autofree gchar *data_lv_path = NULL;
+    g_autofree gchar *metadata_lv_path = NULL;
     gboolean ret = FALSE;
 
     obj_id = g_strdup_printf ("%s/%s", vg_name, data_lv);
@@ -3795,8 +3683,8 @@ gboolean bd_lvm_cache_pool_convert (const gchar *vg_name, const gchar *data_lv, 
     GVariantBuilder builder;
     GVariant *params = NULL;
     gchar *obj_id = NULL;
-    gchar *data_lv_path = NULL;
-    gchar *metadata_lv_path = NULL;
+    g_autofree gchar *data_lv_path = NULL;
+    g_autofree gchar *metadata_lv_path = NULL;
     gboolean ret = FALSE;
 
     obj_id = g_strdup_printf ("%s/%s", vg_name, data_lv);

@@ -61,6 +61,218 @@ GMutex global_config_lock;
 gchar *global_config_str = NULL;
 gchar *global_devices_str = NULL;
 
+BDLVMPVdata* bd_lvm_pvdata_copy (BDLVMPVdata *data) {
+    if (data == NULL)
+        return NULL;
+
+    BDLVMPVdata *new_data = g_new0 (BDLVMPVdata, 1);
+
+    new_data->pv_name = g_strdup (data->pv_name);
+    new_data->pv_uuid = g_strdup (data->pv_uuid);
+    new_data->pv_free = data->pv_free;
+    new_data->pv_size = data->pv_size;
+    new_data->pe_start = data->pe_start;
+    new_data->vg_name = g_strdup (data->vg_name);
+    new_data->vg_uuid = g_strdup (data->vg_uuid);
+    new_data->vg_size = data->vg_size;
+    new_data->vg_free = data->vg_free;
+    new_data->vg_extent_size = data->vg_extent_size;
+    new_data->vg_extent_count = data->vg_extent_count;
+    new_data->vg_free_count = data->vg_free_count;
+    new_data->vg_pv_count = data->vg_pv_count;
+    new_data->pv_tags = g_strdupv (data->pv_tags);
+    new_data->missing = data->missing;
+
+    return new_data;
+}
+
+void bd_lvm_pvdata_free (BDLVMPVdata *data) {
+    if (data == NULL)
+        return;
+
+    g_free (data->pv_name);
+    g_free (data->pv_uuid);
+    g_free (data->vg_name);
+    g_free (data->vg_uuid);
+    g_strfreev (data->pv_tags);
+    g_free (data);
+}
+
+BDLVMVGdata* bd_lvm_vgdata_copy (BDLVMVGdata *data) {
+    if (data == NULL)
+        return NULL;
+
+    BDLVMVGdata *new_data = g_new0 (BDLVMVGdata, 1);
+
+    new_data->name = g_strdup (data->name);
+    new_data->uuid = g_strdup (data->uuid);
+    new_data->size = data->size;
+    new_data->free = data->free;
+    new_data->extent_size = data->extent_size;
+    new_data->extent_count = data->extent_count;
+    new_data->free_count = data->free_count;
+    new_data->pv_count = data->pv_count;
+    new_data->vg_tags = g_strdupv (data->vg_tags);
+    new_data->exported = data->exported;
+    return new_data;
+}
+
+void bd_lvm_vgdata_free (BDLVMVGdata *data) {
+    if (data == NULL)
+        return;
+
+    g_free (data->name);
+    g_free (data->uuid);
+    g_strfreev (data->vg_tags);
+    g_free (data);
+}
+
+BDLVMSEGdata* bd_lvm_segdata_copy (BDLVMSEGdata *data) {
+    if (data == NULL)
+        return NULL;
+
+    BDLVMSEGdata *new_data = g_new0 (BDLVMSEGdata, 1);
+
+    new_data->size_pe = data->size_pe;
+    new_data->pv_start_pe = data->pv_start_pe;
+    new_data->pvdev = g_strdup (data->pvdev);
+    return new_data;
+}
+
+void bd_lvm_segdata_free (BDLVMSEGdata *data) {
+    if (data == NULL)
+        return;
+
+    g_free (data->pvdev);
+    g_free (data);
+}
+
+static BDLVMSEGdata **copy_segs (BDLVMSEGdata **segs) {
+    int len;
+    BDLVMSEGdata **new_segs;
+
+    if (segs == NULL)
+       return NULL;
+
+    for (len = 0; segs[len]; len++)
+        ;
+
+    new_segs = g_new0 (BDLVMSEGdata *, len+1);
+    for (int i = 0; i < len; i++)
+        new_segs[i] = bd_lvm_segdata_copy (segs[i]);
+
+    return new_segs;
+}
+
+static void free_segs (BDLVMSEGdata **segs) {
+    if (segs == NULL)
+       return;
+
+    for (int i = 0; segs[i]; i++)
+        bd_lvm_segdata_free (segs[i]);
+    (g_free) (segs);
+}
+
+BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
+    if (data == NULL)
+        return NULL;
+
+    BDLVMLVdata *new_data = g_new0 (BDLVMLVdata, 1);
+
+    new_data->lv_name = g_strdup (data->lv_name);
+    new_data->vg_name = g_strdup (data->vg_name);
+    new_data->uuid = g_strdup (data->uuid);
+    new_data->size = data->size;
+    new_data->attr = g_strdup (data->attr);
+    new_data->segtype = g_strdup (data->segtype);
+    new_data->origin = g_strdup (data->origin);
+    new_data->pool_lv = g_strdup (data->pool_lv);
+    new_data->data_lv = g_strdup (data->data_lv);
+    new_data->metadata_lv = g_strdup (data->metadata_lv);
+    new_data->roles = g_strdup (data->roles);
+    new_data->move_pv = g_strdup (data->move_pv);
+    new_data->data_percent = data->data_percent;
+    new_data->metadata_percent = data->metadata_percent;
+    new_data->copy_percent = data->copy_percent;
+    new_data->lv_tags = g_strdupv (data->lv_tags);
+    new_data->data_lvs = g_strdupv (data->data_lvs);
+    new_data->metadata_lvs = g_strdupv (data->metadata_lvs);
+    new_data->segs = copy_segs (data->segs);
+    return new_data;
+}
+
+void bd_lvm_lvdata_free (BDLVMLVdata *data) {
+    if (data == NULL)
+        return;
+
+    g_free (data->lv_name);
+    g_free (data->vg_name);
+    g_free (data->uuid);
+    g_free (data->attr);
+    g_free (data->segtype);
+    g_free (data->origin);
+    g_free (data->pool_lv);
+    g_free (data->data_lv);
+    g_free (data->metadata_lv);
+    g_free (data->roles);
+    g_free (data->move_pv);
+    g_strfreev (data->lv_tags);
+    g_strfreev (data->data_lvs);
+    g_strfreev (data->metadata_lvs);
+    free_segs (data->segs);
+    g_free (data);
+}
+
+BDLVMVDOPooldata* bd_lvm_vdopooldata_copy (BDLVMVDOPooldata *data) {
+    if (data == NULL)
+        return NULL;
+
+    BDLVMVDOPooldata *new_data = g_new0 (BDLVMVDOPooldata, 1);
+
+    new_data->operating_mode = data->operating_mode;
+    new_data->compression_state = data->compression_state;
+    new_data->index_state = data->index_state;
+    new_data->write_policy = data->write_policy;
+    new_data->used_size = data->used_size;
+    new_data->saving_percent = data->saving_percent;
+    new_data->index_memory_size = data->index_memory_size;
+    new_data->deduplication = data->deduplication;
+    new_data->compression = data->compression;
+    return new_data;
+}
+
+void bd_lvm_vdopooldata_free (BDLVMVDOPooldata *data) {
+    if (data == NULL)
+        return;
+
+    g_free (data);
+}
+
+BDLVMCacheStats* bd_lvm_cache_stats_copy (BDLVMCacheStats *data) {
+    if (data == NULL)
+        return NULL;
+
+    BDLVMCacheStats *new = g_new0 (BDLVMCacheStats, 1);
+
+    new->block_size = data->block_size;
+    new->cache_size = data->cache_size;
+    new->cache_used = data->cache_used;
+    new->md_block_size = data->md_block_size;
+    new->md_size = data->md_size;
+    new->md_used = data->md_used;
+    new->read_hits = data->read_hits;
+    new->read_misses = data->read_misses;
+    new->write_hits = data->write_hits;
+    new->write_misses = data->write_misses;
+    new->mode = data->mode;
+
+    return new;
+}
+
+void bd_lvm_cache_stats_free (BDLVMCacheStats *data) {
+    g_free (data);
+}
+
 /**
  * bd_lvm_is_supported_pe_size:
  * @size: size (in bytes) to test
@@ -789,7 +1001,7 @@ gchar* bd_lvm_config_get (const gchar *section, const gchar *setting, const gcha
 }
 
 gboolean _vgcfgbackup_restore (const gchar *command, const gchar *vg_name, const gchar *file, const BDExtraArg **extra, GError **error) {
-    const gchar *args[6] = {"lvm", NULL, NULL, NULL, NULL, NULL};
+    const gchar *args[7] = {"lvm", NULL, NULL, NULL, NULL, NULL, NULL};
     guint next_arg = 1;
     g_autofree gchar *config_arg = NULL;
 
