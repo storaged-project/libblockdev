@@ -81,7 +81,7 @@ gboolean bd_s390_init (void) {
  *
  */
 void bd_s390_close (void) {
-    /* nothing to do here */
+    g_atomic_int_set (&avail_deps, 0);
 }
 
 /**

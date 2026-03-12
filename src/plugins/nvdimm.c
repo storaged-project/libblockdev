@@ -105,8 +105,7 @@ gboolean bd_nvdimm_init (void) {
  * Deprecated: 3.1: NVDIMM plugin will be removed in the next major release
  */
 void bd_nvdimm_close (void) {
-    /* nothing to do here */
-    return;
+    g_atomic_int_set (&avail_deps, 0);
 }
 
 

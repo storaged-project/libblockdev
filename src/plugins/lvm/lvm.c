@@ -114,6 +114,12 @@ gboolean bd_lvm_init (void) {
 void bd_lvm_close (void) {
     dm_log_with_errno_init (NULL);
     dm_log_init_verbose (0);
+
+    /* reset the cached availability checks so they are re-evaluated
+       next time the plugin is loaded */
+    g_atomic_int_set (&avail_deps, 0);
+    g_atomic_int_set (&avail_features, 0);
+    g_atomic_int_set (&avail_module_deps, 0);
 }
 
 /**
