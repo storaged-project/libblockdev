@@ -689,7 +689,7 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps5.size, 10 * 1024**2)
 
         # we should get just next primary partition (GPT)
-        ps6 = BlockDev.part_create_part (self.loop_devs[0], BlockDev.PartTypeReq.NEXT, ps5.start + ps4.size + 1,
+        ps6 = BlockDev.part_create_part (self.loop_devs[0], BlockDev.PartTypeReq.NEXT, ps5.start + ps5.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps6)
         self.assertEqual(ps6.path, self.loop_devs[0] + "6")
