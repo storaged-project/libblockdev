@@ -198,7 +198,7 @@ def get_loading_func(fn_infos, module_name):
     ret += '    char *error = NULL;\n'
     ret += '    gboolean (*init_fn) (void) = NULL;\n\n'
 
-    ret += '    handle = dlopen(so_name, RTLD_LAZY);\n'
+    ret += '    handle = dlopen(so_name, RTLD_LAZY | RTLD_NODELETE);\n'
     ret += '    if (!handle) {\n'
     ret += '        bd_utils_log_format (BD_UTILS_LOG_WARNING, "failed to load module {0}: %s", dlerror());\n'.format(module_name)
     ret += '        return NULL;\n'

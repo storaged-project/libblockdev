@@ -226,7 +226,8 @@ AS_IF([test "x$with_dm" != "xno" -o "x$with_lvm" != "xno" -o "x$with_lvm_dbus" !
       [])
 
 AS_IF([test "x$with_lvm" != "xno" -o "x$with_lvm_dbus" != "xno"],
-      [LIBBLOCKDEV_PKG_CHECK_MODULES([YAML], [yaml-0.1])],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([YAML], [yaml-0.1])
+       LIBBLOCKDEV_PKG_CHECK_MODULES([JSON_GLIB], [json-glib-1.0])],
       [])
 
 AS_IF([test "x$with_part" != "xno"],
