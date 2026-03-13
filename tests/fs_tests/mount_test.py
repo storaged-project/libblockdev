@@ -120,7 +120,7 @@ class MountTestCase(FSTestCase):
         loop_dev = "/dev/" + dev
         # without any options, the mount should fall back to RO
         self.assertTrue(BlockDev.fs_mount(loop_dev, tmp_dir, None, None, None))
-        self.addCleanup(utils.umount, dev)
+        self.addCleanup(utils.umount, loop_dev)
         self.assertTrue(os.path.ismount(tmp_dir))
 
         succ = BlockDev.fs_unmount(tmp_dir, False, False, None)
