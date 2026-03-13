@@ -55,13 +55,15 @@ class PartTestCase(PartTest):
                 raise RuntimeError("Failed to setup loop device for testing: %s" % e)
 
     def _clean_up(self):
-        for i in range(self._num_devices):
+        for dev in self.loop_devs:
             try:
-                delete_lio_device(self.loop_devs[i])
+                delete_lio_device(dev)
             except RuntimeError:
                 # just move on, we can do no better here
                 pass
-            os.unlink(self.dev_files[i])
+
+        for dev_file in self.dev_files:
+            os.unlink(dev_file)
 
         self.dev_files.clear()
         self.loop_devs.clear()
