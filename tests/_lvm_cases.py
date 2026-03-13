@@ -1347,7 +1347,7 @@ class LvmTestLVs(LvmPVVGLVTestCase):
         self.assertEqual(stats.md_size, 8 * 1024**2)
         self.assertEqual(stats.mode, BlockDev.LVMCacheMode.WRITETHROUGH)
 
-    def test_vgtags(self):
+    def test_lvtags(self):
         """Verify that it's possible to set and get info about LV tags"""
 
         succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
