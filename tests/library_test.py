@@ -169,7 +169,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         """Verify that the library initializes with lang different from en_US"""
 
         orig_lang = os.environ.get("LANG")
-        os.environ["LANG"] = "cs.CZ_UTF-8"
+        os.environ["LANG"] = "cs_CZ.UTF-8"
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
         if orig_lang:
             os.environ["LANG"] = orig_lang
