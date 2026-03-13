@@ -151,7 +151,7 @@ def _get_lio_dev_path(store_wwn, tgt_wwn, store_name, retry=True):
         if retry:
             time.sleep(3)
             os.system("udevadm settle")
-            return _get_lio_dev_path(store_wwn, tgt_wwn, store_wwn, False)
+            return _get_lio_dev_path(store_wwn, tgt_wwn, store_name, False)
         else:
             _delete_target(tgt_wwn, store_name)
             raise RuntimeError("Failed to identify the resulting device for '%s'" % store_name)
