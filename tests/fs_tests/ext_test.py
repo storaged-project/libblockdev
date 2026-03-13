@@ -251,7 +251,7 @@ class ExtGetInfo(ExtTestCase):
         self.assertTrue(fi.state, "clean")
 
         with mounted(self.loop_devs[0], self.mount_dir):
-            fi = BlockDev.fs_ext4_get_info(self.loop_devs[0])
+            fi = info_function(self.loop_devs[0])
             self.assertEqual(fi.block_size, 1024)
             self.assertEqual(fi.block_count, self.loop_size / 1024)
             # at least 50 % should be available, so it should be reported
