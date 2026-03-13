@@ -624,7 +624,7 @@ class CryptoTestErrorLocale(CryptoTestCase):
     def setUp(self):
         self._orig_loc = None
         CryptoTestCase.setUp(self)
-        self._orig_loc = ".".join(locale.getdefaultlocale())
+        self._orig_loc = locale.setlocale(locale.LC_ALL)
 
     def _clean_up(self):
         CryptoTestCase._clean_up(self)
