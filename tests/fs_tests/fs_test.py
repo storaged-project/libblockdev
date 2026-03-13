@@ -116,7 +116,7 @@ class FSTestCase(FSNoDevTestCase):
         self.addCleanup(self._clean_up)
 
         for i in range(self.num_devices):
-            dev_file = utils.create_sparse_tempfile("crypto_test", self.loop_size)
+            dev_file = utils.create_sparse_tempfile("fs_test", self.loop_size)
             self.dev_files.append(dev_file)
 
             try:
