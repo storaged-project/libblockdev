@@ -2,7 +2,7 @@ import os
 import unittest
 import re
 import overrides_hack
-from utils import fake_path, TestTags, tag_test, required_plugins
+from utils import TestTags, tag_test, required_plugins
 
 import gi
 gi.require_version('GLib', '2.0')

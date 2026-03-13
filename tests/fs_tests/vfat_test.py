@@ -7,7 +7,6 @@ from .fs_test import FSTestCase, FSNoDevTestCase, mounted
 
 import overrides_hack
 import utils
-from utils import TestTags, tag_test
 
 from gi.repository import BlockDev, GLib
 
