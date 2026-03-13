@@ -203,7 +203,7 @@ def _split_test_id(test_id):
 
 def _print_skip_message(test, skip_tags, missing):
     test_id = test.id()
-    test_module, test_name = _split_test_id(test_id)
+    test_name, test_module = _split_test_id(test_id)
 
     if missing:
         reason = 'skipping test because it is not tagged as one of: ' + ', '.join((t.value for t in skip_tags))
