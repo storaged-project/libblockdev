@@ -200,7 +200,7 @@ def create_lio_device(fpath, block_size=0):
     # create a new loopback device
     out = subprocess.check_output(["targetcli", "/loopback create"])
     out = out.decode("utf-8")
-    match = re.match(r'Created target (.*).', out)
+    match = re.match(r'Created target (.*)\.', out)
     if match:
         tgt_wwn = match.groups()[0]
     else:
