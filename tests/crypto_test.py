@@ -1474,7 +1474,7 @@ class CryptoTestLUKSToken(CryptoTestCase):
         self.assertEqual(info[0].keyslot, 0)
 
     @tag_test(TestTags.SLOW)
-    def test_luks2_integrity(self):
+    def test_luks2_token_info(self):
         """Verify that we can get information about LUKS2 tokens"""
 
         # the simple case with password
