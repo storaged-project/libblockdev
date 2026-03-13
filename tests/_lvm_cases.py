@@ -1618,7 +1618,7 @@ class LvmTestThpool(LvmPVVGthpoolTestCase):
 
         # there should be at least 3 LVs -- testPool, [testPool_tdata], [testPool_tmeta] (plus probably some spare LVs)
         lvs = BlockDev.lvm_lvs("testVG")
-        self.assertGreater(len(lvs), 3)
+        self.assertGreaterEqual(len(lvs), 3)
 
     @tag_test(TestTags.CORE)
     def test_thpoolcreate(self):
