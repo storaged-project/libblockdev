@@ -1937,8 +1937,8 @@ class LvmVDOTest(LvmTestCase):
             if "File exists" not in e.message:
                 raise unittest.SkipTest("cannot load VDO kernel module, skipping.")
 
-        if LVM_VERSION < Version("2.3.07"):
-            raise unittest.SkipTest("LVM version 2.3.07 or newer needed for LVM VDO.")
+        if LVM_VERSION < Version("2.03.07"):
+            raise unittest.SkipTest("LVM version 2.03.07 or newer needed for LVM VDO.")
 
         if not shutil.which("vdoformat"):
             raise unittest.SkipTest("vdoformat executable not found in $PATH, skipping.")
