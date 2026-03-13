@@ -762,7 +762,7 @@ class PartGetDiskFreeRegions(PartTestCase):
         self.assertGreaterEqual(fi.start, 80 * 1024**2)
         self.assertGreaterEqual(fi.size, 19 * 1024**2)
 
-        # now something simple with GPT
+        # now something simple with MSDOS
         succ = BlockDev.part_create_table (self.loop_devs[0], BlockDev.PartTableType.MSDOS, True)
         self.assertTrue(succ)
 

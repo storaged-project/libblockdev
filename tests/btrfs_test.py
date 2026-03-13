@@ -33,7 +33,7 @@ class BtrfsTest(unittest.TestCase):
             raise unittest.SkipTest('Btrfs kernel module not available, skipping.')
 
         if not shutil.which("btrfs"):
-            raise unittest.SkipTest("btrfs executable not foundin $PATH, skipping.")
+            raise unittest.SkipTest("btrfs executable not found in $PATH, skipping.")
 
         if not BlockDev.is_initialized():
             BlockDev.init(cls.requested_plugins, None)

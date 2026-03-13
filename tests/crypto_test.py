@@ -232,7 +232,7 @@ class CryptoTestFormat(CryptoTestCase):
         succ = BlockDev.crypto_luks_format(self.loop_devs[0], "aes-xts-plain64", 0, pw_ctx, 0)
         self.assertTrue(succ)
 
-        # create with a keyfile
+        # create with a passphrase context
         kf_ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
         succ = BlockDev.crypto_luks_format(self.loop_devs[0], "aes-xts-plain64", 0, kf_ctx, 0)
         self.assertTrue(succ)
