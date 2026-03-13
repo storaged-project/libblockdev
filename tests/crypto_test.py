@@ -293,7 +293,6 @@ class CryptoTestFormat(CryptoTestCase):
         with self.assertRaisesRegex(GLib.GError, "Invalid pbkdf specified"):
             BlockDev.crypto_luks_format(self.loop_devs[0], "aes-xts-plain64", 0, ctx, 0,
                                         BlockDev.CryptoLUKSVersion.LUKS1, extra)
-        self.assertTrue(succ)
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
     def test_luks2_format_pbkdf_options(self):
