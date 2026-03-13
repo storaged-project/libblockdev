@@ -68,7 +68,7 @@ class NILFS2TestAvailability(NILFS2NoDevTestCase):
 
 class NILFS2TestFeatures(NILFS2NoDevTestCase):
 
-    def test_vfat_features(self):
+    def test_nilfs2_features(self):
         features = BlockDev.fs_features("nilfs2")
         self.assertIsNotNone(features)
 
