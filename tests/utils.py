@@ -453,7 +453,7 @@ def setup_nvme_target(dev_paths, subnqn):
         }}
         """.format(nguid=uuid.uuid4(), path=dev_path, nsid=i) for i, dev_path in enumerate(dev_paths, start=1)])
 
-        json = """
+        json_str = """
 {
   "ports": [
     {
@@ -484,7 +484,7 @@ def setup_nvme_target(dev_paths, subnqn):
   ]
 }
 """
-        tmp.write(json % (subnqn, namespaces, subnqn))
+        tmp.write(json_str % (subnqn, namespaces, subnqn))
 
     # export the loop device on the target
     ret, out, err = run_command("nvmetcli restore %s" % tcli_json_file)
