@@ -248,7 +248,7 @@ class ExtGetInfo(ExtTestCase):
         self.assertEqual(fi.label, "")
         # should be an non-empty string
         self.assertTrue(fi.uuid)
-        self.assertTrue(fi.state, "clean")
+        self.assertTrue(fi.state)
 
         with mounted(self.loop_devs[0], self.mount_dir):
             fi = info_function(self.loop_devs[0])
@@ -259,7 +259,7 @@ class ExtGetInfo(ExtTestCase):
             self.assertEqual(fi.label, "")
             # should be an non-empty string
             self.assertTrue(fi.uuid)
-            self.assertTrue(fi.state, "clean")
+            self.assertTrue(fi.state)
 
     @tag_test(TestTags.CORE)
     def test_ext2_get_info(self):
