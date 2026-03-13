@@ -2,7 +2,7 @@ import os
 import unittest
 import re
 import overrides_hack
-from utils import fake_path, TestTags, tag_test, required_plugins
+from utils import TestTags, tag_test, required_plugins
 
 import gi
 gi.require_version('GLib', '2.0')
@@ -169,7 +169,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         """Verify that the library initializes with lang different from en_US"""
 
         orig_lang = os.environ.get("LANG")
-        os.environ["LANG"] = "cs.CZ_UTF-8"
+        os.environ["LANG"] = "cs_CZ.UTF-8"
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
         if orig_lang:
             os.environ["LANG"] = orig_lang

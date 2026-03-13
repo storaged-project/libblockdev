@@ -252,7 +252,7 @@ class XfsResize(XfsTestCase):
         if xfs_version < Version("5.12"):
             with mounted(lv, self.mount_dir):
                 with self.assertRaises(GLib.GError):
-                    succ = BlockDev.fs_xfs_resize(self.mount_dir, 40 * 1024**2 / fi.block_size, None)
+                    succ = BlockDev.fs_xfs_resize(self.mount_dir, 40 * 1024**2 // fi.block_size, None)
 
         self._lvresize("libbd_fs_tests", "xfs_test", "400M")
         # should grow to 400 MiB (full size of the LV)
@@ -267,7 +267,7 @@ class XfsResize(XfsTestCase):
         self._lvresize("libbd_fs_tests", "xfs_test", "450M")
         # grow just to 430 MiB
         with mounted(lv, self.mount_dir):
-            succ = BlockDev.fs_xfs_resize(self.mount_dir, 430 * 1024**2 / fi.block_size, None)
+            succ = BlockDev.fs_xfs_resize(self.mount_dir, 430 * 1024**2 // fi.block_size, None)
         self.assertTrue(succ)
         with mounted(lv, self.mount_dir):
             fi = BlockDev.fs_xfs_get_info(lv)

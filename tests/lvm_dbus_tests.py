@@ -129,10 +129,10 @@ class LvmTestLVs(_lvm_cases.LvmTestLVs, LvmDBusTestCase):
         LvmDBusTestCase.setUpClass()
 
 
-class LvmDBusTestLVcreateType(_lvm_cases.LvmPVVGLVTestCase, LvmDBusTestCase):
+class LvmDBusTestLVcreateType(_lvm_cases.LvmTestLVcreateType, LvmDBusTestCase):
     @classmethod
     def setUpClass(cls):
-        _lvm_cases.LvmPVVGLVTestCase.setUpClass()
+        _lvm_cases.LvmTestLVcreateType.setUpClass()
         LvmDBusTestCase.setUpClass()
 
 

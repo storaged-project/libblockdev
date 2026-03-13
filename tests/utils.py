@@ -151,7 +151,7 @@ def _get_lio_dev_path(store_wwn, tgt_wwn, store_name, retry=True):
         if retry:
             time.sleep(3)
             os.system("udevadm settle")
-            return _get_lio_dev_path(store_wwn, tgt_wwn, store_wwn, False)
+            return _get_lio_dev_path(store_wwn, tgt_wwn, store_name, False)
         else:
             _delete_target(tgt_wwn, store_name)
             raise RuntimeError("Failed to identify the resulting device for '%s'" % store_name)
@@ -200,7 +200,7 @@ def create_lio_device(fpath, block_size=0):
     # create a new loopback device
     out = subprocess.check_output(["targetcli", "/loopback create"])
     out = out.decode("utf-8")
-    match = re.match(r'Created target (.*).', out)
+    match = re.match(r'Created target (.*)\.', out)
     if match:
         tgt_wwn = match.groups()[0]
     else:
@@ -453,7 +453,7 @@ def setup_nvme_target(dev_paths, subnqn):
         }}
         """.format(nguid=uuid.uuid4(), path=dev_path, nsid=i) for i, dev_path in enumerate(dev_paths, start=1)])
 
-        json = """
+        json_str = """
 {
   "ports": [
     {
@@ -484,7 +484,7 @@ def setup_nvme_target(dev_paths, subnqn):
   ]
 }
 """
-        tmp.write(json % (subnqn, namespaces, subnqn))
+        tmp.write(json_str % (subnqn, namespaces, subnqn))
 
     # export the loop device on the target
     ret, out, err = run_command("nvmetcli restore %s" % tcli_json_file)

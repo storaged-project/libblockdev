@@ -46,7 +46,7 @@ class MpathTestCase(MpathTest):
 
         # just test that some non-mpath is not reported as a multipath member
         # device and no error is reported
-        self.assertFalse(BlockDev.mpath_is_mpath_member("/dev/loop0"))
+        self.assertFalse(BlockDev.mpath_is_mpath_member(self.loop_dev))
 
     def test_flush_mpaths(self):
         """ Verify that mpath_flush_mpaths can be called """

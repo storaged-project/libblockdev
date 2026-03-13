@@ -4,7 +4,6 @@ from .fs_test import FSTestCase, FSNoDevTestCase, mounted
 
 import overrides_hack
 import utils
-from utils import TestTags, tag_test
 
 from gi.repository import BlockDev, GLib
 
@@ -19,10 +18,10 @@ class ExfatNoDevTestCase(FSNoDevTestCase):
 
 class ExfatTestCase(FSTestCase):
     def setUp(self):
-        super(ExfatTestCase, self).setUp()
-
         if not self.exfat_avail:
             self.skipTest("skipping exFAT: not available")
+
+        super(ExfatTestCase, self).setUp()
 
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="exfat_test")
 

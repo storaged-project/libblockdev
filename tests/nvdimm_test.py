@@ -63,7 +63,7 @@ class NVDIMMNamespaceTestCase(NVDIMMTestCase):
         # get the dict for the first nvdimm device
         self.sys_info = self.sys_info[0]
 
-        # skip the tests if the nvdimm is a 'fake' one
+        # skip the tests if the nvdimm is not a 'fake' one
         cmdline = read_file("/proc/cmdline")
         if "memmap=" not in cmdline:
             self.skipTest("NVDIMM device found, but not created by the 'memmap' kernel command-line option.")

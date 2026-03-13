@@ -116,7 +116,7 @@ class FSTestCase(FSNoDevTestCase):
         self.addCleanup(self._clean_up)
 
         for i in range(self.num_devices):
-            dev_file = utils.create_sparse_tempfile("crypto_test", self.loop_size)
+            dev_file = utils.create_sparse_tempfile("fs_test", self.loop_size)
             self.dev_files.append(dev_file)
 
             try:
@@ -131,13 +131,15 @@ class FSTestCase(FSNoDevTestCase):
         except:
             pass
 
-        for i in range(self.num_devices):
+        for dev in self.loop_devs:
             try:
-                utils.delete_lio_device(self.loop_devs[i])
+                utils.delete_lio_device(dev)
             except RuntimeError:
                 # just move on, we can do no better here
                 pass
-            os.unlink(self.dev_files[i])
+
+        for dev_file in self.dev_files:
+            os.unlink(dev_file)
 
         self.dev_files.clear()
         self.loop_devs.clear()
@@ -175,7 +177,6 @@ class FSTestCase(FSNoDevTestCase):
 
         ret, _out, err = utils.run_command("lvcreate -n %s -L%s %s --config \"devices {use_devicesfile = 0}\"" % (lvname, lvsize, vgname))
         if ret != 0:
-            import pdb; pdb.set_trace()
             raise RuntimeError("Failed to create LV for fs tests: %s" % err)
 
         return "/dev/%s/%s" % (vgname, lvname)

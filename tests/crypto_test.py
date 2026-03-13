@@ -80,13 +80,15 @@ class CryptoTestCase(unittest.TestCase):
         except:
             pass
 
-        for i in range(self._num_devices):
+        for dev in self.loop_devs:
             try:
-                delete_lio_device(self.loop_devs[i])
+                delete_lio_device(dev)
             except RuntimeError:
                 # just move on, we can do no better here
                 pass
-            os.unlink(self.dev_files[i])
+
+        for dev_file in self.dev_files:
+            os.unlink(dev_file)
 
         os.unlink(self.keyfile)
 
@@ -230,7 +232,7 @@ class CryptoTestFormat(CryptoTestCase):
         succ = BlockDev.crypto_luks_format(self.loop_devs[0], "aes-xts-plain64", 0, pw_ctx, 0)
         self.assertTrue(succ)
 
-        # create with a keyfile
+        # create with a passphrase context
         kf_ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
         succ = BlockDev.crypto_luks_format(self.loop_devs[0], "aes-xts-plain64", 0, kf_ctx, 0)
         self.assertTrue(succ)
@@ -291,7 +293,6 @@ class CryptoTestFormat(CryptoTestCase):
         with self.assertRaisesRegex(GLib.GError, "Invalid pbkdf specified"):
             BlockDev.crypto_luks_format(self.loop_devs[0], "aes-xts-plain64", 0, ctx, 0,
                                         BlockDev.CryptoLUKSVersion.LUKS1, extra)
-        self.assertTrue(succ)
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
     def test_luks2_format_pbkdf_options(self):
@@ -622,7 +623,7 @@ class CryptoTestErrorLocale(CryptoTestCase):
     def setUp(self):
         self._orig_loc = None
         CryptoTestCase.setUp(self)
-        self._orig_loc = ".".join(locale.getdefaultlocale())
+        self._orig_loc = locale.setlocale(locale.LC_ALL)
 
     def _clean_up(self):
         CryptoTestCase._clean_up(self)
@@ -1472,7 +1473,7 @@ class CryptoTestLUKSToken(CryptoTestCase):
         self.assertEqual(info[0].keyslot, 0)
 
     @tag_test(TestTags.SLOW)
-    def test_luks2_integrity(self):
+    def test_luks2_token_info(self):
         """Verify that we can get information about LUKS2 tokens"""
 
         # the simple case with password
