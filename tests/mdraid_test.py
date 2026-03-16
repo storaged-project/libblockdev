@@ -121,9 +121,9 @@ class MDTestCase(MDTest):
         except:
             pass
 
-        for i in range(self._num_devices):
+        for dev in self.loop_devs:
             try:
-                BlockDev.md_destroy(self.loop_devs[i])
+                BlockDev.md_destroy(dev)
             except:
                 pass
 
@@ -136,13 +136,15 @@ class MDTestCase(MDTest):
         except:
             pass
 
-        for i in range(self._num_devices):
+        for dev in self.loop_devs:
             try:
-                delete_lio_device(self.loop_devs[i])
+                delete_lio_device(dev)
             except RuntimeError:
                 # just move on, we can do no better here
                 pass
-            os.unlink(self.dev_files[i])
+
+        for dev_file in self.dev_files:
+            os.unlink(dev_file)
 
         self.dev_files.clear()
         self.loop_devs.clear()

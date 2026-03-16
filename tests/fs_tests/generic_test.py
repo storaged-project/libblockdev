@@ -673,7 +673,7 @@ class GenericCheck(GenericTestCase):
         succ = BlockDev.utils_init_prog_reporting(None)
 
     def test_xfs_generic_check(self):
-        """Test generic check function with an ext4 file system"""
+        """Test generic check function with an xfs file system"""
         self._test_generic_check(mkfs_function=BlockDev.fs_xfs_mkfs, fstype="xfs")
 
     def test_ntfs_generic_check(self):
@@ -1097,7 +1097,7 @@ class GenericResize(GenericTestCase):
                     succ = BlockDev.fs_resize(lv, 40 * 1024**2)
 
         self._lvresize("libbd_fs_tests", "generic_test", "380M")
-        # should grow to 375 MiB (full size of the LV)
+        # should grow to 380 MiB (full size of the LV)
         if mount:
             with mounted(lv, self.mount_dir):
                 succ = BlockDev.fs_resize(lv, 0)
@@ -1304,25 +1304,25 @@ class GenericGetFreeSpace(GenericTestCase):
         self.assertLessEqual(free, size)
 
     def test_ext2_get_free_space(self):
-        """Test generic resize function with an ext2 file system"""
+        """Test generic get_free_space function with an ext2 file system"""
         self._test_get_free_space(mkfs_function=BlockDev.fs_ext2_mkfs, fstype="ext2")
 
     def test_ext3_check_get_free_space(self):
-        """Test generic resize function with an ext3 file system"""
+        """Test generic get_free_space function with an ext3 file system"""
         self._test_get_free_space(mkfs_function=BlockDev.fs_ext3_mkfs, fstype="ext3")
 
     def test_ext4_get_free_space(self):
-        """Test generic resize function with an ext4 file system"""
+        """Test generic get_free_space function with an ext4 file system"""
         self._test_get_free_space(mkfs_function=BlockDev.fs_ext4_mkfs, fstype="ext4")
 
     def test_ntfs_get_free_space(self):
-        """Test generic resize function with an ntfs file system"""
+        """Test generic get_free_space function with an ntfs file system"""
         if not self.ntfs_avail:
             self.skipTest("skipping NTFS: not available")
         self._test_get_free_space(mkfs_function=BlockDev.fs_ntfs_mkfs, fstype="ntfs")
 
     def test_vfat_get_free_space(self):
-        """Test generic resize function with a vfat file system"""
+        """Test generic get_free_space function with a vfat file system"""
         def mkfs_vfat(device, options=None):
             if self._vfat_version >= Version("4.2"):
                 if options:
@@ -1335,19 +1335,19 @@ class GenericGetFreeSpace(GenericTestCase):
         self._test_get_free_space(mkfs_function=mkfs_vfat, fstype="vfat")
 
     def test_nilfs2_get_free_space(self):
-        """Test generic resize function with an nilfs2 file system"""
+        """Test generic get_free_space function with an nilfs2 file system"""
         if not self.nilfs2_avail:
             self.skipTest("skipping NILFS2: not available")
         self._test_get_free_space(mkfs_function=BlockDev.fs_nilfs2_mkfs, fstype="nilfs2")
 
     def test_btrfs_get_free_space(self):
-        """Test generic resize function with an btrfs file system"""
+        """Test generic get_free_space function with a btrfs file system"""
         if not self.btrfs_avail:
             self.skipTest("skipping Btrfs: not available")
         self._test_get_free_space(mkfs_function=BlockDev.fs_btrfs_mkfs, fstype="btrfs")
 
     def test_udf_get_free_space(self):
-        """Test generic resize function with an udf file system"""
+        """Test generic get_free_space function with a udf file system"""
         if not self.udf_avail:
             self.skipTest("skipping UDF: not available")
 

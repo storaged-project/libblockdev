@@ -37,7 +37,7 @@ class BtrfsTestFeatures(BtrfsNoDevTestCase):
         self.assertIsNotNone(features)
 
         self.assertTrue(features.resize & BlockDev.FSResizeFlags.ONLINE_GROW)
-        self.assertTrue(features.resize & BlockDev.FSResizeFlags.ONLINE_GROW)
+        self.assertTrue(features.resize & BlockDev.FSResizeFlags.ONLINE_SHRINK)
 
         self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.LABEL)
         self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.UUID)

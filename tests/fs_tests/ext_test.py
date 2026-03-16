@@ -248,10 +248,10 @@ class ExtGetInfo(ExtTestCase):
         self.assertEqual(fi.label, "")
         # should be an non-empty string
         self.assertTrue(fi.uuid)
-        self.assertTrue(fi.state, "clean")
+        self.assertTrue(fi.state)
 
         with mounted(self.loop_devs[0], self.mount_dir):
-            fi = BlockDev.fs_ext4_get_info(self.loop_devs[0])
+            fi = info_function(self.loop_devs[0])
             self.assertEqual(fi.block_size, 1024)
             self.assertEqual(fi.block_count, self.loop_size / 1024)
             # at least 50 % should be available, so it should be reported
@@ -259,7 +259,7 @@ class ExtGetInfo(ExtTestCase):
             self.assertEqual(fi.label, "")
             # should be an non-empty string
             self.assertTrue(fi.uuid)
-            self.assertTrue(fi.state, "clean")
+            self.assertTrue(fi.state)
 
     @tag_test(TestTags.CORE)
     def test_ext2_get_info(self):
@@ -409,33 +409,33 @@ class ExtSetUUID(ExtTestCase):
 
     test_uuid = "4d7086c4-a4d3-432f-819e-73da03870df9"
 
-    def _test_ext_set_uuid(self, mkfs_function, info_function, label_function, check_function):
+    def _test_ext_set_uuid(self, mkfs_function, info_function, uuid_function, check_function):
         succ = mkfs_function(self.loop_devs[0], None)
         self.assertTrue(succ)
 
         fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
 
-        succ = label_function(self.loop_devs[0], self.test_uuid)
+        succ = uuid_function(self.loop_devs[0], self.test_uuid)
         self.assertTrue(succ)
         fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.uuid, self.test_uuid)
 
-        succ = label_function(self.loop_devs[0], "clear")
+        succ = uuid_function(self.loop_devs[0], "clear")
         self.assertTrue(succ)
         fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.uuid, "")
 
-        succ = label_function(self.loop_devs[0], "random")
+        succ = uuid_function(self.loop_devs[0], "random")
         self.assertTrue(succ)
         fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertNotEqual(fi.uuid, "")
         random_uuid = fi.uuid
 
-        succ = label_function(self.loop_devs[0], "time")
+        succ = uuid_function(self.loop_devs[0], "time")
         self.assertTrue(succ)
         fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
@@ -444,7 +444,7 @@ class ExtSetUUID(ExtTestCase):
         time_uuid = fi.uuid
 
         # no UUID -> random
-        succ = label_function(self.loop_devs[0], None)
+        succ = uuid_function(self.loop_devs[0], None)
         self.assertTrue(succ)
         fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
@@ -461,19 +461,19 @@ class ExtSetUUID(ExtTestCase):
         """Verify that it is possible to set UUID of an ext2 file system"""
         self._test_ext_set_uuid(mkfs_function=BlockDev.fs_ext2_mkfs,
                                 info_function=BlockDev.fs_ext2_get_info,
-                                label_function=BlockDev.fs_ext2_set_uuid,
+                                uuid_function=BlockDev.fs_ext2_set_uuid,
                                 check_function=BlockDev.fs_ext2_check_uuid)
 
     def test_ext3_set_uuid(self):
         """Verify that it is possible to set UUID of an ext3 file system"""
         self._test_ext_set_uuid(mkfs_function=BlockDev.fs_ext3_mkfs,
                                 info_function=BlockDev.fs_ext3_get_info,
-                                label_function=BlockDev.fs_ext3_set_uuid,
+                                uuid_function=BlockDev.fs_ext3_set_uuid,
                                 check_function=BlockDev.fs_ext3_check_uuid)
 
     def test_ext4_set_uuid(self):
         """Verify that it is possible to set UUID of an ext4 file system"""
         self._test_ext_set_uuid(mkfs_function=BlockDev.fs_ext4_mkfs,
                                 info_function=BlockDev.fs_ext4_get_info,
-                                label_function=BlockDev.fs_ext4_set_uuid,
+                                uuid_function=BlockDev.fs_ext4_set_uuid,
                                 check_function=BlockDev.fs_ext4_check_uuid)

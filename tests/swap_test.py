@@ -149,7 +149,7 @@ class SwapTestCase(SwapTest):
         """Verify that activating swap with a wrong size fails with expected exception"""
 
         # create swap bigger than the device (twice as big in 1024 sectors)
-        ret, out, err = run_command("mkswap -f %s %d" % (self.loop_dev, (self.dev_size * 2) / 1024))
+        ret, out, err = run_command("mkswap -f %s %d" % (self.loop_dev, (self.dev_size * 2) // 1024))
         if ret != 0:
             self.fail("Failed to prepare swap for wrong size test: %s %s" % (out, err))
 

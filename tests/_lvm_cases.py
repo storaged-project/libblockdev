@@ -1347,7 +1347,7 @@ class LvmTestLVs(LvmPVVGLVTestCase):
         self.assertEqual(stats.md_size, 8 * 1024**2)
         self.assertEqual(stats.mode, BlockDev.LVMCacheMode.WRITETHROUGH)
 
-    def test_vgtags(self):
+    def test_lvtags(self):
         """Verify that it's possible to set and get info about LV tags"""
 
         succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
@@ -1618,7 +1618,7 @@ class LvmTestThpool(LvmPVVGthpoolTestCase):
 
         # there should be at least 3 LVs -- testPool, [testPool_tdata], [testPool_tmeta] (plus probably some spare LVs)
         lvs = BlockDev.lvm_lvs("testVG")
-        self.assertGreater(len(lvs), 3)
+        self.assertGreaterEqual(len(lvs), 3)
 
     @tag_test(TestTags.CORE)
     def test_thpoolcreate(self):
@@ -1937,8 +1937,8 @@ class LvmVDOTest(LvmTestCase):
             if "File exists" not in e.message:
                 raise unittest.SkipTest("cannot load VDO kernel module, skipping.")
 
-        if LVM_VERSION < Version("2.3.07"):
-            raise unittest.SkipTest("LVM version 2.3.07 or newer needed for LVM VDO.")
+        if LVM_VERSION < Version("2.03.07"):
+            raise unittest.SkipTest("LVM version 2.03.07 or newer needed for LVM VDO.")
 
         if not shutil.which("vdoformat"):
             raise unittest.SkipTest("vdoformat executable not found in $PATH, skipping.")
