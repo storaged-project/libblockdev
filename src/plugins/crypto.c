@@ -2598,12 +2598,14 @@ BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *device, GError **error) {
     if (ret != 0) {
         /* not a block device, try init_by_name */
         crypt_free (cd);
+        cd = NULL;
         ret = crypt_init_by_name (&cd, device);
     } else {
         ret = crypt_load (cd, CRYPT_LUKS, NULL);
         if (ret != 0) {
             /* not a LUKS device, try init_by_name */
             crypt_free (cd);
+            cd = NULL;
             ret = crypt_init_by_name (&cd, device);
         }
     }
@@ -2751,6 +2753,7 @@ BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **e
     if (ret != 0) {
         /* not a block device, try init_by_name */
         crypt_free (cd);
+        cd = NULL;
         ret = crypt_init_by_name (&cd, device);
     } else {
         ret = crypt_load (cd, CRYPT_LUKS, NULL);
@@ -2759,6 +2762,7 @@ BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **e
             ret = crypt_load (cd, CRYPT_INTEGRITY, NULL);
             if (ret != 0) {
                 crypt_free (cd);
+                cd = NULL;
                 ret = crypt_init_by_name (&cd, device);
             }
         }
@@ -2824,12 +2828,14 @@ BDCryptoLUKSTokenInfo** bd_crypto_luks_token_info (const gchar *device, GError *
     if (ret != 0) {
         /* not a block device, try init_by_name */
         crypt_free (cd);
+        cd = NULL;
         ret = crypt_init_by_name (&cd, device);
     } else {
         ret = crypt_load (cd, CRYPT_LUKS, NULL);
         if (ret != 0) {
             /* not a LUKS device, try init_by_name */
             crypt_free (cd);
+            cd = NULL;
             ret = crypt_init_by_name (&cd, device);
         }
     }
