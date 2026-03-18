@@ -1799,7 +1799,7 @@ static gboolean set_part_type (struct fdisk_context *cxt, gint part_num, const g
  *
  * Returns: whether the name was successfully set or not
  *
- * Tech category: %BD_PART_TECH_MODE_MODIFY_PART + the tech according to the partition table type
+ * Tech category: %BD_PART_TECH_GPT-%BD_PART_TECH_MODE_MODIFY_PART
  */
 gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gchar *name, GError **error) {
     struct fdisk_context *cxt = NULL;

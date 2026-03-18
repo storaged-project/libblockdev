@@ -416,7 +416,7 @@ BDMDDetailData* bd_md_detail (const gchar *raid_spec, GError **error);
  * @uuid: UUID to canonicalize
  * @error: (out) (optional): place to store error (if any)
  *
- * Returns: (transfer full): canonicalized form of @uuid
+ * Returns: (transfer full): canonicalized form of @uuid or %NULL in case of error
  *
  * This function expects a UUID in the form that mdadm returns. The change is as
  * follows: 3386ff85:f5012621:4a435f06:1eb47236 -> 3386ff85-f501-2621-4a43-5f061eb47236
@@ -430,7 +430,7 @@ gchar* bd_md_canonicalize_uuid (const gchar *uuid, GError **error);
  * @uuid: UUID to transform into format used by MD RAID
  * @error: (out) (optional): place to store error (if any)
  *
- * Returns: (transfer full): transformed form of @uuid
+ * Returns: (transfer full): transformed form of @uuid or %NULL in case of error
  *
  * This function expects a UUID in the canonical (traditional format) and
  * returns a UUID in the format used by MD RAID and is thus reverse to

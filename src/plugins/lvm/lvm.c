@@ -2755,7 +2755,7 @@ gboolean bd_lvm_vdo_enable_deduplication (const gchar *vg_name, const gchar *poo
 }
 
 /**
- * bd_lvm_vdo_enable_deduplication:
+ * bd_lvm_vdo_disable_deduplication:
  * @vg_name: name of the VG containing the to-be-changed VDO pool LV
  * @pool_name: name of the VDO pool LV to disable deduplication on
  * @extra: (nullable) (array zero-terminated=1): extra options for the VDO change

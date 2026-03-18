@@ -634,11 +634,12 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
  *                                               uid (gid), if you specify one of
  *                                               these, the function will run in
  *                                               a child process with real user
+ *                                               and/or group ID set to these values.
  * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether @spec was successfully unmounted or not
  *
- * Tech category: %BD_FS_TECH_GENERIC (no mode, ignored)
+ * Tech category: %BD_FS_TECH_MOUNT (no mode, ignored)
  */
 gboolean bd_fs_unmount (const gchar *spec, gboolean lazy, gboolean force, const BDExtraArg **extra, GError **error) {
     uid_t run_as_uid = -1;

@@ -1193,7 +1193,7 @@ gboolean bd_nvme_format (const gchar *device, guint16 lba_data_size, guint16 met
  * The sanitize operation is set to run under the Allow Unrestricted Sanitize Exit
  * mode.
  *
- * Returns: %TRUE if the format command finished successfully, %FALSE otherwise with @error set.
+ * Returns: %TRUE if the sanitize command was successfully submitted, %FALSE otherwise with @error set.
  *
  * Tech category: %BD_NVME_TECH_NVME-%BD_NVME_TECH_MODE_MANAGE
  */

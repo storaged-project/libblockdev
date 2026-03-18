@@ -3185,7 +3185,7 @@ gboolean bd_crypto_keyring_add_key (const gchar *key_desc, const guint8 *key_dat
  * To achieve this, we calculate the chi square value of the first
  * 512 Bytes and treat devices with a chi square value between 136
  * and 426 as candidates for being encrypted.
- * For the reasoning, see: https://tails.boum.org/blueprint/veracrypt/#detection
+ * For the reasoning, see: https://gitlab.tails.boum.org/tails/blueprints/-/wikis/veracrypt/#detecting-veracrypt-volumes
  *
  * Returns: %TRUE if the given @device seems to be encrypted or %FALSE if not or
  * failed to determine (the @error) is populated with the error in such

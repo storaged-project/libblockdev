@@ -122,7 +122,8 @@ BDLoopInfo* bd_loop_info (const gchar *loop, GError **error);
  * @file: path of the backing file to get loop name for
  * @error: (out) (optional): place to store error (if any)
  *
- * Returns: (transfer full): name of the loop device associated with the given @file
+ * Returns: (transfer full): name of the loop device associated with the given
+ * @file or %NULL if failed to determine
  *
  * Tech category: %BD_LOOP_TECH_LOOP-%BD_LOOP_TECH_MODE_QUERY
  */
