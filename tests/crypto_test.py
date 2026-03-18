@@ -1128,6 +1128,10 @@ class CryptoTestInfo(CryptoTestCase):
     def test_luks_info(self):
         """Verify that we can get information about a LUKS device"""
 
+        with self.assertRaisesRegex(GLib.GError, "Failed to initialize device"):
+            # not a LUKS device
+            BlockDev.crypto_luks_info(self.loop_devs[0])
+
         ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
         succ = BlockDev.crypto_luks_format(self.loop_devs[0], "aes-cbc-essiv:sha256", 256, ctx, 0)
         self.assertTrue(succ)
@@ -1430,6 +1434,9 @@ class CryptoTestLUKS2Integrity(CryptoTestCase):
         if not BlockDev.utils_have_kernel_module("dm-integrity"):
             self.skipTest('dm-integrity kernel module not available, skipping.')
 
+        with self.assertRaisesRegex(GLib.GError, "Failed to initialize device"):
+            BlockDev.crypto_integrity_info(self.loop_devs[0])
+
         extra = BlockDev.CryptoLUKSExtra()
         extra.integrity = "hmac(sha256)"
 
@@ -1475,6 +1482,9 @@ class CryptoTestLUKSToken(CryptoTestCase):
     @tag_test(TestTags.SLOW)
     def test_luks2_token_info(self):
         """Verify that we can get information about LUKS2 tokens"""
+
+        with self.assertRaisesRegex(GLib.GError, "Failed to initialize device"):
+            BlockDev.crypto_luks_token_info(self.loop_devs[0])
 
         # the simple case with password
         self._luks2_format(self.loop_devs[0], PASSWD, None, fast_pbkdf=True)
