@@ -593,7 +593,7 @@ BDNVDIMMNamespaceInfo** bd_nvdimm_list_namespaces (const gchar *bus_name, const 
 /**
  * bd_nvdimm_namespace_reconfigure:
  * @namespace: name of the namespace to reconfigure
- * @mode: mode type to set
+ * @mode: mode type to set (raw/sector/memory/dax/fsdax/devdax)
  * @force: whether to use force to reconfigure an active namespace
  * @error: (out) (optional): place to store error if any
  * @extra: (nullable) (array zero-terminated=1): extra options for the creation (right now

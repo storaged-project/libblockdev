@@ -855,8 +855,8 @@ BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_passphrase (const guint8 *
 /**
  * bd_crypto_keyslot_context_new_keyfile:
  * @keyfile: a key file for the new context
- * @keyfile_offset: number of bytes to read from @keyfile or 0 for unlimited
- * @key_size: number of bytes to skip at start of @keyfile
+ * @keyfile_offset: number of bytes to skip at start of @keyfile
+ * @key_size: number of bytes to read from @keyfile or 0 for unlimited
  * @error: (out) (optional): place to store error (if any)
  *
  * Returns (transfer full): new %BDCryptoKeyslotContext initialized by key file or
@@ -1299,7 +1299,7 @@ gboolean bd_crypto_keyring_add_key (const gchar *key_desc, const guint8 *key_dat
  * To achieve this, we calculate the chi square value of the first
  * 512 Bytes and treat devices with a chi square value between 136
  * and 426 as candidates for being encrypted.
- * For the reasoning, see: https://tails.boum.org/blueprint/veracrypt/
+ * For the reasoning, see: https://gitlab.tails.boum.org/tails/blueprints/-/wikis/veracrypt/#detecting-veracrypt-volumes
  *
  * Returns: %TRUE if the given @device seems to be encrypted or %FALSE if not or
  * failed to determine (the @error) is populated with the error in such

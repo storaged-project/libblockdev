@@ -169,7 +169,7 @@ gboolean bd_dm_remove (const gchar *map_name, GError **error) {
  * @error: (out) (optional): place to store error (if any)
  *
  * Returns: map name of the map providing the @dm_node device or %NULL
- * (@error) contains the error in such cases)
+ * (@error) contains the error in such cases
  *
  * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_MODE_QUERY
  */
@@ -208,7 +208,7 @@ gchar* bd_dm_name_from_node (const gchar *dm_node, GError **error) {
  * @error: (out) (optional): place to store error (if any)
  *
  * Returns: DM node name for the @map_name map or %NULL (@error) contains
- * the error in such cases)
+ * the error in such cases
  *
  * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_MODE_QUERY
  */
@@ -306,7 +306,7 @@ gchar* bd_dm_get_subsystem_from_name (const gchar *device_name, GError **error) 
  *
  * Returns: whether the given @map_name exists (and is live if @live_only is
  * %TRUE (and is active if @active_only is %TRUE)). If %FALSE is returned,
- * @error) indicates whether error appeared (non-%NULL) or not (%NULL).
+ * @error indicates whether error appeared (non-%NULL) or not (%NULL).
  *
  * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_MODE_QUERY
  */

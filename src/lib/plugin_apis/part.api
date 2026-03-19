@@ -385,7 +385,7 @@ gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar 
  *
  * Returns: whether the @uuid type was successfully set for @part or not
  *
- * Tech category: %BD_PART_TECH_MODE_MODIFY_PART + the tech according to the partition table type
+ * Tech category: %BD_PART_TECH_GPT-%BD_PART_TECH_MODE_MODIFY_PART
  */
 gboolean bd_part_set_part_uuid (const gchar *disk, const gchar *part, const gchar *uuid, GError **error);
 

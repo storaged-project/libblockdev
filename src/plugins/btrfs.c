@@ -448,7 +448,7 @@ gboolean bd_btrfs_delete_subvolume (const gchar *mountpoint, const gchar *name, 
  * @error: (out) (optional): place to store error (if any)
  *
  * Returns: ID of the @mountpoint volume's default subvolume. If 0,
- * @error) may be set to indicate error
+ *          @error may be set to indicate error
  *
  * Tech category: %BD_BTRFS_TECH_SUBVOL-%BD_BTRFS_TECH_MODE_QUERY
  */

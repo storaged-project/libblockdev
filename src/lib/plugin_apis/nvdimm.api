@@ -214,12 +214,11 @@ BDNVDIMMNamespaceInfo* bd_nvdimm_namespace_info (const gchar *namespace, const B
 /**
  * bd_nvdimm_list_namespaces:
  * @bus: (nullable): return only namespaces on given bus (specified by name),
- *                     %NULL may be specified to return namespaces from all buses
- * @region: (nullable): return only namespaces on given region (specified by regionX name or region id),
+ *                    %NULL may be specified to return namespaces from all buses
+ * @region: (nullable): return only namespaces on given region (specified by 'regionX' name),
  *                        %NULL may be specified to return namespaces from all regions
  * @idle: whether to list idle (not enabled) namespaces too
- * @extra: (nullable) (array zero-terminated=1): extra options for the creation (right now
- *                                                 passed to the 'ndctl' utility)
+ * @extra: (nullable) (array zero-terminated=1): extra options (currently unused)
  * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (array zero-terminated=1): information about the namespaces on @bus and @region or
@@ -234,13 +233,15 @@ BDNVDIMMNamespaceInfo** bd_nvdimm_list_namespaces (const gchar *bus, const gchar
 /**
  * bd_nvdimm_namespace_reconfigure:
  * @namespace: name of the namespace to reconfigure
- * @mode: mode type to set (memory/sector/raw/dax)
+ * @mode: mode type to set (raw/sector/memory/dax/fsdax/devdax)
  * @force: whether to use force to reconfigure an active namespace
  * @error: (out) (optional): place to store error if any
  * @extra: (nullable) (array zero-terminated=1): extra options for the creation (right now
  *                                                 passed to the 'ndctl' utility)
  *
  * Returns: whether @namespace was successfully reconfigured or not
+ *
+ * Tech category: %BD_NVDIMM_TECH_NAMESPACE-%BD_NVDIMM_TECH_MODE_RECONFIGURE
  *
  * Deprecated: 3.1: NVDIMM plugin will be removed in the next major release
  */
