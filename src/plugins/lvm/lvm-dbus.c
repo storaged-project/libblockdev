@@ -198,19 +198,26 @@ gboolean bd_lvm_init (void) {
 void bd_lvm_close (void) {
     GError *error = NULL;
 
-    /* the check() call should create the DBus connection for us, but let's not
-       completely rely on it */
-    if (!g_dbus_connection_flush_sync (bus, NULL, &error)) {
-        bd_utils_log_format (BD_UTILS_LOG_CRIT, "Failed to flush DBus connection: %s", error->message);
-        g_clear_error (&error);
-    }
-    if (!g_dbus_connection_close_sync (bus, NULL, &error)) {
-        bd_utils_log_format (BD_UTILS_LOG_CRIT, "Failed to close DBus connection: %s", error->message);
-        g_clear_error (&error);
+    if (bus) {
+        if (!g_dbus_connection_flush_sync (bus, NULL, &error)) {
+            bd_utils_log_format (BD_UTILS_LOG_CRIT, "Failed to flush DBus connection: %s", error->message);
+            g_clear_error (&error);
+        }
+        if (!g_dbus_connection_close_sync (bus, NULL, &error)) {
+            bd_utils_log_format (BD_UTILS_LOG_CRIT, "Failed to close DBus connection: %s", error->message);
+            g_clear_error (&error);
+        }
+
+        g_clear_object (&bus);
     }
 
     dm_log_with_errno_init (NULL);
     dm_log_init_verbose (0);
+
+    g_atomic_int_set (&avail_deps, 0);
+    g_atomic_int_set (&avail_dbus_deps, 0);
+    g_atomic_int_set (&avail_features, 0);
+    g_atomic_int_set (&avail_module_deps, 0);
 }
 
 /**

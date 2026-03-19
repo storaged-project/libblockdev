@@ -150,7 +150,8 @@ gboolean bd_btrfs_init (void) {
  *
  */
 void bd_btrfs_close (void) {
-    /* nothing to do here */
+    g_atomic_int_set (&avail_deps, 0);
+    g_atomic_int_set (&avail_module_deps, 0);
 }
 
 

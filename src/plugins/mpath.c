@@ -81,7 +81,7 @@ gboolean bd_mpath_init (void) {
  *
  */
 void bd_mpath_close (void) {
-    /* nothing to do here */
+    g_atomic_int_set (&avail_deps, 0);
 }
 
 /**

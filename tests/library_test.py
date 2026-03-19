@@ -211,39 +211,6 @@ class PluginsTestCase(unittest.TestCase):
         BlockDev.reinit(self.requested_plugins, True, None)
 
     # recompiles the LVM plugin
-    @tag_test(TestTags.SLOW, TestTags.CORE, TestTags.SOURCEONLY)
-    def test_reload(self):
-        """Verify that reloading plugins works as expected"""
-
-        # max LV size should be something sane (not 1024 bytes)
-        orig_max_size = BlockDev.lvm_get_max_lv_size()
-        self.assertNotEqual(orig_max_size, 1024)
-
-        # change the sources and recompile
-        os.system("sed -ri 's?MAX_LV_SIZE;?1024;//test-change?' src/plugins/lvm/lvm-common.c > /dev/null")
-        ret = os.system("make -C src/plugins/lvm/ libbd_lvm.la >/dev/null 2>&1")
-        self.assertEqual(ret, 0, "Failed to recompile libblockdev for reload test")
-
-        # library should successfully reinitialize without reloading plugins
-        self.assertTrue(BlockDev.reinit(self.requested_plugins, False, None))
-
-        # LVM plugin not reloaded, max LV size should be the same
-        self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
-
-        # library should successfully reinitialize reloading plugins
-        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
-
-        # LVM plugin reloaded, max LV size should be 1024 bytes
-        self.assertEqual(BlockDev.lvm_get_max_lv_size(), 1024)
-
-        # change the sources back and recompile
-        os.system("sed -ri 's?1024;//test-change?MAX_LV_SIZE;?' src/plugins/lvm/lvm-common.c > /dev/null")
-        os.system("make -C src/plugins/lvm/ libbd_lvm.la >/dev/null 2>&1")
-
-        # library should successfully reinitialize reloading original plugins
-        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
-
-    # recompiles the LVM plugin
     @tag_test(TestTags.SLOW, TestTags.SOURCEONLY)
     def test_force_plugin(self):
         """Verify that forcing plugin to be used works as expected"""

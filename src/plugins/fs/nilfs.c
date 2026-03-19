@@ -28,6 +28,11 @@
 static volatile guint avail_deps = 0;
 static GMutex deps_check_lock;
 
+G_GNUC_INTERNAL
+void _fs_nilfs_reset_avail_deps (void) {
+    g_atomic_int_set (&avail_deps, 0);
+}
+
 #define DEPS_MKFSNILFS2 0
 #define DEPS_MKFSNILFS2_MASK (1 << DEPS_MKFSNILFS2)
 #define DEPS_NILFSTUNE 1

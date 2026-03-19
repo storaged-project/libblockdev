@@ -31,6 +31,11 @@
 #include "smart.h"
 #include "smart-private.h"
 
+G_GNUC_INTERNAL
+void _smart_close_plugin (void) {
+    /* nothing to do here */
+}
+
 /**
  * bd_smart_check_deps:
  *
