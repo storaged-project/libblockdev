@@ -556,7 +556,7 @@ BDNVDIMMNamespaceInfo** bd_nvdimm_list_namespaces (const gchar *bus_name, const 
             continue;
 
         ndctl_region_foreach (bus, region) {
-            if (region_name && g_strcmp0 (bus_name, ndctl_region_get_devname (region)) != 0)
+            if (region_name && g_strcmp0 (region_name, ndctl_region_get_devname (region)) != 0)
                 continue;
 
             ndctl_namespace_foreach (region, ndns) {
