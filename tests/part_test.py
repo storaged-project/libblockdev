@@ -1236,10 +1236,10 @@ class PartSetUUIDCase(PartTestCase):
 
         # we should still get proper data back
         self.assertTrue(ps)
-        self.assertIn(ps.uuid, ("", None))  # no name
+        self.assertIn(ps.uuid, ("", None))  # no uuid
 
         with self.assertRaises(GLib.GError):
-            BlockDev.part_set_part_name (self.loop_devs[0], ps.path, self.test_uuid)
+            BlockDev.part_set_part_uuid (self.loop_devs[0], ps.path, self.test_uuid)
 
 
 class PartSetTypeCase(PartTestCase):
