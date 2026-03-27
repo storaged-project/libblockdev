@@ -1712,8 +1712,10 @@ gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size
 
     fdisk_unref_table (table);
 
-    /* XXX: double free in libfdisk, see https://github.com/karelzak/util-linux/pull/822
-    fdisk_unref_partition (pa); */
+    /* fixed in mass fdisk_ref_partition() in libfdisk 2.35,
+       see https://github.com/karelzak/util-linux/pull/822 */
+    if (fdisk_version >= 2350)
+        fdisk_unref_partition (pa);
     close_context (cxt);
 
     bd_utils_report_finished (progress_id, "Completed");
