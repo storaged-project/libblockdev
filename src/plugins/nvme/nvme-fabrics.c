@@ -272,7 +272,6 @@ gboolean bd_nvme_connect (const gchar *subsysnqn, const gchar *transport, const 
                      "Could not determine HostID value from HostNQN '%s'",
                      host_nqn_val);
         g_free (host_nqn_val);
-        g_free (host_id_val);
         return FALSE;
     }
 
