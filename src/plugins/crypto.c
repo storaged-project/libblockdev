@@ -3287,7 +3287,6 @@ gboolean bd_crypto_tc_open_flags (const gchar *device, const gchar *name, BDCryp
                              "Only 'passphrase' context type is valid for TC open.");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
-        crypt_free (cd);
         return FALSE;
     }
 
