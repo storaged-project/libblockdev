@@ -2561,6 +2561,8 @@ static gboolean get_subsystem_label (const gchar *device, gchar **subsystem, gch
         if (status != 0) {
             g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                          "Failed to get subsystem for the device '%s'", device);
+            g_free (*label);
+            *label = NULL;
             blkid_free_probe (probe);
             synced_close (fd);
             return FALSE;
@@ -3285,7 +3287,6 @@ gboolean bd_crypto_tc_open_flags (const gchar *device, const gchar *name, BDCryp
                              "Only 'passphrase' context type is valid for TC open.");
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
-        crypt_free (cd);
         return FALSE;
     }
 

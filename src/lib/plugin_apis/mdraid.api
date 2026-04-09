@@ -172,6 +172,7 @@ BDMDDetailData* bd_md_detail_data_copy (BDMDDetailData *data) {
     new_data->array_size = data->array_size;
     new_data->use_dev_size = data->use_dev_size;
     new_data->raid_devices = data->raid_devices;
+    new_data->total_devices = data->total_devices;
     new_data->active_devices = data->active_devices;
     new_data->working_devices = data->working_devices;
     new_data->failed_devices = data->failed_devices;

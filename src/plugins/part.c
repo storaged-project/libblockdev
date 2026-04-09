@@ -991,12 +991,11 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
     if (status != 0) {
         g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to get existing partitions on the device: %s", strerror_l (-status, c_locale));
-        fdisk_unref_partition (npa);
         close_context (cxt);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return NULL;
-   }
+    }
 
     npa = fdisk_new_partition ();
     if (!npa) {

@@ -79,7 +79,7 @@ BDNVDIMMNamespaceInfo* bd_nvdimm_namespace_info_copy (BDNVDIMMNamespaceInfo *inf
 
     BDNVDIMMNamespaceInfo *new_info = g_new0 (BDNVDIMMNamespaceInfo, 1);
 
-    new_info->dev = info->dev;
+    new_info->dev = g_strdup (info->dev);
     new_info->mode = info->mode;
     new_info->size = info->size;
     new_info->uuid = g_strdup (info->uuid);

@@ -1916,6 +1916,12 @@ class LvmTestCache(LvmPVVGLVcachePoolTestCase):
         succ = BlockDev.lvm_cache_pool_convert("testVG", "dataLV", "metadataLV", "testCache", None)
         self.assertTrue(succ)
 
+        # verify the cache pool exists under the requested name
+        info = BlockDev.lvm_lvinfo("testVG", "testCache")
+        self.assertIsNotNone(info)
+        self.assertEqual(info.lv_name, "testCache")
+        self.assertIn("C", info.attr)
+
     @tag_test(TestTags.SLOW)
     def test_cache_pool_attach_detach(self):
         """Verify that is it possible to attach and detach a cache pool"""

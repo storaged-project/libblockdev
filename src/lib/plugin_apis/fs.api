@@ -339,6 +339,7 @@ BDFSVfatInfo* bd_fs_vfat_info_copy (BDFSVfatInfo *data) {
     ret->uuid = g_strdup (data->uuid);
     ret->cluster_size = data->cluster_size;
     ret->cluster_count = data->cluster_count;
+    ret->free_cluster_count = data->free_cluster_count;
 
     return ret;
 }

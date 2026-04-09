@@ -708,7 +708,9 @@ BDLVMCacheStats* bd_lvm_cache_stats_copy (BDLVMCacheStats *data) {
  *
  * Frees @data.
  */
-void bd_lvm_cache_stats_free (BDLVMLVdata *data) {
+void bd_lvm_cache_stats_free (BDLVMCacheStats *data) {
+    if (data == NULL)
+        return;
     g_free (data);
 }
 

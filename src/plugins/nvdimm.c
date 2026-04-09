@@ -577,6 +577,7 @@ BDNVDIMMNamespaceInfo** bd_nvdimm_list_namespaces (const gchar *bus_name, const 
     }
 
     if (namespaces->len == 0) {
+        g_ptr_array_free (namespaces, TRUE);
         ndctl_unref (ctx);
         return NULL;
     }

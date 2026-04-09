@@ -172,7 +172,7 @@ gboolean bd_btrfs_is_tech_avail (BDBtrfsTech tech G_GNUC_UNUSED, guint64 mode G_
 }
 
 static BDBtrfsDeviceInfo* get_device_info_from_match (GMatchInfo *match_info) {
-    BDBtrfsDeviceInfo *ret = g_new(BDBtrfsDeviceInfo, 1);
+    BDBtrfsDeviceInfo *ret = g_new0(BDBtrfsDeviceInfo, 1);
     gchar *item = NULL;
     BSSize size = NULL;
     BSError *error = NULL;
@@ -213,7 +213,7 @@ static BDBtrfsDeviceInfo* get_device_info_from_match (GMatchInfo *match_info) {
 }
 
 static BDBtrfsSubvolumeInfo* get_subvolume_info_from_match (GMatchInfo *match_info) {
-    BDBtrfsSubvolumeInfo *ret = g_new(BDBtrfsSubvolumeInfo, 1);
+    BDBtrfsSubvolumeInfo *ret = g_new0(BDBtrfsSubvolumeInfo, 1);
     gchar *item = NULL;
 
     item = g_match_info_fetch_named (match_info, "id");
@@ -230,7 +230,7 @@ static BDBtrfsSubvolumeInfo* get_subvolume_info_from_match (GMatchInfo *match_in
 }
 
 static BDBtrfsFilesystemInfo* get_filesystem_info_from_match (GMatchInfo *match_info) {
-    BDBtrfsFilesystemInfo *ret = g_new(BDBtrfsFilesystemInfo, 1);
+    BDBtrfsFilesystemInfo *ret = g_new0(BDBtrfsFilesystemInfo, 1);
     gchar *item = NULL;
     BSSize size = NULL;
     BSError *error = NULL;
