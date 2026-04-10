@@ -3664,7 +3664,7 @@ gboolean bd_lvm_thpool_convert (const gchar *vg_name, const gchar *data_lv, cons
 
     ret = call_lvm_obj_method_sync (vg_name, VG_INTF, "CreateThinPool", params, NULL, extra, TRUE, error);
     if (ret && name)
-        bd_lvm_lvrename (vg_name, data_lv, name, NULL, error);
+        ret = bd_lvm_lvrename (vg_name, data_lv, name, NULL, error);
     return ret;
 }
 
@@ -3715,7 +3715,7 @@ gboolean bd_lvm_cache_pool_convert (const gchar *vg_name, const gchar *data_lv, 
     ret = call_lvm_obj_method_sync (vg_name, VG_INTF, "CreateCachePool", params, NULL, extra, TRUE, error);
 
     if (ret && name)
-        bd_lvm_lvrename (vg_name, data_lv, name, NULL, error);
+        ret = bd_lvm_lvrename (vg_name, data_lv, name, NULL, error);
 
     return ret;
 }
