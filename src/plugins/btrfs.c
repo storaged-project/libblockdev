@@ -20,6 +20,10 @@
 #include <glib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/ioctl.h>
+#include <linux/btrfs.h>
 #include <blockdev/utils.h>
 #include <bs_size.h>
 
@@ -109,6 +113,31 @@ void bd_btrfs_filesystem_info_free (BDBtrfsFilesystemInfo *info) {
     g_free (info->label);
     g_free (info->uuid);
     g_free (info);
+}
+
+BDBtrfsDeviceStats* bd_btrfs_device_stats_copy (BDBtrfsDeviceStats *stats) {
+    if (stats == NULL)
+        return NULL;
+
+    BDBtrfsDeviceStats *new_stats = g_new0 (BDBtrfsDeviceStats, 1);
+
+    new_stats->id = stats->id;
+    new_stats->path = g_strdup (stats->path);
+    new_stats->write_io_errs = stats->write_io_errs;
+    new_stats->read_io_errs = stats->read_io_errs;
+    new_stats->flush_io_errs = stats->flush_io_errs;
+    new_stats->corruption_errs = stats->corruption_errs;
+    new_stats->generation_errs = stats->generation_errs;
+
+    return new_stats;
+}
+
+void bd_btrfs_device_stats_free (BDBtrfsDeviceStats *stats) {
+    if (stats == NULL)
+        return;
+
+    g_free (stats->path);
+    g_free (stats);
 }
 
 static volatile guint avail_deps = 0;
@@ -925,4 +954,97 @@ gboolean bd_btrfs_change_label (const gchar *mountpoint, const gchar *label, GEr
         return FALSE;
 
     return bd_utils_exec_and_report_error (argv, NULL, error);
+}
+
+/**
+ * bd_btrfs_device_stats:
+ * @mountpoint: a mountpoint of the queried btrfs volume
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: (array zero-terminated=1): device stats for each device that is part of the btrfs volume
+ * mounted at @mountpoint or %NULL in case of error
+ *
+ * Tech category: %BD_BTRFS_TECH_MULTI_DEV-%BD_BTRFS_TECH_MODE_QUERY
+ */
+BDBtrfsDeviceStats** bd_btrfs_device_stats (const gchar *mountpoint, GError **error) {
+    int fd = -1;
+    struct btrfs_ioctl_fs_info_args fs_info;
+    struct btrfs_ioctl_dev_info_args dev_info;
+    struct btrfs_ioctl_get_dev_stats dev_stats;
+    GPtrArray *stats_array = NULL;
+    BDBtrfsDeviceStats *stats = NULL;
+
+    if (!check_module_deps (&avail_module_deps, MODULE_DEPS_BTRFS_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error))
+        return NULL;
+
+    fd = open (mountpoint, O_RDONLY);
+    if (fd < 0) {
+        g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_DEVICE,
+                     "Failed to open mountpoint %s: %s", mountpoint, g_strerror (errno));
+        return NULL;
+    }
+
+    memset (&fs_info, 0, sizeof (fs_info));
+    if (ioctl (fd, BTRFS_IOC_FS_INFO, &fs_info) < 0) {
+        g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_DEVICE,
+                     "Failed to get filesystem info for %s: %s", mountpoint, g_strerror (errno));
+        close (fd);
+        return NULL;
+    }
+
+    stats_array = g_ptr_array_new_with_free_func ((GDestroyNotify) bd_btrfs_device_stats_free);
+
+    for (guint64 devid = 1; devid <= fs_info.max_id; devid++) {
+        memset (&dev_info, 0, sizeof (dev_info));
+        dev_info.devid = devid;
+        if (ioctl (fd, BTRFS_IOC_DEV_INFO, &dev_info) < 0) {
+            if (errno == ENODEV)
+                continue;
+            g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_DEVICE,
+                         "Failed to get device info for devid %" G_GUINT64_FORMAT " on %s: %s",
+                         devid, mountpoint, g_strerror (errno));
+            g_ptr_array_free (stats_array, TRUE);
+            close (fd);
+            return NULL;
+        }
+
+        memset (&dev_stats, 0, sizeof (dev_stats));
+        dev_stats.devid = devid;
+        dev_stats.nr_items = BTRFS_DEV_STAT_VALUES_MAX;
+        dev_stats.flags = 0;
+        if (ioctl (fd, BTRFS_IOC_GET_DEV_STATS, &dev_stats) < 0) {
+            g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_DEVICE,
+                         "Failed to get device stats for devid %" G_GUINT64_FORMAT " on %s: %s",
+                         devid, mountpoint, g_strerror (errno));
+            g_ptr_array_free (stats_array, TRUE);
+            close (fd);
+            return NULL;
+        }
+
+        stats = g_new0 (BDBtrfsDeviceStats, 1);
+        stats->id = devid;
+        stats->path = g_strdup ((const gchar *) dev_info.path);
+        stats->write_io_errs = dev_stats.values[BTRFS_DEV_STAT_WRITE_ERRS];
+        stats->read_io_errs = dev_stats.values[BTRFS_DEV_STAT_READ_ERRS];
+        stats->flush_io_errs = dev_stats.values[BTRFS_DEV_STAT_FLUSH_ERRS];
+        stats->corruption_errs = dev_stats.values[BTRFS_DEV_STAT_CORRUPTION_ERRS];
+        stats->generation_errs = dev_stats.values[BTRFS_DEV_STAT_GENERATION_ERRS];
+
+        g_ptr_array_add (stats_array, stats);
+
+        if (stats_array->len == fs_info.num_devices)
+            break;
+    }
+
+    close (fd);
+
+    if (stats_array->len == 0) {
+        g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_DEVICE,
+                     "No devices found for %s", mountpoint);
+        g_ptr_array_free (stats_array, TRUE);
+        return NULL;
+    }
+
+    g_ptr_array_add (stats_array, NULL);
+    return (BDBtrfsDeviceStats **) g_ptr_array_free (stats_array, FALSE);
 }
