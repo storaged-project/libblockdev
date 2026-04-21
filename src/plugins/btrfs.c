@@ -116,11 +116,14 @@ static volatile guint avail_module_deps = 0;
 static GMutex deps_check_lock;
 
 #define DEPS_BTRFS 0
+#define DEPS_BTRFS_612 1
 #define DEPS_BTRFS_MASK (1 << DEPS_BTRFS)
-#define DEPS_LAST 1
+#define DEPS_BTRFS_612_MASK (1 << DEPS_BTRFS_612)
+#define DEPS_LAST 2
 
 static const UtilDep deps[DEPS_LAST] = {
     {"btrfs", BTRFS_MIN_VERSION, NULL, "[Bb]trfs.* v([\\d\\.]+)"},
+    {"btrfs", "6.12", NULL, "[Bb]trfs.* v([\\d\\.]+)"},
 };
 
 #define MODULE_DEPS_BTRFS 0
@@ -165,10 +168,16 @@ void bd_btrfs_close (void) {
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
  */
-gboolean bd_btrfs_is_tech_avail (BDBtrfsTech tech G_GNUC_UNUSED, guint64 mode G_GNUC_UNUSED, GError **error) {
+gboolean bd_btrfs_is_tech_avail (BDBtrfsTech tech, guint64 mode, GError **error) {
     /* all tech-mode combinations are supported by this implementation of the plugin */
-    return check_deps (&avail_deps, DEPS_BTRFS_MASK, deps, DEPS_LAST, &deps_check_lock, error) &&
-           check_module_deps (&avail_module_deps, MODULE_DEPS_BTRFS_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error);
+    if (!check_deps (&avail_deps, DEPS_BTRFS_MASK, deps, DEPS_LAST, &deps_check_lock, error) ||
+        !check_module_deps (&avail_module_deps, MODULE_DEPS_BTRFS_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
+    if (tech == BD_BTRFS_TECH_SUBVOL && (mode & BD_BTRFS_TECH_MODE_DELETE_RECURSIVE))
+        return check_deps (&avail_deps, DEPS_BTRFS_612_MASK, deps, DEPS_LAST, &deps_check_lock, error);
+
+    return TRUE;
 }
 
 static BDBtrfsDeviceInfo* get_device_info_from_match (GMatchInfo *match_info) {
@@ -423,19 +432,51 @@ gboolean bd_btrfs_create_subvolume (const gchar *mountpoint, const gchar *name, 
  * Tech category: %BD_BTRFS_TECH_SUBVOL-%BD_BTRFS_TECH_MODE_DELETE
  */
 gboolean bd_btrfs_delete_subvolume (const gchar *mountpoint, const gchar *name, const BDExtraArg **extra, GError **error) {
+    return bd_btrfs_delete_subvolume_recursive (mountpoint, name, FALSE, extra, error);
+}
+
+/**
+ * bd_btrfs_delete_subvolume_recursive:
+ * @mountpoint: mountpoint of the btrfs volume to delete subvolume from
+ * @name: name of the subvolume
+ * @recursive: whether to delete child subvolumes recursively
+ * @extra: (nullable) (array zero-terminated=1): extra options for the subvolume deletion (right now
+ *                                               passed to the 'btrfs' utility)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether the @mountpoint/@name subvolume was successfully deleted or not
+ *
+ * If @recursive is %TRUE, all child subvolumes will be deleted before deleting
+ * the subvolume itself. This requires btrfs-progs >= 6.12.
+ *
+ * Tech category: %BD_BTRFS_TECH_SUBVOL-%BD_BTRFS_TECH_MODE_DELETE if @recursive is %FALSE,
+ *                %BD_BTRFS_TECH_SUBVOL-%BD_BTRFS_TECH_MODE_DELETE_RECURSIVE if @recursive is %TRUE
+ */
+gboolean bd_btrfs_delete_subvolume_recursive (const gchar *mountpoint, const gchar *name, gboolean recursive, const BDExtraArg **extra, GError **error) {
     gchar *path = NULL;
     gboolean success = FALSE;
-    const gchar *argv[5] = {"btrfs", "subvol", "delete", NULL, NULL};
+    const gchar *argv[6] = {"btrfs", "subvol", "delete", NULL, NULL, NULL};
 
     if (!check_deps (&avail_deps, DEPS_BTRFS_MASK, deps, DEPS_LAST, &deps_check_lock, error) ||
         !check_module_deps (&avail_module_deps, MODULE_DEPS_BTRFS_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error))
         return FALSE;
 
+    if (recursive) {
+        if (!check_deps (&avail_deps, DEPS_BTRFS_612_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+            return FALSE;
+    }
+
     if (g_str_has_suffix (mountpoint, "/"))
         path = g_strdup_printf ("%s%s", mountpoint, name);
     else
         path = g_strdup_printf ("%s/%s", mountpoint, name);
-    argv[3] = path;
+
+    if (recursive) {
+        argv[3] = "--recursive";
+        argv[4] = path;
+    } else {
+        argv[3] = path;
+    }
 
     success = bd_utils_exec_and_report_error (argv, extra, error);
     g_free (path);

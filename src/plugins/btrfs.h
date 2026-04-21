@@ -54,10 +54,11 @@ typedef enum {
 } BDBtrfsTech;
 
 typedef enum {
-    BD_BTRFS_TECH_MODE_CREATE = 1 << 0,
-    BD_BTRFS_TECH_MODE_DELETE = 1 << 1,
-    BD_BTRFS_TECH_MODE_MODIFY = 1 << 2,
-    BD_BTRFS_TECH_MODE_QUERY  = 1 << 3,
+    BD_BTRFS_TECH_MODE_CREATE           = 1 << 0,
+    BD_BTRFS_TECH_MODE_DELETE           = 1 << 1,
+    BD_BTRFS_TECH_MODE_MODIFY           = 1 << 2,
+    BD_BTRFS_TECH_MODE_QUERY            = 1 << 3,
+    BD_BTRFS_TECH_MODE_DELETE_RECURSIVE = 1 << 4,
 } BDBtrfsTechMode;
 
 /*
@@ -78,6 +79,7 @@ gboolean bd_btrfs_add_device (const gchar *mountpoint, const gchar *device, cons
 gboolean bd_btrfs_remove_device (const gchar *mountpoint, const gchar *device, const BDExtraArg **extra, GError **error);
 gboolean bd_btrfs_create_subvolume (const gchar *mountpoint, const gchar *name, const BDExtraArg **extra, GError **error);
 gboolean bd_btrfs_delete_subvolume (const gchar *mountpoint, const gchar *name, const BDExtraArg **extra, GError **error);
+gboolean bd_btrfs_delete_subvolume_recursive (const gchar *mountpoint, const gchar *name, gboolean recursive, const BDExtraArg **extra, GError **error);
 guint64 bd_btrfs_get_default_subvolume_id (const gchar *mountpoint, GError **error);
 gboolean bd_btrfs_set_default_subvolume (const gchar *mountpoint, guint64 subvol_id, const BDExtraArg **extra, GError **error);
 gboolean bd_btrfs_create_snapshot (const gchar *source, const gchar *dest, gboolean ro, const BDExtraArg **extra, GError **error);
