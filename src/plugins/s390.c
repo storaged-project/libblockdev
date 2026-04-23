@@ -714,8 +714,7 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
 }
 
 /**
- * bd_s390_zfcp_scsi_offline
- *
+ * bd_s390_zfcp_scsi_offline:
  * @devno: zfcp device number
  * @wwpn: zfcp WWPN (World Wide Port Number)
  * @lun: zfcp LUN (Logical Unit Number)

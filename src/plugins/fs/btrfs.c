@@ -86,6 +86,7 @@ bd_fs_btrfs_is_tech_avail (BDFSTech tech G_GNUC_UNUSED, guint64 mode, GError **e
 
 /**
  * bd_fs_btrfs_info_copy: (skip)
+ * @data: (nullable): %BDFSBtrfsInfo to copy
  *
  * Creates a new copy of @data.
  */
@@ -105,6 +106,7 @@ BDFSBtrfsInfo* bd_fs_btrfs_info_copy (BDFSBtrfsInfo *data) {
 
 /**
  * bd_fs_btrfs_info_free: (skip)
+ * @data: (nullable): %BDFSBtrfsInfo to free
  *
  * Frees @data.
  */

@@ -518,10 +518,10 @@ BDNVDIMMNamespaceInfo* bd_nvdimm_namespace_info (const gchar *namespace, const B
 
 /**
  * bd_nvdimm_list_namespaces:
- * @bus_name: (nullable): return only namespaces on given bus (specified by name),
- *                          %NULL may be specified to return namespaces from all buses
- * @region_name: (nullable): return only namespaces on given region (specified by 'regionX' name),
- *                             %NULL may be specified to return namespaces from all regions
+ * @bus: (nullable): return only namespaces on given bus (specified by name),
+ *                    %NULL may be specified to return namespaces from all buses
+ * @region: (nullable): return only namespaces on given region (specified by 'regionX' name),
+ *                       %NULL may be specified to return namespaces from all regions
  * @idle: whether to list idle (not enabled) namespaces too
  * @extra: (nullable) (array zero-terminated=1): extra options (currently unused)
  * @error: (out) (optional): place to store error (if any)

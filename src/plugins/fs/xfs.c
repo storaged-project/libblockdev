@@ -95,6 +95,7 @@ bd_fs_xfs_is_tech_avail (BDFSTech tech G_GNUC_UNUSED, guint64 mode, GError **err
 
 /**
  * bd_fs_xfs_info_copy: (skip)
+ * @data: (nullable): %BDFSXfsInfo to copy
  *
  * Creates a new copy of @data.
  */
@@ -114,6 +115,7 @@ BDFSXfsInfo* bd_fs_xfs_info_copy (BDFSXfsInfo *data) {
 
 /**
  * bd_fs_xfs_info_free: (skip)
+ * @data: (nullable): %BDFSXfsInfo to free
  *
  * Frees @data.
  */

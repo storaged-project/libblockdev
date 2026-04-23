@@ -99,6 +99,7 @@ bd_fs_udf_is_tech_avail (BDFSTech tech G_GNUC_UNUSED, guint64 mode, GError **err
 
 /**
  * bd_fs_udf_info_copy: (skip)
+ * @data: (nullable): %BDFSUdfInfo to copy
  *
  * Creates a new copy of @data.
  */
@@ -122,6 +123,7 @@ BDFSUdfInfo* bd_fs_udf_info_copy (BDFSUdfInfo *data) {
 
 /**
  * bd_fs_udf_info_free: (skip)
+ * @data: (nullable): %BDFSUdfInfo to free
  *
  * Frees @data.
  */

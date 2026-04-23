@@ -173,6 +173,7 @@ bd_fs_ext_is_tech_avail (BDFSTech tech G_GNUC_UNUSED, guint64 mode, GError **err
 
 /**
  * bd_fs_ext2_info_copy: (skip)
+ * @data: (nullable): %BDFSExt2Info to copy
  *
  * Creates a new copy of @data.
  */
@@ -194,6 +195,7 @@ BDFSExt2Info* bd_fs_ext2_info_copy (BDFSExt2Info *data) {
 
 /**
  * bd_fs_ext3_info_copy: (skip)
+ * @data: (nullable): %BDFSExt3Info to copy
  *
  * Creates a new copy of @data.
  */
@@ -203,6 +205,7 @@ BDFSExt3Info* bd_fs_ext3_info_copy (BDFSExt3Info *data) {
 
 /**
  * bd_fs_ext4_info_copy: (skip)
+ * @data: (nullable): %BDFSExt4Info to copy
  *
  * Creates a new copy of @data.
  */
@@ -212,6 +215,7 @@ BDFSExt4Info* bd_fs_ext4_info_copy (BDFSExt4Info *data) {
 
 /**
  * bd_fs_ext2_info_free: (skip)
+ * @data: (nullable): %BDFSExt2Info to free
  *
  * Frees @data.
  */
@@ -227,6 +231,7 @@ void bd_fs_ext2_info_free (BDFSExt2Info *data) {
 
 /**
  * bd_fs_ext3_info_free: (skip)
+ * @data: (nullable): %BDFSExt3Info to free
  *
  * Frees @data.
  */
@@ -236,6 +241,7 @@ void bd_fs_ext3_info_free (BDFSExt3Info *data) {
 
 /**
  * bd_fs_ext4_info_free: (skip)
+ * @data: (nullable): %BDFSExt4Info to free
  *
  * Frees @data.
  */

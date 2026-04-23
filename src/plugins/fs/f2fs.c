@@ -145,6 +145,7 @@ bd_fs_f2fs_is_tech_avail (BDFSTech tech G_GNUC_UNUSED, guint64 mode, GError **er
 
 /**
  * bd_fs_f2fs_info_copy: (skip)
+ * @data: (nullable): %BDFSF2FSInfo to copy
  *
  * Creates a new copy of @data.
  */
@@ -165,6 +166,7 @@ BDFSF2FSInfo* bd_fs_f2fs_info_copy (BDFSF2FSInfo *data) {
 
 /**
  * bd_fs_f2fs_info_free: (skip)
+ * @data: (nullable): %BDFSF2FSInfo to free
  *
  * Frees @data.
  */
