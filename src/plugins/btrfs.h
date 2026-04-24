@@ -35,6 +35,19 @@ typedef struct BDBtrfsSubvolumeInfo {
 void bd_btrfs_subvolume_info_free (BDBtrfsSubvolumeInfo *info);
 BDBtrfsSubvolumeInfo* bd_btrfs_subvolume_info_copy (BDBtrfsSubvolumeInfo *info);
 
+typedef struct BDBtrfsDeviceStats {
+    guint64 id;
+    gchar *path;
+    guint64 write_io_errs;
+    guint64 read_io_errs;
+    guint64 flush_io_errs;
+    guint64 corruption_errs;
+    guint64 generation_errs;
+} BDBtrfsDeviceStats;
+
+void bd_btrfs_device_stats_free (BDBtrfsDeviceStats *stats);
+BDBtrfsDeviceStats* bd_btrfs_device_stats_copy (BDBtrfsDeviceStats *stats);
+
 typedef struct BDBtrfsFilesystemInfo {
     gchar *label;
     gchar *uuid;
@@ -92,5 +105,7 @@ gboolean bd_btrfs_resize (const gchar *mountpoint, guint64 size, const BDExtraAr
 gboolean bd_btrfs_check (const gchar *device, const BDExtraArg **extra, GError **error);
 gboolean bd_btrfs_repair (const gchar *device, const BDExtraArg **extra, GError **error);
 gboolean bd_btrfs_change_label (const gchar *mountpoint, const gchar *label, GError **error);
+
+BDBtrfsDeviceStats** bd_btrfs_device_stats (const gchar *mountpoint, GError **error);
 
 #endif  /* BD_BTRFS */

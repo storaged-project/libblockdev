@@ -208,6 +208,78 @@ GType bd_btrfs_filesystem_info_get_type () {
     return type;
 }
 
+#define BD_BTRFS_TYPE_DEVICE_STATS (bd_btrfs_device_stats_get_type ())
+GType bd_btrfs_device_stats_get_type();
+
+/**
+ * BDBtrfsDeviceStats:
+ * @id: ID of the device
+ * @path: path of the device
+ * @write_io_errs: number of write I/O errors
+ * @read_io_errs: number of read I/O errors
+ * @flush_io_errs: number of flush I/O errors
+ * @corruption_errs: number of corruption errors
+ * @generation_errs: number of generation errors
+ */
+typedef struct BDBtrfsDeviceStats {
+    guint64 id;
+    gchar *path;
+    guint64 write_io_errs;
+    guint64 read_io_errs;
+    guint64 flush_io_errs;
+    guint64 corruption_errs;
+    guint64 generation_errs;
+} BDBtrfsDeviceStats;
+
+/**
+ * bd_btrfs_device_stats_copy: (skip)
+ * @stats: (nullable): %BDBtrfsDeviceStats to copy
+ *
+ * Creates a new copy of @stats.
+ */
+BDBtrfsDeviceStats* bd_btrfs_device_stats_copy (BDBtrfsDeviceStats *stats) {
+    if (stats == NULL)
+        return NULL;
+
+    BDBtrfsDeviceStats *new_stats = g_new0 (BDBtrfsDeviceStats, 1);
+
+    new_stats->id = stats->id;
+    new_stats->path = g_strdup (stats->path);
+    new_stats->write_io_errs = stats->write_io_errs;
+    new_stats->read_io_errs = stats->read_io_errs;
+    new_stats->flush_io_errs = stats->flush_io_errs;
+    new_stats->corruption_errs = stats->corruption_errs;
+    new_stats->generation_errs = stats->generation_errs;
+
+    return new_stats;
+}
+
+/**
+ * bd_btrfs_device_stats_free: (skip)
+ * @stats: (nullable): %BDBtrfsDeviceStats to free
+ *
+ * Frees @stats.
+ */
+void bd_btrfs_device_stats_free (BDBtrfsDeviceStats *stats) {
+    if (stats == NULL)
+        return;
+
+    g_free (stats->path);
+    g_free (stats);
+}
+
+GType bd_btrfs_device_stats_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDBtrfsDeviceStats",
+                                            (GBoxedCopyFunc) bd_btrfs_device_stats_copy,
+                                            (GBoxedFreeFunc) bd_btrfs_device_stats_free);
+    }
+
+    return type;
+}
+
 typedef enum {
     BD_BTRFS_TECH_FS = 0,
     BD_BTRFS_TECH_MULTI_DEV,
@@ -480,5 +552,17 @@ gboolean bd_btrfs_repair (const gchar *device, const BDExtraArg **extra, GError 
  * Tech category: %BD_BTRFS_TECH_FS-%BD_BTRFS_TECH_MODE_MODIFY
  */
 gboolean bd_btrfs_change_label (const gchar *mountpoint, const gchar *label, GError **error);
+
+/**
+ * bd_btrfs_device_stats:
+ * @mountpoint: a mountpoint of the queried btrfs volume
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: (array zero-terminated=1): device stats for each device that is part of the btrfs volume
+ * mounted at @mountpoint or %NULL in case of error
+ *
+ * Tech category: %BD_BTRFS_TECH_MULTI_DEV-%BD_BTRFS_TECH_MODE_QUERY
+ */
+BDBtrfsDeviceStats** bd_btrfs_device_stats (const gchar *mountpoint, GError **error);
 
 #endif  /* BD_BTRFS_API */

@@ -29,6 +29,9 @@ bd_btrfs_subvolume_info_copy
 BDBtrfsFilesystemInfo
 bd_btrfs_filesystem_info_free
 bd_btrfs_filesystem_info_copy
+BDBtrfsDeviceStats
+bd_btrfs_device_stats_free
+bd_btrfs_device_stats_copy
 bd_btrfs_create_volume
 bd_btrfs_add_device
 bd_btrfs_remove_device
@@ -46,6 +49,7 @@ bd_btrfs_resize
 bd_btrfs_check
 bd_btrfs_repair
 bd_btrfs_change_label
+bd_btrfs_device_stats
 BDBtrfsTech
 BDBtrfsTechMode
 bd_btrfs_is_tech_avail

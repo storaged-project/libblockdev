@@ -461,6 +461,29 @@ class BtrfsTestFilesystemInfoNoLabel(BtrfsTestCase):
         self.assertEqual(info.num_devices, 1)
         self.assertGreaterEqual(info.used, 0)
 
+class BtrfsTestDeviceStats(BtrfsMultiTestCase):
+    def test_device_stats(self):
+        """Verify that it is possible to get device stats for btrfs volume"""
+
+        succ = BlockDev.btrfs_create_volume([self.loop_dev, self.loop_dev2], None, None, None, None)
+        self.assertTrue(succ)
+
+        mount(self.loop_dev, TEST_MNT)
+
+        stats = BlockDev.btrfs_device_stats(TEST_MNT)
+        self.assertEqual(len(stats), 2)
+        self.assertEqual(stats[0].id, 1)
+        self.assertEqual(stats[1].id, 2)
+        self.assertEqual(stats[0].path, self.loop_dev)
+        self.assertEqual(stats[1].path, self.loop_dev2)
+
+        for s in stats:
+            self.assertEqual(s.write_io_errs, 0)
+            self.assertEqual(s.read_io_errs, 0)
+            self.assertEqual(s.flush_io_errs, 0)
+            self.assertEqual(s.corruption_errs, 0)
+            self.assertEqual(s.generation_errs, 0)
+
 class BtrfsTestMkfs(BtrfsTestCase):
     @tag_test(TestTags.CORE)
     def test_mkfs(self):
