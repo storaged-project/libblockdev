@@ -98,6 +98,7 @@ bd_fs_vfat_is_tech_avail (BDFSTech tech G_GNUC_UNUSED, guint64 mode, GError **er
 
 /**
  * bd_fs_vfat_info_copy: (skip)
+ * @data: (nullable): %BDFSVfatInfo to copy
  *
  * Creates a new copy of @data.
  */
@@ -118,6 +119,7 @@ BDFSVfatInfo* bd_fs_vfat_info_copy (BDFSVfatInfo *data) {
 
 /**
  * bd_fs_vfat_info_free: (skip)
+ * @data: (nullable): %BDFSVfatInfo to free
  *
  * Frees @data.
  */

@@ -101,6 +101,7 @@ bd_fs_nilfs2_is_tech_avail (BDFSTech tech G_GNUC_UNUSED, guint64 mode, GError **
 
 /**
  * bd_fs_nilfs2_info_copy: (skip)
+ * @data: (nullable): %BDFSNILFS2Info to copy
  *
  * Creates a new copy of @data.
  */
@@ -121,6 +122,7 @@ BDFSNILFS2Info* bd_fs_nilfs2_info_copy (BDFSNILFS2Info *data) {
 
 /**
  * bd_fs_nilfs2_info_free: (skip)
+ * @data: (nullable): %BDFSNILFS2Info to free
  *
  * Frees @data.
  */

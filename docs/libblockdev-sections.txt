@@ -502,7 +502,6 @@ bd_swap_is_tech_avail
 bd_part_init
 bd_part_close
 BD_PART_ERROR
-BD_PART_TYPE_SPEC
 BDPartAlign
 BDPartSpec
 BDPartType
@@ -518,7 +517,6 @@ bd_part_get_disk_parts
 bd_part_get_part_spec
 bd_part_spec_copy
 bd_part_spec_free
-bd_part_spec_get_type
 bd_part_get_part_table_type_str
 bd_part_get_type_str
 bd_part_get_best_free_region
@@ -848,8 +846,6 @@ BDSmartError
 BDSmartTech
 BDSmartTechMode
 bd_smart_is_tech_avail
-BD_SMART_TYPE_ATA
-BD_SMART_TYPE_ATA_ATTRIBUTE
 BDSmartATAAttribute
 BDSmartATAAttributeUnit
 BDSmartATAAttributeFlag

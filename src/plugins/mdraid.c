@@ -52,6 +52,7 @@ GQuark bd_md_error_quark (void)
 
 /**
  * bd_md_examine_data_copy: (skip)
+ * @data: (nullable): %BDMDExamineData to copy
  *
  * Creates a new copy of @data.
  */
@@ -77,6 +78,7 @@ BDMDExamineData* bd_md_examine_data_copy (BDMDExamineData *data) {
 
 /**
  * bd_md_examine_data_free: (skip)
+ * @data: (nullable): %BDMDExamineData to free
  *
  * Frees @data.
  */
@@ -95,6 +97,7 @@ void bd_md_examine_data_free (BDMDExamineData *data) {
 
 /**
  * bd_md_detail_data_copy: (skip)
+ * @data: (nullable): %BDMDDetailData to copy
  *
  * Creates a new copy of @data.
  */
@@ -125,6 +128,7 @@ BDMDDetailData* bd_md_detail_data_copy (BDMDDetailData *data) {
 
 /**
  * bd_md_detail_data_free: (skip)
+ * @data: (nullable): %BDMDDetailData to free
  *
  * Frees @data.
  */
@@ -1396,7 +1400,7 @@ gchar* bd_md_name_from_node (const gchar *node, GError **error) {
 }
 
 /**
- * bd_md_get_status
+ * bd_md_get_status:
  * @raid_spec: specification of the RAID device (name, node or path) to get status
  * @error: (out) (optional): place to store error (if any)
  *

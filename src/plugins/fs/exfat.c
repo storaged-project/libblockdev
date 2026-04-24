@@ -98,6 +98,7 @@ bd_fs_exfat_is_tech_avail (BDFSTech tech G_GNUC_UNUSED, guint64 mode, GError **e
 
 /**
  * bd_fs_exfat_info_copy: (skip)
+ * @data: (nullable): %BDFSExfatInfo to copy
  *
  * Creates a new copy of @data.
  */
@@ -118,6 +119,7 @@ BDFSExfatInfo* bd_fs_exfat_info_copy (BDFSExfatInfo *data) {
 
 /**
  * bd_fs_exfat_info_free: (skip)
+ * @data: (nullable): %BDFSExfatInfo to free
  *
  * Frees @data.
  */

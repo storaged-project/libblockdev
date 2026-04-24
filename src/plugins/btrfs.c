@@ -908,8 +908,6 @@ gboolean bd_btrfs_repair (const gchar *device, const BDExtraArg **extra, GError 
  * bd_btrfs_change_label:
  * @mountpoint: a mountpoint of the btrfs filesystem to change label of
  * @label: new label for the filesystem
- * @extra: (nullable) (array zero-terminated=1): extra options for the volume creation (right now
- *                                                 passed to the 'btrfs' utility)
  * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the label of the @mountpoint filesystem was successfully set
