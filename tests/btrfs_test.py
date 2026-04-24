@@ -244,6 +244,41 @@ class BtrfsTestCreateDeleteSubvolume(BtrfsTestCase):
             seen.add(subvol)
             self.assertTrue(subvol.parent_id == BlockDev.BTRFS_MAIN_VOLUME_ID or any(subvol.parent_id == other.id for other in seen))
 
+class BtrfsTestDeleteSubvolumeRecursive(BtrfsTestCase):
+    @tag_test(TestTags.CORE)
+    def test_delete_subvolume_recursive(self):
+        """Verify that it is possible to recursively delete subvolumes"""
+
+        succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None, None)
+        self.assertTrue(succ)
+
+        mount(self.loop_dev, TEST_MNT)
+
+        # create a subvolume with nested child subvolumes
+        succ = BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol1", None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.btrfs_create_subvolume(os.path.join(TEST_MNT, "subvol1"), "subvol1.1", None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.btrfs_create_subvolume(os.path.join(TEST_MNT, "subvol1", "subvol1.1"), "subvol1.1.1", None)
+        self.assertTrue(succ)
+
+        subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
+        self.assertEqual(len(subvols), 3)
+
+        version = self._get_btrfs_version()
+        if version < Version("6.12"):
+            with self.assertRaisesRegex(GLib.GError, "Too low version of btrfs"):
+                BlockDev.btrfs_delete_subvolume_recursive(TEST_MNT, "subvol1", True, None)
+        else:
+            # recursive delete should remove the subvolume and all its children
+            succ = BlockDev.btrfs_delete_subvolume_recursive(TEST_MNT, "subvol1", True, None)
+            self.assertTrue(succ)
+
+            subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
+            self.assertEqual(len(subvols), 0)
+
 class BtrfsTestCreateSnapshot(BtrfsTestCase):
     def test_create_snapshot(self):
         succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None, None)

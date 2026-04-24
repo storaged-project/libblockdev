@@ -34,6 +34,7 @@ bd_btrfs_add_device
 bd_btrfs_remove_device
 bd_btrfs_create_subvolume
 bd_btrfs_delete_subvolume
+bd_btrfs_delete_subvolume_recursive
 bd_btrfs_get_default_subvolume_id
 bd_btrfs_set_default_subvolume
 bd_btrfs_create_snapshot
