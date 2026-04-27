@@ -1,4 +1,227 @@
+Libblockdev 3.5.0
+------------------
+
+New minor release of the libblockdev library with multiple fixes and new features. See below
+for details.
+
+**Notable changes**
+
+- More than hundred fixes for various issues both in code and test suite were found and fixed
+  using Claude AI.
+- Crypto plugin now offers activate functions that accept cryptsetup activation flags.
+- Two new functions added to the btrfs plugin for recursively removing subvolumes and
+  getting btrfs device stats.
+
+**Full list of changes**
+
+Michael Biebl (1):
+- Mark _get_linux_version() as static
+
+Tomas Bzatek (3):
+- nvme: Add bd_nvme_find_namespaces_for_ctrl()
+- nvme: Clarify argument doc strings for bd_nvme_find_ctrls_for_ns()
+- tests: Add tests for bd_nvme_find_namespaces_for_ctrl()
+
+Vojtech Trefny (188):
+- misc: Remove custom Vagrantfile
+- misc: Add some missing dependencies for pgi-docgen
+- fs: Log mount and unmount calls
+- fs: Preserve XFS quota options in temporary mounts
+- crypto: Add a function to check for label and subsystem validity
+- ci: Add a GH action to check for exported private symbols
+- lvm-dbus: Show better error for invalid LVM IDs
+- ci: Do not install DNF5 Python bindings on CentOS/RHEL 10
+- md: Fix getting bitmap location on latest kernels
+- tests: Add a separate simpler MD activation test case
+- tests: Remove some obsolete reasons to skip tests
+- README: Update directions for updating documentation
+- ci: Add configuration for CodeRabbit
+- crypto: Allow using activate flags when opening a device
+- Fix calling md_activate with UUID in MDTestActivateDeactivate
+- Fix typos and grammar in docstrings
+- nvme: Fix typo in BD_NVME_SANITIZE_STATUS_IN_PROG*R*ESS
+- crypto: Show better error when crypt_activate returns ETXTBSY
+- crypto: Fix reading keyfile in bd_crypto_luks_change_key
+- s390: Fix string comparison in bd_s390_zfcp_scsi_offline
+- s390: Remove trailing newlines from values read by getline
+- dm: Use libdevmapper instead of dmsetup to get subsystem from name
+- tests: Various improvements in DM tests
+- dm: Remove root permission check in bd_dm_map_exists
+- tests: Fix typo in test_list_subvolumes_different_mount
+- tests: Add a test case for lvm_pvmove
+- tests: Add a test case for bd_fs_can_set_uuid
+- tests: Fix test case for fs_can_get_info
+- lvm: Fix getting VDO saving percent from LVM DBus API
+- tests: Add tests for BlockDev.get_plugin_name and try_reinit
+- tests: Cover more corner cases in LVM plugins tests
+- lvm: Move bd_lvm_cache_stats to the lvm-common file
+- lvm: Remove EUID check from bd_lvm_cache_stats
+- tests: Test XFS resize with both mounted and unmounted devices
+- tests: Add missing test cases for generic FS set/check label/UUID
+- smart: Fix API for bd_smart_is_tech_avail
+- tests: Add more tests for the utils module
+- tests: Add more tests for the loop plugin
+- tests: Add more tests for the part plugin
+- mpath: Remove EUID check from the mpath plugin functions
+- tests: Add a simple test case for bd_mpath_flush_mpaths
+- smart: Mark bd_smart_check_deps as deprecated
+- docs: Add steps to run coverage with LCOV
+- tests: Add more tests for the crypto plugin
+- Revert "dm: Remove root permission check in bd_dm_map_exists"
+- dm: Fix memory leak in bd_dm_map_exists
+- crypto: Fix memory leak in bd_crypto_luks_info
+- utils: Check if resolved path in bd_utils_resolve_device is device
+- dm: Fail fast when no name/node specified for
+  dm_node_from_name/dm_name_from_node
+- lvm-dbus: bd_lvm_vdo_pool_convert implementation
+- part: Check partition parsed partition type before setting it
+- part: Check whether partition exists before setting GPT attributes
+- lvm-dbus: Validate device/object ID parameters for NULL and empty string
+- loop: Remove the loop device when setting sector size fails
+- fs: Never show progress bar for ntfsresize
+- nvme: Fix loop variable reuse in namespace descriptor iteration
+- s390: Fix fgetc comparison to use character '1' instead of integer 1
+- lvm: Fix next_arg index in bd_lvm_vdo_pool_convert
+- utils: Fix NULL dereference in bd_utils_dbus_service_available
+- fs: Fix g_free(label) to g_free(*label) in get_uuid_label
+- core: Fix bd_ensure_init to check all plugins, not just the last
+- core: Restore stub on dlsym failure in generated plugin loaders
+- fs: Remove mnt_free_fs calls on table-owned fs pointers
+- lvm: Fix FEATURES_WRITECACHE index to distinguish from FEATURES_VDO
+- dm: Remove extraneous device argument in bd_dm_create_linear
+- crypto: Zero sensitive data before freeing in keyslot context
+- crypto: Fix crypt_device leak in bd_crypto_luks_remove_key
+- crypto: Fix key_buf leaks on error paths
+- crypto: Fix strerror_l usage for ioctl error in OPAL support check
+- crypto: Remove stale strerror_l from LUKS label type-check error
+- crypto, part: Call freelocale before clearing c_locale on close
+- core: Fix GKeyFile leak on config load failure
+- core: Free so_name strings before clearing on plugin reload
+- lvm: Fix NULL dereference of error parameter in bd_lvm_pvs
+- lvm: Fix g_prefix_error called on wrong variable in cache_create
+- mdraid: Remove g_hash_table_destroy call on NULL table
+- swap: Fix NULL+1 from strchr in bd_swap_swapstatus
+- dm, mpath: Fix DM task resource leaks on early returns
+- part: Fix type_name leak in get_part_type_guid_and_gpt_flags
+- nvme: Fix fd leak on _nvme_alloc failure in controller info
+- nvme: Fix out-of-bounds read on empty string in set_host_nqn/id
+- utils: Fix GRegex leak in bd_utils_version_cmp error paths
+- utils: Fix GIOChannel leak in bd_utils_echo_str_to_file
+- lvm: Add missing vg_exported field to bd_lvm_vgs query
+- mdraid: Handle failed UUID canonicalization in bd_md_detail
+- mpath: Fix string array leak on error in get_map_deps
+- crypto: Remove incorrect (nullable) annotation from luks_resume context
+- crypto: Call report_finished on wipe success in integrity_format
+- lib: Add bounds checking and fix integer width in plugin operations
+- lvm: Fix sscanf type mismatch with gboolean variable
+- lvm: Use exec_and_report_error in _vgcfgbackup_restore
+- lvm: Fix PV list length truncation in bd_lvm_lvcreate
+- fs: Fix memory leak of intermediate g_autofree value in btrfs_get_info
+- fs: Include colon in ntfsinfo strstr patterns to prevent NULL strchr
+- fs: Fix copy-paste error in bd_fs_mount error message
+- fs: Fix wrong error code when NTFS device is mounted
+- fs: Set error on regex mismatch in btrfs_get_info
+- fs: Use g_new0 for BDFSBtrfsInfo allocation in btrfs_get_info
+- fs: Fix mount cache leak on mnt_table_set_cache failure
+- swap: Fix double report_finished call in swapon/swapoff
+- s390: Fix error message saying "online" in bd_s390_zfcp_offline
+- loop: Fix double /dev/ prefix in autoclear progress message
+- s390: Fix potential NULL dereference of error in bd_s390_zfcp_online
+- part: Fix inconsistent progress tracking in set_part_name/set_part_uuid
+- s390: Fix multiple memory leaks in bd_s390_zfcp_scsi_offline
+- part: Fix partition ID validation
+- Use g_set_error_literal instead of g_set_error where no format specifiers are used
+- crypto: Fix progress reporting in bd_crypto_integrity_open
+- fs: Fix typo in error message in bd_fs_exfat_get_info
+- mpath: Fix error message in bd_mpath_is_mpath_member
+- tests: Use correct mkfs and info function in ExtGetInfo
+- tests: Lower the expected amount of free space in ext filesystems
+- lvm: Fix buffer overrun in _vgcfgbackup_restore
+- lvm-dbus: Fix duplicate feature index for VDO and writecache
+- lvm-dbus: Fix NULL dereferences on failed D-Bus calls
+- lvm: Route pvmove through call_lvm_and_report_progress
+- lvm-dbus: Free and copy data_lvs, metadata_lvs, and segs in LVdata
+- crypto: Add BD_CRYPTO_TECH_MODE_MODIFY to LUKS supported modes
+- fs: Guard against division by zero in f2fs and xfs resize
+- dm: Move sys_path construction after NULL check in bd_dm_name_from_node
+- python: Fix exact exception type matching in ErrorProxy
+- crypto: Check ioctl return value when getting entropy level
+- utils: Fix memory leak of args in exec error paths
+- utils: Check WIFEXITED before calling WEXITSTATUS in exec
+- fs: Close pipe fds on fork failure in run_as_user
+- utils: Close fds and reap child on stdin write failure
+- lvm: Copy missing fields in pvdata and vgdata copy functions
+- lvm-dbus: Fix multiple memory leaks
+- tests: Fix device path check in clean_scsi_debug
+- s390: Close file descriptor on fputs failure in bd_s390_zfcp_offline
+- part: Add lower bound check in get_part_num backward scan
+- blockdev: Use zero-initializer for plugins_sonames array
+- crypto: Add missing crypt_free(cd) on error paths
+- lvm-dbus: Add NULL checks after get_object_property in get_lv_data_from_props
+- nvdimm: Add missing ndctl_unref on error paths
+- fs: Remove unreachable code in bd_fs_unmount and bd_fs_mount
+- lvm: Move data copy and free functions to lvm-common.c
+- tests: Remove leftover pdb.set_trace() debugger breakpoint
+- tests: Fix swapped return values in _print_skip_message
+- tests: Fix LvmTestLVcreateType classes inheriting wrong base class
+- tests: Fix wrong variable in _get_lio_dev_path retry call
+- tests: Fix _clean_up iterating range(num_devices) instead of actual list
+- tests: Fix hardcoded ext4_get_info in parameterized _test_ext_get_info
+- tests: Fix duplicate ONLINE_GROW assertion in BtrfsTestFeatures
+- tests: Replace deprecated locale.getdefaultlocale()
+- tests: Fix incorrect locale string format in test_non_en_init
+- tests: Fix unescaped dot in regex for targetcli output
+- tests: Rename test_vgtags to test_lvtags in LvmTestLVs
+- tests: Fix assertGreater to assertGreaterEqual in test_lvs_all
+- tests: Fix copy-paste method name test_vfat_features in NILFS2TestFeatures
+- tests: Use integer division where values are passed to C functions
+- tests: Check exFAT availability before creating LIO devices
+- tests: Fix wrong variable in partition start calculation
+- tests: Fix copy-paste sparse file name "crypto_test" in fs_test.py
+- tests: Rename label_function parameter to uuid_function in ExtSetUUID
+- tests: Rename test_luks2_integrity to test_luks2_token_info
+- tests: Fix various comments, docstrings, and typos
+- tests: Remove unused imports
+- tests: Fix cleanup using device name without /dev/ prefix in mount_test
+- tests: Use created LIO device instead of hardcoded /dev/loop0 in mpath test
+- tests: Rename local variable that shadows imported json module
+- tests: Remove stale assertTrue(succ) after assertRaisesRegex block
+- tests: Fix inconsistent LVM version string format
+- tests: Fix assert in ExtGetInfo._test_ext_get_info
+- lvm: Switch to JSON-based output parsing for LVM commands
+- crypto: Set crypt_device to NULL after crypt_free
+- Fix docstring differences between API files and C implementations
+- lib: Use RTLD_NODELETE when loading plugins and reset cached deps on close
+- tests: Remove test_reload test case
+- swap: Fix duplicate enum value for BDSwapTechMode
+- nvdimm: Fix region name filter in bd_nvdimm_list_namespaces
+- tests: Fix wrong function call in PartSetUUIDCase
+- part: Fix partition reference leak in bd_part_resize_part
+- nvme: Remove dead g_free call on known-NULL pointer
+- lvm-dbus: Fix logic error in bd_lvm_cache_pool_convert rename condition
+- nvdimm: Fix missing g_strdup for dev field in namespace_info_copy
+- lvm: Fix wrong parameter type in bd_lvm_cache_stats_free
+- fs: Add missing free_cluster_count to bd_fs_vfat_info_copy
+- mdraid: Add missing total_devices to bd_md_detail_data_copy
+- btrfs: Use g_new0 instead of g_new for info structs
+- crypto: Fix memory leak of label in get_subsystem_label error path
+- nvdimm: Fix GPtrArray leak in bd_nvdimm_list_namespaces
+- part: Remove dead fdisk_unref_partition call on known-NULL pointer
+- crypto: Remove dead crypt_free call on known-NULL pointer
+- lvm-dbus: Do not ignore rename fails in thpool/cachepool_convert
+- btrfs: Add bd_btrfs_device_stats() to expose per-device error stats
+- btrfs: Add bd_btrfs_delete_subvolume_recursive function
+- Fix gtk-doc warnings for docstrings and sections file
+
+dependabot[bot] (5):
+- infra: bump github/codeql-action from 3 to 4
+- infra: bump actions/upload-artifact from 4 to 5
+- infra: bump actions/checkout from 5 to 6
+- infra: bump actions/upload-artifact from 5 to 6
+- infra: bump actions/upload-artifact from 6 to 7
+
 Libblockdev 3.4.0
+------------------
 
 New minor release of the libblockdev library with multiple fixes and new features. See below
 for details.
