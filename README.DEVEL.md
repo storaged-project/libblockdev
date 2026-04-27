@@ -141,7 +141,7 @@ Making releases
        it to *docs/html*
 
  - [ ] Update the documentation by copying the contents of the *docs/html*
-       folder to the *libblockdev* directory in the
+       folder to the *libblockdev/docs* directory in the
        [Storaged project website repository](https://github.com/storaged-project/storaged-project.github.io)
        and commit and push the changes
 
