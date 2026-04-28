@@ -1,0 +1,23 @@
+name: Check RST files using restructuredtext-lint
+
+on:
+  pull_request:
+    branches:
+     - master
+
+jobs:
+  build:
+    name: rst-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout libblockdev repository
+        uses: actions/checkout@v6
+
+      - name: Install restructuredtext-lint
+        run: |
+          sudo apt -qq update
+          sudo apt -y -qq install python3-restructuredtext-lint
+
+      - name: Run restructuredtext-lint
+        run: |
+          rst-lint *.rst tests/*.rst

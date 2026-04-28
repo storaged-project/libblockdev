@@ -15,14 +15,17 @@ for details.
 **Full list of changes**
 
 Michael Biebl (1):
+
 - Mark _get_linux_version() as static
 
 Tomas Bzatek (3):
+
 - nvme: Add bd_nvme_find_namespaces_for_ctrl()
 - nvme: Clarify argument doc strings for bd_nvme_find_ctrls_for_ns()
 - tests: Add tests for bd_nvme_find_namespaces_for_ctrl()
 
 Vojtech Trefny (188):
+
 - misc: Remove custom Vagrantfile
 - misc: Add some missing dependencies for pgi-docgen
 - fs: Log mount and unmount calls
@@ -71,8 +74,7 @@ Vojtech Trefny (188):
 - dm: Fix memory leak in bd_dm_map_exists
 - crypto: Fix memory leak in bd_crypto_luks_info
 - utils: Check if resolved path in bd_utils_resolve_device is device
-- dm: Fail fast when no name/node specified for
-  dm_node_from_name/dm_name_from_node
+- dm: Fail fast when no name/node specified for dm_node_from_name/dm_name_from_node
 - lvm-dbus: bd_lvm_vdo_pool_convert implementation
 - part: Check partition parsed partition type before setting it
 - part: Check whether partition exists before setting GPT attributes
@@ -83,7 +85,7 @@ Vojtech Trefny (188):
 - s390: Fix fgetc comparison to use character '1' instead of integer 1
 - lvm: Fix next_arg index in bd_lvm_vdo_pool_convert
 - utils: Fix NULL dereference in bd_utils_dbus_service_available
-- fs: Fix g_free(label) to g_free(*label) in get_uuid_label
+- fs: Fix g_free(label) to g_free(\*label) in get_uuid_label
 - core: Fix bd_ensure_init to check all plugins, not just the last
 - core: Restore stub on dlsym failure in generated plugin loaders
 - fs: Remove mnt_free_fs calls on table-owned fs pointers
@@ -214,6 +216,7 @@ Vojtech Trefny (188):
 - Fix gtk-doc warnings for docstrings and sections file
 
 dependabot[bot] (5):
+
 - infra: bump github/codeql-action from 3 to 4
 - infra: bump actions/upload-artifact from 4 to 5
 - infra: bump actions/checkout from 5 to 6
@@ -228,8 +231,7 @@ for details.
 
 **Notable changes**
 
-- bd_nvme_connect() now defaults to port 4420 or 8009 for discovery NQN respectively when
-the transport_svcid argument is not specified.
+- bd_nvme_connect() now defaults to port 4420 or 8009 for discovery NQN respectively when the transport_svcid argument is not specified.
 
 **Full list of changes**
 
