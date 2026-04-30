@@ -1,7 +1,6 @@
 name: Run static analysis using csmock
 
 env:
-  CSMOCK_CHROOTS: "default"
   CSMOCK_TOOLS: "clang cppcheck gcc"
 
 on:
@@ -11,8 +10,14 @@ on:
 
 jobs:
   build:
-    name: csmock
-    runs-on: ubuntu-22.04
+    name: csmock (${{ matrix.chroot }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        chroot:
+          - default
+          - fedora-rawhide
     env:
       CI_CONTAINER: libblockdev-ci-csmock
     steps:
@@ -38,11 +43,11 @@ jobs:
 
       - name: Run csmock build in the container
         run: |
-          podman exec -it ${{ env.CI_CONTAINER }} bash -c "/ci/run_csmock_tests -c /ci/copr-builder.conf -p libblockdev-udisks -t ${{ env.CSMOCK_TOOLS }} -r ${{ env.CSMOCK_CHROOTS }}"
+          podman exec -it ${{ env.CI_CONTAINER }} bash -c "/ci/run_csmock_tests -c /ci/copr-builder.conf -p libblockdev-udisks -t ${{ env.CSMOCK_TOOLS }} -r ${{ matrix.chroot }}"
 
       - name: Upload the csmock logs
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: csmock_logs
+          name: csmock_logs_${{ matrix.chroot }}
           path: csmock_*/*
