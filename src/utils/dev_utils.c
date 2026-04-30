@@ -64,6 +64,12 @@ gchar* bd_utils_resolve_device (const gchar *dev_spec, GError **error) {
     g_autofree gchar *symlink = NULL;
     GError *l_error = NULL;
 
+    if (dev_spec == NULL) {
+        g_set_error (error, BD_UTILS_DEV_UTILS_ERROR, BD_UTILS_DEV_UTILS_ERROR_FAILED,
+                     "Device specification required");
+        return NULL;
+    }
+
     if (!g_str_has_prefix (dev_spec, "/dev/"))
         path = g_strdup_printf ("/dev/%s", dev_spec);
     else
