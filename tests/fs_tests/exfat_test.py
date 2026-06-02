@@ -1,4 +1,8 @@
+import os
+import re
 import tempfile
+
+from packaging.version import Version
 
 from .fs_test import FSTestCase, FSNoDevTestCase, mounted
 
@@ -6,6 +10,18 @@ import overrides_hack
 import utils
 
 from gi.repository import BlockDev, GLib
+
+
+def _get_exfatprogs_version():
+    _ret, out, _err = utils.run_command("mkfs.exfat --version")
+    # exfatprogs version : 1.4.1 (2026-05-28)
+    m = re.search(r"exfatprogs version : ([\d\.]+)", out)
+    if not m or len(m.groups()) != 1:
+        raise RuntimeError("Failed to determine exfatprogs version from: %s" % out)
+    return Version(m.groups()[0])
+
+
+EXFATPROGS_VERSION = _get_exfatprogs_version()
 
 
 class ExfatNoDevTestCase(FSNoDevTestCase):
@@ -24,6 +40,11 @@ class ExfatTestCase(FSTestCase):
         super(ExfatTestCase, self).setUp()
 
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="exfat_test")
+
+        if EXFATPROGS_VERSION < Version("1.4.0"):
+            self._mkfs_options = None
+        else:
+            self._mkfs_options = [BlockDev.ExtraArg.new("-P", "none")]
 
 
 class ExfatTestAvailability(ExfatNoDevTestCase):
@@ -80,7 +101,7 @@ class ExfatTestFeatures(ExfatNoDevTestCase):
         self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.UUID)
         self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.DRY_RUN)
         self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.NODISCARD)
-        self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.NOPT)
+        self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.NOPT)
 
         self.assertTrue(features.fsck & BlockDev.FSFsckFlags.CHECK)
         self.assertTrue(features.fsck & BlockDev.FSFsckFlags.REPAIR)
@@ -88,7 +109,7 @@ class ExfatTestFeatures(ExfatNoDevTestCase):
         self.assertTrue(features.configure & BlockDev.FSConfigureFlags.LABEL)
         self.assertTrue(features.configure & BlockDev.FSConfigureFlags.UUID)
 
-        self.assertEqual(features.features, 0)
+        self.assertEqual(features.features, BlockDev.FSFeatureFlags.PARTITION_TABLE)
 
         self.assertEqual(features.partition_id, "0x07")
         self.assertEqual(features.partition_type, "ebd0a0a2-b9e5-4433-87c0-68b6b72699c7")
@@ -132,7 +153,7 @@ class ExfatTestCheck(ExfatTestCase):
     def test_exfat_check(self):
         """Verify that it is possible to check an exfat file system"""
 
-        succ = BlockDev.fs_exfat_mkfs(self.loop_devs[0])
+        succ = BlockDev.fs_exfat_mkfs(self.loop_devs[0], self._mkfs_options)
         self.assertTrue(succ)
 
         succ = BlockDev.fs_exfat_check(self.loop_devs[0])
@@ -143,7 +164,7 @@ class ExfatTestRepair(ExfatTestCase):
     def test_exfat_repair(self):
         """Verify that it is possible to repair an exfat file system"""
 
-        succ = BlockDev.fs_exfat_mkfs(self.loop_devs[0])
+        succ = BlockDev.fs_exfat_mkfs(self.loop_devs[0], self._mkfs_options)
         self.assertTrue(succ)
 
         succ = BlockDev.fs_exfat_repair(self.loop_devs[0])
@@ -154,7 +175,7 @@ class ExfatGetInfo(ExfatTestCase):
     def test_exfat_get_info(self):
         """Verify that it is possible to get info about an exfat file system"""
 
-        succ = BlockDev.fs_exfat_mkfs(self.loop_devs[0], None)
+        succ = BlockDev.fs_exfat_mkfs(self.loop_devs[0], self._mkfs_options)
         self.assertTrue(succ)
 
         fi = BlockDev.fs_exfat_get_info(self.loop_devs[0])
@@ -171,7 +192,7 @@ class ExfatSetLabel(ExfatTestCase):
     def test_exfat_set_label(self):
         """Verify that it is possible to set label of an exfat file system"""
 
-        succ = BlockDev.fs_exfat_mkfs(self.loop_devs[0], None)
+        succ = BlockDev.fs_exfat_mkfs(self.loop_devs[0], self._mkfs_options)
         self.assertTrue(succ)
 
         fi = BlockDev.fs_exfat_get_info(self.loop_devs[0])
@@ -207,7 +228,7 @@ class ExfatSetUUID(ExfatTestCase):
     def test_exfat_set_uuid(self):
         """Verify that it is possible to set UUID/volume ID of an exfat file system"""
 
-        succ = BlockDev.fs_exfat_mkfs(self.loop_devs[0])
+        succ = BlockDev.fs_exfat_mkfs(self.loop_devs[0], self._mkfs_options)
         self.assertTrue(succ)
 
         succ = BlockDev.fs_exfat_set_uuid(self.loop_devs[0], "0x2E24EC82")

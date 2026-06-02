@@ -147,6 +147,8 @@ G_GNUC_INTERNAL BDExtraArg **
 bd_fs_exfat_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra) {
     GPtrArray *options_array = g_ptr_array_new ();
     const BDExtraArg **extra_p = NULL;
+    UtilDep dep = {"mkfs.exfat", "1.4.0", "--version", "exfatprogs version[:\\s]+([\\d\\.]+).+"};
+    gboolean new_exfat = FALSE;
 
     if (options->label && g_strcmp0 (options->label, "") != 0)
         g_ptr_array_add (options_array, bd_extra_arg_new ("-n", options->label));
@@ -154,6 +156,15 @@ bd_fs_exfat_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra) {
     if (extra) {
         for (extra_p = extra; *extra_p; extra_p++)
             g_ptr_array_add (options_array, bd_extra_arg_copy ((BDExtraArg *) *extra_p));
+    }
+
+    if (options->no_pt) {
+        /* only exfatprogs >= 1.4.0 (sometimes) creates the partition table */
+        new_exfat = bd_utils_check_util_version (dep.name, dep.version,
+                                                 dep.ver_arg, dep.ver_regexp,
+                                                 NULL);
+        if (new_exfat)
+            g_ptr_array_add (options_array, bd_extra_arg_new ("-P", "none"));
     }
 
     g_ptr_array_add (options_array, NULL);
