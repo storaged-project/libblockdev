@@ -59,13 +59,24 @@ static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
     DEPS_TUNEEXFAT_MASK,    /* set-uuid */
 };
 
-/* line prefixes in tune.exfat output for parsing */
-#define BLOCK_SIZE_PREFIX "Block sector size : "
-#define BLOCK_SIZE_PREFIX_LEN 20
-#define SECTORS_PREFIX "Number of the sectors : "
-#define SECTORS_PREFIX_LEN 24
-#define CLUSTERS_PREFIX "Number of the clusters : "
-#define CLUSTERS_PREFIX_LEN 25
+/* key names in tune.exfat output for parsing */
+#define BLOCK_SIZE_KEY "Block sector size"
+#define SECTORS_KEY "Number of the sectors"
+#define CLUSTERS_KEY "Number of the clusters"
+
+static guint64 _exfat_parse_line_val (const gchar *line) {
+    gchar *val_start = NULL;
+
+    val_start = strchr (line, ':');
+    if (!val_start)
+        return 0;
+
+    val_start++;
+    while (*val_start == ' ' || *val_start == '\t')
+        val_start++;
+
+    return g_ascii_strtoull (val_start, NULL, 0);
+}
 
 
 
@@ -390,7 +401,6 @@ BDFSExfatInfo* bd_fs_exfat_get_info (const gchar *device, GError **error) {
     BDFSExfatInfo *ret = NULL;
     gchar **lines = NULL;
     gchar **line_p = NULL;
-    gchar *val_start = NULL;
 
     if (!check_deps (&avail_deps, DEPS_TUNEEXFAT_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return NULL;
@@ -415,23 +425,12 @@ BDFSExfatInfo* bd_fs_exfat_get_info (const gchar *device, GError **error) {
     g_free (output);
 
     for (line_p=lines; *line_p; line_p++) {
-        if (ret->sector_size == 0) {
-            val_start = g_strrstr (*line_p, BLOCK_SIZE_PREFIX);
-            if (val_start)
-                ret->sector_size = g_ascii_strtoull (val_start + BLOCK_SIZE_PREFIX_LEN, NULL, 0);
-        }
-
-        if (ret->sector_count == 0) {
-            val_start = g_strrstr (*line_p, SECTORS_PREFIX);
-            if (val_start)
-                ret->sector_count = g_ascii_strtoull (val_start + SECTORS_PREFIX_LEN, NULL, 0);
-        }
-
-        if (ret->cluster_count == 0) {
-            val_start = g_strrstr (*line_p, CLUSTERS_PREFIX);
-            if (val_start)
-                ret->cluster_count = g_ascii_strtoull (val_start + CLUSTERS_PREFIX_LEN, NULL, 0);
-        }
+        if (g_strrstr (*line_p, BLOCK_SIZE_KEY) && ret->sector_size == 0)
+            ret->sector_size = _exfat_parse_line_val (*line_p);
+        else if (g_strrstr (*line_p, SECTORS_KEY) && ret->sector_count == 0)
+            ret->sector_count = _exfat_parse_line_val (*line_p);
+        else if (g_strrstr (*line_p, CLUSTERS_KEY) && ret->cluster_count == 0)
+            ret->cluster_count = _exfat_parse_line_val (*line_p);
 
         if (ret->sector_size > 0 && ret->sector_count > 0 && ret->cluster_count > 0)
             break;
