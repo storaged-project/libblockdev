@@ -22,7 +22,7 @@ jobs:
       CI_CONTAINER: libblockdev-ci-csmock
     steps:
       - name: Checkout libblockdev repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install podman
         run: |
