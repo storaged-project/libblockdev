@@ -111,3 +111,14 @@ class S390DepsTest(unittest.TestCase):
             # dasdfmt is not available, so the s390 plugin should fail to load
             with self.assertRaisesRegex(GLib.GError, "The 'dasdfmt' utility is not available"):
                 BlockDev.s390_is_tech_avail(BlockDev.S390Tech.DASD, BlockDev.S390TechMode.MODIFY)
+
+    @tag_test(TestTags.EXTRADEPS, TestTags.NOSTORAGE)
+    def test_missing_zkey(self):
+        """Verify that checking for pervasive encryption support works as expected"""
+
+        with fake_path(all_but="zkey"):
+            # zkey is not available, so the PAES technology should not be available
+            with self.assertRaisesRegex(GLib.GError, "The 'zkey' utility is not available"):
+                BlockDev.s390_is_tech_avail(BlockDev.S390Tech.PAES, BlockDev.S390TechMode.CREATE)
+            with self.assertRaisesRegex(GLib.GError, "The 'zkey' utility is not available"):
+                BlockDev.s390_is_tech_avail(BlockDev.S390Tech.PAES, BlockDev.S390TechMode.QUERY)

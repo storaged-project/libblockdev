@@ -15,16 +15,19 @@ typedef enum {
     BD_S390_ERROR_FORMAT_FAILED,
     BD_S390_ERROR_DASDFMT,
     BD_S390_ERROR_IO,
+    BD_S390_ERROR_ZKEY,
 } BDS390Error;
 
 typedef enum {
     BD_S390_TECH_DASD = 0,
     BD_S390_TECH_ZFCP,
+    BD_S390_TECH_PAES,
 } BDS390Tech;
 
 typedef enum {
     BD_S390_TECH_MODE_MODIFY  = 1 << 0,
     BD_S390_TECH_MODE_QUERY   = 1 << 1,
+    BD_S390_TECH_MODE_CREATE  = 1 << 2,
 } BDS390TechMode;
 
 /**
@@ -174,5 +177,151 @@ gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const 
  * Tech category: %BD_S390_TECH_ZFCP-%BD_S390_TECH_MODE_MODIFY
  */
 gboolean bd_s390_zfcp_offline (const gchar *devno, const gchar *wwpn, const gchar *lun, GError **error);
+
+/**
+ * bd_s390_zkey_generate:
+ * @name: name of the secure key to generate in the secure key repository
+ * @key_type: (nullable): type of the secure key to generate (e.g. "CCA-AESCIPHER") or %NULL for the zkey default
+ * @keybits: size of the key in bits or 0 for the zkey default
+ * @volumes: (nullable) (array zero-terminated=1): list of volumes to associate with the key, each given
+ *                                                 in the "volume:dmname" format, or %NULL
+ * @apqns: (nullable) (array zero-terminated=1): list of cryptographic adapters (APQNs) to associate with
+ *                                               the key, each given in the "card.domain" format, or %NULL
+ * @sector_size: sector size in bytes to use with dm-crypt or 0 for the system default
+ * @dummy_passphrase: whether to generate and associate a dummy passphrase with the key
+ * @extra: (nullable) (array zero-terminated=1): extra options for the key generation (right now
+ *                                               passed to the 'zkey' utility)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Generates a new secure key for pervasive encryption using the 'zkey' utility and stores it
+ * in the secure key repository. The key is generated as an XTS key with the 'LUKS2' volume type.
+ *
+ * Returns: whether the secure key was successfully generated or not
+ *
+ * Tech category: %BD_S390_TECH_PAES-%BD_S390_TECH_MODE_CREATE
+ */
+gboolean bd_s390_zkey_generate (const gchar *name, const gchar *key_type, guint64 keybits, const gchar **volumes, const gchar **apqns, guint64 sector_size, gboolean dummy_passphrase, const BDExtraArg **extra, GError **error);
+
+#define BD_S390_TYPE_ZKEY_INFO (bd_s390_zkey_info_get_type ())
+GType bd_s390_zkey_info_get_type();
+
+/**
+ * BDS390ZkeyInfo:
+ * @name: name of the secure key in the secure key repository;
+ * @description: user provided description of the key (empty if none was set);
+ * @secure_key_size: size of the secure key in bytes;
+ * @clear_key_size: size of the effective (clear) key in bits;
+ * @xts: whether the key is an XTS type key or not;
+ * @key_type: type of the secure key (e.g. "CCA-AESCIPHER");
+ * @volumes: (array zero-terminated=1): volumes associated with the key, each in the "volume:dmname" format;
+ * @apqns: (array zero-terminated=1): cryptographic adapters (APQNs) associated with the key, each in the "card.domain" format;
+ * @key_file_name: full path to the file holding the secure key;
+ * @sector_size: sector size in bytes to use with dm-crypt or 0 for the system default;
+ * @volume_type: volume type the key is to be used with (e.g. "LUKS2");
+ * @dummy_passphrase: (nullable): path to the dummy passphrase file associated with the key or %NULL if none is set;
+ */
+typedef struct BDS390ZkeyInfo {
+    gchar *name;
+    gchar *description;
+    guint64 secure_key_size;
+    guint64 clear_key_size;
+    gboolean xts;
+    gchar *key_type;
+    gchar **volumes;
+    gchar **apqns;
+    gchar *key_file_name;
+    guint64 sector_size;
+    gchar *volume_type;
+    gchar *dummy_passphrase;
+} BDS390ZkeyInfo;
+
+/**
+ * bd_s390_zkey_info_free: (skip)
+ * @info: (nullable): %BDS390ZkeyInfo to free
+ *
+ * Frees @info.
+ */
+void bd_s390_zkey_info_free (BDS390ZkeyInfo *info) {
+    if (info == NULL)
+        return;
+
+    g_free (info->name);
+    g_free (info->description);
+    g_free (info->key_type);
+    g_strfreev (info->volumes);
+    g_strfreev (info->apqns);
+    g_free (info->key_file_name);
+    g_free (info->volume_type);
+    g_free (info->dummy_passphrase);
+    g_free (info);
+}
+
+/**
+ * bd_s390_zkey_info_copy: (skip)
+ * @info: (nullable): %BDS390ZkeyInfo to copy
+ *
+ * Creates a new copy of @info.
+ */
+BDS390ZkeyInfo* bd_s390_zkey_info_copy (BDS390ZkeyInfo *info) {
+    if (info == NULL)
+        return NULL;
+
+    BDS390ZkeyInfo *new_info = g_new0 (BDS390ZkeyInfo, 1);
+
+    new_info->name = g_strdup (info->name);
+    new_info->description = g_strdup (info->description);
+    new_info->secure_key_size = info->secure_key_size;
+    new_info->clear_key_size = info->clear_key_size;
+    new_info->xts = info->xts;
+    new_info->key_type = g_strdup (info->key_type);
+    new_info->volumes = g_strdupv (info->volumes);
+    new_info->apqns = g_strdupv (info->apqns);
+    new_info->key_file_name = g_strdup (info->key_file_name);
+    new_info->sector_size = info->sector_size;
+    new_info->volume_type = g_strdup (info->volume_type);
+    new_info->dummy_passphrase = g_strdup (info->dummy_passphrase);
+
+    return new_info;
+}
+
+GType bd_s390_zkey_info_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDS390ZkeyInfo",
+                                            (GBoxedCopyFunc) bd_s390_zkey_info_copy,
+                                            (GBoxedFreeFunc) bd_s390_zkey_info_free);
+    }
+
+    return type;
+}
+
+/**
+ * bd_s390_zkey_list:
+ * @name: (nullable): name of a single secure key to get information about or %NULL to list all keys
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Lists the secure keys stored in the secure key repository using the 'zkey' utility. If @name
+ * is given, only the information about the matching key is returned.
+ *
+ * Returns: (array zero-terminated=1) (transfer full): information about the secure keys in the
+ *          repository (an empty list if there are none) or %NULL in case of error
+ *
+ * Tech category: %BD_S390_TECH_PAES-%BD_S390_TECH_MODE_QUERY
+ */
+BDS390ZkeyInfo** bd_s390_zkey_list (const gchar *name, GError **error);
+
+/**
+ * bd_s390_zkey_remove:
+ * @name: name of the secure key to remove from the secure key repository
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Removes the secure key @name from the secure key repository using the 'zkey' utility.
+ *
+ * Returns: whether the secure key was successfully removed or not
+ *
+ * Tech category: %BD_S390_TECH_PAES-%BD_S390_TECH_MODE_MODIFY
+ */
+gboolean bd_s390_zkey_remove (const gchar *name, GError **error);
 
 #endif  /* BD_S390_API */

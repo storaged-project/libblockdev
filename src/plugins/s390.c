@@ -53,11 +53,14 @@ static GMutex deps_check_lock;
 
 #define DEPS_DASDFMT 0
 #define DEPS_DASDFMT_MASK (1 << DEPS_DASDFMT)
-#define DEPS_LAST 1
+#define DEPS_ZKEY 1
+#define DEPS_ZKEY_MASK (1 << DEPS_ZKEY)
+#define DEPS_LAST 2
 
 static const UtilDep deps[DEPS_LAST] = {
     /* dasdfmt doesn't return version info */
     {"dasdfmt", NULL, NULL, NULL},
+    {"zkey", NULL, NULL, NULL},
 };
 
 
@@ -104,6 +107,9 @@ gboolean bd_s390_is_tech_avail (BDS390Tech tech, guint64 mode, GError **error) {
             return check_deps (&avail_deps, DEPS_DASDFMT_MASK, deps, DEPS_LAST, &deps_check_lock, error);
         else
             return TRUE;
+    case BD_S390_TECH_PAES:
+        /* pervasive encryption support requires the 'zkey' utility */
+        return check_deps (&avail_deps, DEPS_ZKEY_MASK, deps, DEPS_LAST, &deps_check_lock, error);
     default:
         g_set_error_literal (error, BD_S390_ERROR, BD_S390_ERROR_TECH_UNAVAIL, "Unknown technology");
         return FALSE;
@@ -1054,4 +1060,272 @@ gboolean bd_s390_zfcp_offline (const gchar *devno, const gchar *wwpn, const gcha
 
     bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
+}
+
+/**
+ * bd_s390_zkey_generate:
+ * @name: name of the secure key to generate in the secure key repository
+ * @key_type: (nullable): type of the secure key to generate (e.g. "CCA-AESCIPHER") or %NULL for the zkey default
+ * @keybits: size of the key in bits or 0 for the zkey default
+ * @volumes: (nullable) (array zero-terminated=1): list of volumes to associate with the key, each given
+ *                                                 in the "volume:dmname" format, or %NULL
+ * @apqns: (nullable) (array zero-terminated=1): list of cryptographic adapters (APQNs) to associate with
+ *                                               the key, each given in the "card.domain" format, or %NULL
+ * @sector_size: sector size in bytes to use with dm-crypt or 0 for the system default
+ * @dummy_passphrase: whether to generate and associate a dummy passphrase with the key
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Generates a new secure key for pervasive encryption using the 'zkey' utility and stores it
+ * in the secure key repository. The key is generated as an XTS key with the 'LUKS2' volume type.
+ *
+ * Returns: whether the secure key was successfully generated or not
+ *
+ * Tech category: %BD_S390_TECH_PAES-%BD_S390_TECH_MODE_CREATE
+ */
+gboolean bd_s390_zkey_generate (const gchar *name, const gchar *key_type, guint64 keybits, const gchar **volumes, const gchar **apqns, guint64 sector_size, gboolean dummy_passphrase, const BDExtraArg **extra, GError **error) {
+    gboolean success = FALSE;
+    GPtrArray *argv = NULL;
+
+    if (!check_deps (&avail_deps, DEPS_ZKEY_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
+    if (name == NULL || *name == '\0') {
+        g_set_error_literal (error, BD_S390_ERROR, BD_S390_ERROR_ZKEY,
+                             "Key name must be specified");
+        return FALSE;
+    }
+
+    argv = g_ptr_array_new_with_free_func (g_free);
+    g_ptr_array_add (argv, g_strdup ("zkey"));
+    g_ptr_array_add (argv, g_strdup ("generate"));
+    g_ptr_array_add (argv, g_strdup ("--name"));
+    g_ptr_array_add (argv, g_strdup (name));
+
+    if (key_type != NULL) {
+        g_ptr_array_add (argv, g_strdup ("--key-type"));
+        g_ptr_array_add (argv, g_strdup (key_type));
+    }
+    if (keybits != 0) {
+        g_ptr_array_add (argv, g_strdup ("--keybits"));
+        g_ptr_array_add (argv, g_strdup_printf ("%"G_GUINT64_FORMAT, keybits));
+    }
+    if (volumes != NULL && *volumes != NULL) {
+        /* zkey expects a single comma-separated list */
+        g_ptr_array_add (argv, g_strdup ("--volumes"));
+        g_ptr_array_add (argv, g_strjoinv (",", (gchar **) volumes));
+    }
+    if (apqns != NULL && *apqns != NULL) {
+        /* zkey expects a single comma-separated list */
+        g_ptr_array_add (argv, g_strdup ("--apqns"));
+        g_ptr_array_add (argv, g_strjoinv (",", (gchar **) apqns));
+    }
+    if (sector_size != 0) {
+        g_ptr_array_add (argv, g_strdup ("--sector-size"));
+        g_ptr_array_add (argv, g_strdup_printf ("%"G_GUINT64_FORMAT, sector_size));
+    }
+    if (dummy_passphrase)
+        g_ptr_array_add (argv, g_strdup ("--gen-dummy-passphrase"));
+
+    /* pervasive encryption of LUKS2 volumes always uses XTS secure keys */
+    g_ptr_array_add (argv, g_strdup ("--xts"));
+    g_ptr_array_add (argv, g_strdup ("--volume-type"));
+    g_ptr_array_add (argv, g_strdup ("LUKS2"));
+
+    g_ptr_array_add (argv, NULL);
+
+    success = bd_utils_exec_and_report_error ((const gchar **) argv->pdata, extra, error);
+    g_ptr_array_free (argv, TRUE);
+
+    return success;
+}
+
+/**
+ * bd_s390_zkey_info_free: (skip)
+ * @info: (nullable): %BDS390ZkeyInfo to free
+ *
+ * Frees @info.
+ */
+void bd_s390_zkey_info_free (BDS390ZkeyInfo *info) {
+    if (info == NULL)
+        return;
+
+    g_free (info->name);
+    g_free (info->description);
+    g_free (info->key_type);
+    g_strfreev (info->volumes);
+    g_strfreev (info->apqns);
+    g_free (info->key_file_name);
+    g_free (info->volume_type);
+    g_free (info->dummy_passphrase);
+    g_free (info);
+}
+
+/**
+ * bd_s390_zkey_info_copy: (skip)
+ * @info: (nullable): %BDS390ZkeyInfo to copy
+ *
+ * Creates a new copy of @info.
+ */
+BDS390ZkeyInfo* bd_s390_zkey_info_copy (BDS390ZkeyInfo *info) {
+    if (info == NULL)
+        return NULL;
+
+    BDS390ZkeyInfo *new_info = g_new0 (BDS390ZkeyInfo, 1);
+
+    new_info->name = g_strdup (info->name);
+    new_info->description = g_strdup (info->description);
+    new_info->secure_key_size = info->secure_key_size;
+    new_info->clear_key_size = info->clear_key_size;
+    new_info->xts = info->xts;
+    new_info->key_type = g_strdup (info->key_type);
+    new_info->volumes = g_strdupv (info->volumes);
+    new_info->apqns = g_strdupv (info->apqns);
+    new_info->key_file_name = g_strdup (info->key_file_name);
+    new_info->sector_size = info->sector_size;
+    new_info->volume_type = g_strdup (info->volume_type);
+    new_info->dummy_passphrase = g_strdup (info->dummy_passphrase);
+
+    return new_info;
+}
+
+/**
+ * bd_s390_zkey_list:
+ * @name: (nullable): name of a single secure key to get information about or %NULL to list all keys
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Lists the secure keys stored in the secure key repository using the 'zkey' utility. If @name
+ * is given, only the information about the matching key is returned.
+ *
+ * Returns: (array zero-terminated=1) (transfer full): information about the secure keys in the
+ *          repository (an empty list if there are none) or %NULL in case of error
+ *
+ * Tech category: %BD_S390_TECH_PAES-%BD_S390_TECH_MODE_QUERY
+ */
+BDS390ZkeyInfo** bd_s390_zkey_list (const gchar *name, GError **error) {
+    const gchar *argv[5] = {"zkey", "list", NULL, NULL, NULL};
+    guint next = 2;
+    gchar *output = NULL;
+    gchar *stderr_data = NULL;
+    gint status = 0;
+    gboolean success = FALSE;
+    GPtrArray *keys = NULL;
+    gchar **lines = NULL;
+    BDS390ZkeyInfo *cur_info = NULL;
+
+    if (!check_deps (&avail_deps, DEPS_ZKEY_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return NULL;
+
+    if (name != NULL && *name != '\0') {
+        argv[next++] = "--name";
+        argv[next++] = name;
+    }
+
+    /* not using bd_utils_exec_and_capture_output because it treats an empty output
+       (i.e. no keys in the repository) as an error */
+    success = bd_utils_exec_and_capture_output_no_progress (argv, NULL, &output, &stderr_data, &status, error);
+    if (!success) {
+        g_free (output);
+        g_free (stderr_data);
+        return NULL;
+    }
+    if (status != 0) {
+        g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_ZKEY,
+                     "Failed to list secure keys: %s", stderr_data ? stderr_data : "");
+        g_free (output);
+        g_free (stderr_data);
+        return NULL;
+    }
+    g_free (stderr_data);
+
+    keys = g_ptr_array_new ();
+
+    lines = g_strsplit (output ? output : "", "\n", -1);
+    g_free (output);
+
+    for (gchar **line_p = lines; *line_p != NULL; line_p++) {
+        gchar *colon = NULL;
+        gchar *label = NULL;
+        gchar *value = NULL;
+
+        /* split the line on the first ':' -- the label never contains a colon while
+           some values (e.g. Volumes) do; lines without a colon are separators, blank
+           lines or continuation lines (e.g. the second line of Verification pattern) */
+        colon = strchr (*line_p, ':');
+        if (colon == NULL)
+            continue;
+
+        label = g_strndup (*line_p, colon - *line_p);
+        label = g_strstrip (label);
+        value = g_strdup (colon + 1);
+        value = g_strstrip (value);
+
+        if (g_strcmp0 (label, "Key") == 0) {
+            /* the "Key" line starts a new key record */
+            cur_info = g_new0 (BDS390ZkeyInfo, 1);
+            cur_info->name = g_strdup (value);
+            g_ptr_array_add (keys, cur_info);
+        } else if (cur_info == NULL) {
+            /* a field line before any "Key" line -- ignore it */
+        } else if (g_strcmp0 (label, "Description") == 0) {
+            cur_info->description = g_strdup (value);
+        } else if (g_strcmp0 (label, "Secure key size") == 0) {
+            cur_info->secure_key_size = g_ascii_strtoull (value, NULL, 0);
+        } else if (g_strcmp0 (label, "Clear key size") == 0) {
+            cur_info->clear_key_size = g_ascii_strtoull (value, NULL, 0);
+        } else if (g_strcmp0 (label, "XTS type key") == 0) {
+            cur_info->xts = (g_ascii_strcasecmp (value, "Yes") == 0);
+        } else if (g_strcmp0 (label, "Key type") == 0) {
+            cur_info->key_type = g_strdup (value);
+        } else if (g_strcmp0 (label, "Volumes") == 0) {
+            cur_info->volumes = g_strsplit (value, ",", -1);
+        } else if (g_strcmp0 (label, "APQNs") == 0) {
+            cur_info->apqns = g_strsplit (value, ",", -1);
+        } else if (g_strcmp0 (label, "Key file name") == 0) {
+            cur_info->key_file_name = g_strdup (value);
+        } else if (g_strcmp0 (label, "Sector size") == 0) {
+            /* "(system default)" is reported as 0 */
+            cur_info->sector_size = g_ascii_strtoull (value, NULL, 0);
+        } else if (g_strcmp0 (label, "Volume type") == 0) {
+            cur_info->volume_type = g_strdup (value);
+        } else if (g_strcmp0 (label, "Dummy passphrase") == 0) {
+            /* "(none)" means no dummy passphrase is set, otherwise it is a path to the passphrase file */
+            if (g_strcmp0 (value, "(none)") != 0)
+                cur_info->dummy_passphrase = g_strdup (value);
+        }
+
+        g_free (label);
+        g_free (value);
+    }
+
+    g_strfreev (lines);
+
+    g_ptr_array_add (keys, NULL);
+    return (BDS390ZkeyInfo **) g_ptr_array_free (keys, FALSE);
+}
+
+/**
+ * bd_s390_zkey_remove:
+ * @name: name of the secure key to remove from the secure key repository
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Removes the secure key @name from the secure key repository using the 'zkey' utility.
+ *
+ * Returns: whether the secure key was successfully removed or not
+ *
+ * Tech category: %BD_S390_TECH_PAES-%BD_S390_TECH_MODE_MODIFY
+ */
+gboolean bd_s390_zkey_remove (const gchar *name, GError **error) {
+    /* --force suppresses the interactive y/n confirmation */
+    const gchar *argv[6] = {"zkey", "remove", "--name", name, "--force", NULL};
+
+    if (!check_deps (&avail_deps, DEPS_ZKEY_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
+    if (name == NULL || *name == '\0') {
+        g_set_error_literal (error, BD_S390_ERROR, BD_S390_ERROR_ZKEY,
+                             "Key name must be specified");
+        return FALSE;
+    }
+
+    return bd_utils_exec_and_report_error (argv, NULL, error);
 }
