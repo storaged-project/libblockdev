@@ -90,5 +90,7 @@ gboolean bd_s390_zfcp_offline(const gchar *devno, const gchar *wwpn, const gchar
 gboolean bd_s390_zkey_generate (const gchar *name, const gchar *key_type, guint64 keybits, const gchar **volumes, const gchar **apqns, guint64 sector_size, gboolean dummy_passphrase, const BDExtraArg **extra, GError **error);
 BDS390ZkeyInfo** bd_s390_zkey_list (const gchar *name, GError **error);
 gboolean bd_s390_zkey_remove (const gchar *name, GError **error);
+gboolean bd_s390_zkey_cryptsetup_setvp (const gchar *device, const gchar *key_file, const BDExtraArg **extra, GError **error);
+gboolean bd_s390_zkey_cryptsetup_validate (const gchar *device, const gchar *key_file, const BDExtraArg **extra, GError **error);
 
 #endif  /* BD_S390 */

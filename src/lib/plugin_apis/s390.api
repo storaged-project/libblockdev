@@ -324,4 +324,43 @@ BDS390ZkeyInfo** bd_s390_zkey_list (const gchar *name, GError **error);
  */
 gboolean bd_s390_zkey_remove (const gchar *name, GError **error);
 
+/**
+ * bd_s390_zkey_cryptsetup_setvp:
+ * @device: LUKS2 device to set the verification pattern on
+ * @key_file: path to a file containing the LUKS passphrase used to unlock a keyslot of @device
+ * @extra: (nullable) (array zero-terminated=1): extra options for setting the verification pattern
+ *                                               (right now passed to the 'zkey-cryptsetup' utility)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Sets the verification pattern of the secure key in the metadata of the LUKS2 volume @device
+ * using the 'zkey-cryptsetup' utility. The verification pattern is used to identify the secure
+ * key associated with the volume. Setting the verification pattern requires unlocking a keyslot
+ * of @device, so the LUKS passphrase needs to be provided in @key_file (this is a passphrase
+ * file, not the secure key file).
+ *
+ * Returns: whether the verification pattern was successfully set or not
+ *
+ * Tech category: %BD_S390_TECH_PAES-%BD_S390_TECH_MODE_MODIFY
+ */
+gboolean bd_s390_zkey_cryptsetup_setvp (const gchar *device, const gchar *key_file, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_s390_zkey_cryptsetup_validate:
+ * @device: LUKS2 device to validate
+ * @key_file: path to a file containing the LUKS passphrase used to unlock a keyslot of @device
+ * @extra: (nullable) (array zero-terminated=1): extra options for the validation
+ *                                               (right now passed to the 'zkey-cryptsetup' utility)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Validates that the LUKS2 volume @device is correctly set up for pervasive encryption using the
+ * 'zkey-cryptsetup' utility. Validation requires unlocking a keyslot of @device, so the LUKS
+ * passphrase needs to be provided in @key_file (this is a passphrase file, not the secure key
+ * file).
+ *
+ * Returns: whether the LUKS2 volume @device is correctly set up for pervasive encryption or not
+ *
+ * Tech category: %BD_S390_TECH_PAES-%BD_S390_TECH_MODE_QUERY
+ */
+gboolean bd_s390_zkey_cryptsetup_validate (const gchar *device, const gchar *key_file, const BDExtraArg **extra, GError **error);
+
 #endif  /* BD_S390_API */
