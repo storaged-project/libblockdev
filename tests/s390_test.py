@@ -2,7 +2,7 @@ import unittest
 import os
 import overrides_hack
 
-from utils import fake_path, TestTags, tag_test, required_plugins
+from utils import fake_path, fake_utils, TestTags, tag_test, required_plugins
 
 import gi
 gi.require_version('GLib', '2.0')
@@ -88,6 +88,66 @@ class S390TestCase(unittest.TestCase):
         lun = "12345678901234567890"
         with self.assertRaises(GLib.GError):
             BlockDev.s390_zfcp_sanitize_lun_input(lun)
+
+    @tag_test(TestTags.NOSTORAGE)
+    def test_zkey_list_multiple_keys(self):
+        """Verify that parsing 'zkey list' output with multiple keys works as expected"""
+
+        with fake_utils("tests/fake_utils/zkey_list_multiple_keys"):
+            keys = BlockDev.s390_zkey_list(None)
+
+        self.assertEqual(len(keys), 2)
+
+        self.assertEqual(keys[0].name, "secure_xtskey1")
+        self.assertEqual(keys[0].description, "")
+        self.assertEqual(keys[0].secure_key_size, 272)
+        self.assertEqual(keys[0].clear_key_size, 512)
+        self.assertTrue(keys[0].xts)
+        self.assertEqual(keys[0].key_type, "CCA-AESCIPHER")
+        self.assertEqual(keys[0].volumes, ["/dev/loop0:enc-disk1"])
+        self.assertEqual(keys[0].apqns, ["02.0016"])
+        self.assertEqual(keys[0].key_file_name, "/etc/zkey/repository/secure_xtskey1.skey")
+        # "(system default)" is reported as 0
+        self.assertEqual(keys[0].sector_size, 0)
+        self.assertEqual(keys[0].volume_type, "LUKS2")
+        # "(none)" means no dummy passphrase is set
+        self.assertIsNone(keys[0].dummy_passphrase)
+
+        self.assertEqual(keys[1].name, "secure_xtskey2")
+        self.assertEqual(keys[1].volumes, ["/dev/loop1:enc-disk2"])
+        self.assertEqual(keys[1].apqns, ["02.0016"])
+        self.assertEqual(keys[1].key_file_name, "/etc/zkey/repository/secure_xtskey2.skey")
+
+    @tag_test(TestTags.NOSTORAGE)
+    def test_zkey_list_multiple_apqns(self):
+        """Verify that parsing 'zkey list' output with multiple APQNs works as expected"""
+
+        # the extra APQNs are printed on continuation lines that carry no label
+        with fake_utils("tests/fake_utils/zkey_list_multiple_apqns"):
+            keys = BlockDev.s390_zkey_list(None)
+
+        self.assertEqual(len(keys), 1)
+        self.assertEqual(keys[0].name, "secure_xtskey1")
+        self.assertEqual(keys[0].description, "This is our secure key in a repository")
+        self.assertEqual(keys[0].volumes, ["/dev/mapper/disk1:enc-disk1"])
+        self.assertEqual(keys[0].apqns, ["03.0039", "04.0039"])
+
+    @tag_test(TestTags.NOSTORAGE)
+    def test_zkey_list_multiple_volumes(self):
+        """Verify that parsing 'zkey list' output with multiple volumes works as expected"""
+
+        # the extra volumes are printed on continuation lines that -- unlike APQNs --
+        # themselves contain a colon (the "volume:dmname" format) and must not be
+        # mistaken for a new "label : value" line
+        with fake_utils("tests/fake_utils/zkey_list_multiple_volumes"):
+            keys = BlockDev.s390_zkey_list(None)
+
+        self.assertEqual(len(keys), 1)
+        self.assertEqual(keys[0].name, "secure_xtskey1")
+        self.assertEqual(keys[0].volumes, ["/dev/mapper/disk1:enc-disk1",
+                                           "/dev/mapper/disk2:enc-disk2",
+                                           "/dev/mapper/disk3:enc-disk3"])
+        self.assertEqual(keys[0].apqns, ["03.0039", "04.0039"])
 
 
 @unittest.skipUnless(os.uname()[4].startswith('s390'), "s390x architecture required")

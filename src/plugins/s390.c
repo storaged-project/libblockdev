@@ -1220,6 +1220,9 @@ BDS390ZkeyInfo** bd_s390_zkey_list (const gchar *name, GError **error) {
     GPtrArray *keys = NULL;
     gchar **lines = NULL;
     BDS390ZkeyInfo *cur_info = NULL;
+    GPtrArray *cur_list = NULL;      /* accumulates a multi-line list value (Volumes/APQNs) */
+    gchar ***cur_list_dest = NULL;   /* struct member to store the finalized NULL-terminated array in */
+    gint value_col = -1;             /* column (0-based) where field values start, learned from field lines */
 
     if (!check_deps (&avail_deps, DEPS_ZKEY_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return NULL;
@@ -1252,18 +1255,46 @@ BDS390ZkeyInfo** bd_s390_zkey_list (const gchar *name, GError **error) {
     g_free (output);
 
     for (gchar **line_p = lines; *line_p != NULL; line_p++) {
+        gchar *line = *line_p;
+        gsize indent = strspn (line, " \t");
         gchar *colon = NULL;
         gchar *label = NULL;
         gchar *value = NULL;
 
-        /* split the line on the first ':' -- the label never contains a colon while
-           some values (e.g. Volumes) do; lines without a colon are separators, blank
-           lines or continuation lines (e.g. the second line of Verification pattern) */
-        colon = strchr (*line_p, ':');
+        /* A multi-value field (Volumes/APQNs) can span several lines: the first item
+           follows the label, any further items appear on continuation lines that carry
+           no label and are indented to the value column. Such continuation lines cannot
+           be recognized by the absence of a colon -- a volume is formatted as
+           "volume:dmname" and thus contains one -- so they are detected by indentation
+           instead: everything left of the value column is whitespace. */
+        if (cur_list != NULL && value_col >= 0 && (gint) indent >= value_col) {
+            gchar *item = g_strstrip (g_strdup (line + indent));
+            if (*item != '\0')
+                g_ptr_array_add (cur_list, item);
+            else
+                g_free (item);
+            continue;
+        }
+
+        /* any other line terminates the current multi-value field */
+        if (cur_list != NULL) {
+            g_ptr_array_add (cur_list, NULL);
+            *cur_list_dest = (gchar **) g_ptr_array_free (cur_list, FALSE);
+            cur_list = NULL;
+            cur_list_dest = NULL;
+        }
+
+        /* split the line on the first ':' -- the label never contains a colon; lines
+           without a colon are separators or blank lines */
+        colon = strchr (line, ':');
         if (colon == NULL)
             continue;
 
-        label = g_strndup (*line_p, colon - *line_p);
+        /* "label : value" -- remember where values start so the continuation lines of
+           the next multi-value field can be recognized */
+        value_col = (gint) (colon - line) + 2;
+
+        label = g_strndup (line, colon - line);
         label = g_strstrip (label);
         value = g_strdup (colon + 1);
         value = g_strstrip (value);
@@ -1286,9 +1317,17 @@ BDS390ZkeyInfo** bd_s390_zkey_list (const gchar *name, GError **error) {
         } else if (g_strcmp0 (label, "Key type") == 0) {
             cur_info->key_type = g_strdup (value);
         } else if (g_strcmp0 (label, "Volumes") == 0) {
-            cur_info->volumes = g_strsplit (value, ",", -1);
+            /* the value continues on the following continuation lines (one volume each) */
+            cur_list = g_ptr_array_new ();
+            cur_list_dest = &cur_info->volumes;
+            if (*value != '\0')
+                g_ptr_array_add (cur_list, g_strdup (value));
         } else if (g_strcmp0 (label, "APQNs") == 0) {
-            cur_info->apqns = g_strsplit (value, ",", -1);
+            /* the value continues on the following continuation lines (one APQN each) */
+            cur_list = g_ptr_array_new ();
+            cur_list_dest = &cur_info->apqns;
+            if (*value != '\0')
+                g_ptr_array_add (cur_list, g_strdup (value));
         } else if (g_strcmp0 (label, "Key file name") == 0) {
             cur_info->key_file_name = g_strdup (value);
         } else if (g_strcmp0 (label, "Sector size") == 0) {
@@ -1304,6 +1343,14 @@ BDS390ZkeyInfo** bd_s390_zkey_list (const gchar *name, GError **error) {
 
         g_free (label);
         g_free (value);
+    }
+
+    /* finalize a multi-value field left open at the end of the output */
+    if (cur_list != NULL) {
+        g_ptr_array_add (cur_list, NULL);
+        *cur_list_dest = (gchar **) g_ptr_array_free (cur_list, FALSE);
+        cur_list = NULL;
+        cur_list_dest = NULL;
     }
 
     g_strfreev (lines);
