@@ -69,6 +69,14 @@
       - xfsprogs
   when: ansible_facts['distribution'] == 'Fedora' and test_dependencies|bool
 
+- name: Install s390utils (Fedora)
+  package:
+    state: present
+    name:
+      - s390utils
+  when: ansible_facts['distribution'] == 'Fedora' and ansible_facts['architecture'] == 's390x' and test_dependencies|bool
+
+
 ####### CentOS
 - name: Install basic build tools (CentOS)
   package:
@@ -127,6 +135,13 @@
       - volume_key
       - xfsprogs
   when: ansible_facts['distribution'] == 'CentOS' and test_dependencies|bool
+
+- name: Install s390utils (CentOS)
+  package:
+    state: present
+    name:
+      - s390utils
+  when: ansible_facts['distribution'] == 'CentOS' and ansible_facts['architecture'] == 's390x' and test_dependencies|bool
 
 - name: Install pylint using pip (CentOS)
   pip:

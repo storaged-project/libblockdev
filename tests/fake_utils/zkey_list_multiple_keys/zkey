@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# fake 'zkey list' output with multiple keys, each with a single volume and a
+# single APQN
+
+cat <<EOF
+Key                          : secure_xtskey1
+-------------------------------------------------------------------------------------
+        Description          :
+        Secure key size      : 272 bytes
+        Clear key size       : 512 bits
+        XTS type key         : Yes
+        Key type             : CCA-AESCIPHER
+        Volumes              : /dev/loop0:enc-disk1
+        APQNs                : 02.0016
+        Key file name        : /etc/zkey/repository/secure_xtskey1.skey
+        Sector size          : (system default)
+        Volume type          : LUKS2
+        Verification pattern : ac1c529d846c3d3d5004b6ddd3feb727
+                               c50d36cb32cec9fecf99107bcbc2193a
+        KMS                  : (local)
+        KMS key label        : (local)
+        Dummy passphrase     : (none)
+        Created              : 2026-08-26 08:05:39
+        Changed              : (never)
+        Re-enciphered        : (never)
+
+Key                          : secure_xtskey2
+-------------------------------------------------------------------------------------
+        Description          :
+        Secure key size      : 272 bytes
+        Clear key size       : 512 bits
+        XTS type key         : Yes
+        Key type             : CCA-AESCIPHER
+        Volumes              : /dev/loop1:enc-disk2
+        APQNs                : 02.0016
+        Key file name        : /etc/zkey/repository/secure_xtskey2.skey
+        Sector size          : (system default)
+        Volume type          : LUKS2
+        Verification pattern : 5c001cabb1ea2b79e8710bb8bbd3a6e8
+                               8e72644ab5a04cc1dea5f5d7d32e9e9d
+        KMS                  : (local)
+        KMS key label        : (local)
+        Dummy passphrase     : (none)
+        Created              : 2026-08-26 08:06:39
+        Changed              : (never)
+        Re-enciphered        : (never)
+EOF

@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# fake 'zkey list' output with a single key associated with multiple APQNs (and a
+# multi-line verification pattern); the extra APQNs are printed on continuation
+# lines indented to the value column
+
+cat <<EOF
+Key                          : secure_xtskey1
+---------------------------------------------------------------------
+        Description          : This is our secure key in a repository
+        Secure key size      : 272 bytes
+        Clear key size       : 512 bits
+        XTS type key         : Yes
+        Key type             : CCA-AESCIPHER
+        Volumes              : /dev/mapper/disk1:enc-disk1
+        APQNs                : 03.0039
+                               04.0039
+        Key file name        : /etc/zkey/repository/secure_xtskey1.skey
+        Sector size          : (system default)
+        Volume type          : LUKS2
+        Verification pattern : ac08c5d154374a247d6bbbae047ab9f8
+                               541575915e764f6e35817b56bcf7c999
+        KMS                  : (local)
+        KMS key label        : (local)
+        Dummy passphrase     : (none)
+        Created              : 2020-08-20 16:57:32
+        Changed              : (never)
+        Re-enciphered        : (never)
+EOF
