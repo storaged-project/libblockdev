@@ -277,25 +277,247 @@ gboolean bd_fs_vfat_repair (const gchar *device, const BDExtraArg **extra, GErro
 }
 
 /**
+ * _vfat_locale_codepage:
+ *
+ * Determine the DOS/OEM codepage that matches the system locale, mirroring
+ * how Windows derives the OEM codepage from the system locale. FAT volume
+ * labels are stored as 8-bit OEM codepage bytes, so the codepage used to
+ * write a label must match the locale of the system that created it.
+ *
+ * The locale is read from the environment (LC_ALL > LC_CTYPE > LANG) rather
+ * than calling setlocale(), to avoid side effects on the host process
+ * (libblockdev runs inside udisksd).
+ *
+ * Returns: the codepage number, or 850 (the dosfstools default) if the locale
+ *          cannot be determined or has no known mapping.
+ */
+static guint
+_vfat_locale_codepage (void) {
+    /* Locale-to-codepage table based on the DOS CODEPAGES table in
+     * fatlabel(8), which mirrors how Windows maps the "Language for
+     * non-Unicode programs" setting to an OEM codepage. Entries are matched
+     * by longest-prefix so region variants (e.g. "zh_TW" over "zh",
+     * "en_GB" over "en") win. When nothing matches, the fatlabel default
+     * CP850 is returned. */
+    typedef struct {
+        const gchar *prefix;
+        guint codepage;
+    } VfatLocaleCodepage;
+    static const VfatLocaleCodepage codepage_table[] = {
+        /* --- CJK (multi-byte) --- */
+        { "zh_CN", 936 }, { "zh_SG", 936 },   /* Chinese (Simplified) / GBK */
+        { "zh_TW", 950 }, { "zh_HK", 950 },   /* Chinese (Traditional) / Big5 */
+        { "zh", 936 },                         /* Chinese default — Simplified */
+        { "ja",    932 },                       /* Japanese / Shift-JIS */
+        { "ko",    949 },                       /* Korean / UHC */
+        /* --- Cyrillic (CP866) --- */
+        { "ba", 866 }, { "be", 866 }, { "bg", 866 },
+        { "ky", 866 }, { "mk", 866 }, { "mn", 866 }, { "ru", 866 },
+        { "tg", 866 }, { "tt", 866 }, { "uk", 866 },
+        { "az@cyrillic", 866 }, { "uz@cyrillic", 866 },
+        /* --- Serbian / Bosnian Cyrillic (CP855) --- */
+        { "sr", 855 }, { "bs@cyrillic", 855 },
+        /* --- Central/Eastern Europe (CP852) --- */
+        { "bs", 852 }, { "cs", 852 }, { "hr", 852 }, { "hu", 852 },
+        { "pl", 852 }, { "ro", 852 }, { "sk", 852 }, { "sl", 852 },
+        { "sq", 852 }, { "sr@latin", 852 }, { "tk", 852 },
+        /* --- Turkish / Azeri / Uzbek (Latin) (CP857) --- */
+        { "tr", 857 }, { "az", 857 }, { "uz", 857 },
+        /* --- Greek (CP737) --- */
+        { "el", 737 },
+        /* --- Baltic (CP775) --- */
+        { "et", 775 }, { "lt", 775 }, { "lv", 775 },
+        /* --- Hebrew (CP862) --- */
+        { "he", 862 }, { "iw", 862 },
+        /* --- Arabic / Persian / Urdu / Uyghur (CP720) --- */
+        { "ar", 720 }, { "fa", 720 }, { "ps", 720 }, { "ur", 720 }, { "ug", 720 },
+        /* --- Thai (CP874) --- */
+        { "th", 874 },
+        /* --- Vietnamese (CP1258) --- */
+        { "vi", 1258 },
+        /* --- English variants (region-specific) --- */
+        { "en_GB", 850 }, { "en_IE", 850 }, { "en_AU", 850 },
+        { "en_CA", 850 }, { "en_NZ", 850 }, { "en_JM", 850 },
+        { "en_BZ", 850 }, { "en_TT", 850 }, { "en_BB", 850 },
+        { "en_AG", 850 }, { "en_BS", 850 }, { "en_BW", 850 }, { "en_GH", 850 },
+        { "en_GM", 850 }, { "en_GY", 850 }, { "en_HK", 850 },
+        { "en_IN", 437 }, { "en_MY", 437 }, { "en_PH", 437 }, { "en_SG", 437 },
+        { "en_US", 437 }, { "en_ZA", 437 }, { "en_ZW", 437 },
+        /* --- Western Europe (CP850) — the dosfstools fatlabel default --- */
+        { "af", 850 }, { "ca", 850 }, { "da", 850 }, { "de", 850 },
+        { "es", 850 }, { "eu", 850 }, { "fi", 850 }, { "fo", 850 },
+        { "fr", 850 }, { "fy", 850 }, { "gl", 850 }, { "is", 850 },
+        { "id", 850 }, { "it", 850 }, { "kl", 850 }, { "ms", 850 },
+        { "nb", 850 }, { "nl", 850 }, { "nn", 850 }, { "no", 850 },
+        { "pt", 850 }, { "rm", 850 }, { "se", 850 }, { "sv", 850 },
+        { "cy", 850 }, { "wo", 850 }, { "xh", 850 }, { "zu", 850 },
+        /* --- US-English fallback when no region matches (CP437) --- */
+        { "en", 437 },
+    };
+    const gchar *locale;
+    g_autofree gchar *lang = NULL;
+    g_autofree gchar *modifier = NULL;
+    gchar *p;
+    gsize i;
+    gsize best = G_MAXSIZE;
+    gsize best_len = 0;
+
+    locale = g_getenv ("LC_ALL");
+    if (locale == NULL || *locale == '\0')
+        locale = g_getenv ("LC_CTYPE");
+    if (locale == NULL || *locale == '\0')
+        locale = g_getenv ("LANG");
+
+    if (locale == NULL || *locale == '\0' ||
+        g_strcmp0 (locale, "C") == 0 || g_strcmp0 (locale, "POSIX") == 0 ||
+        g_str_has_prefix (locale, "C."))
+        return 850;
+
+    /* Extract language[_territory][@modifier], stripping the codeset (".").
+     * The @modifier is kept because it distinguishes script variants that
+     * map to different codepages (e.g. Serbian Cyrillic "sr" → 855 vs
+     * Serbian Latin "sr@latin" → 852). Since the codeset (".") precedes
+     * the modifier ("@") in locale names, save the modifier first. */
+    lang = g_strdup (locale);
+    p = strchr (lang, '@');
+    if (p != NULL) {
+        modifier = g_strdup (p);
+        *p = '\0';
+    }
+    p = strchr (lang, '.');
+    if (p) *p = '\0';
+    if (modifier != NULL) {
+        gchar *tmp = lang;
+        lang = g_strconcat (tmp, modifier, NULL);
+        g_free (tmp);
+    }
+
+    /* Longest-prefix match so region variants win: "zh_TW" over "zh",
+     * "en_US" over "en". */
+    for (i = 0; i < G_N_ELEMENTS (codepage_table); i++) {
+        const gchar *pfx = codepage_table[i].prefix;
+        if (g_str_has_prefix (lang, pfx) && strlen (pfx) > best_len) {
+            best = i;
+            best_len = strlen (pfx);
+        }
+    }
+
+    /* If a @modifier is present (e.g. "sr_RS@latin"), also try matching
+     * "language@modifier" (territory stripped) against @-bearing entries,
+     * which take precedence over the plain language match. */
+    p = strchr (lang, '@');
+    if (p != NULL) {
+        g_autofree gchar *lang_mod = NULL;
+        gchar *underscore = strchr (lang, '_');
+        if (underscore != NULL && underscore < p)
+            lang_mod = g_strdup_printf ("%.*s%s", (gint)(underscore - lang), lang, p);
+        else
+            lang_mod = g_strdup (lang);
+
+        gsize mod_best = G_MAXSIZE;
+        gsize mod_best_len = 0;
+        for (i = 0; i < G_N_ELEMENTS (codepage_table); i++) {
+            const gchar *pfx = codepage_table[i].prefix;
+            if (strchr (pfx, '@') != NULL &&
+                g_str_has_prefix (lang_mod, pfx) && strlen (pfx) > mod_best_len) {
+                mod_best = i;
+                mod_best_len = strlen (pfx);
+            }
+        }
+        if (mod_best != G_MAXSIZE)
+            return codepage_table[mod_best].codepage;
+    }
+
+    if (best != G_MAXSIZE)
+        return codepage_table[best].codepage;
+
+    return 850;
+}
+
+/**
+ * _vfat_label_from_codepage:
+ * @label: (nullable): raw OEM codepage bytes from the filesystem
+ *
+ * Convert a label read from a VFAT filesystem (raw OEM codepage bytes, as
+ * returned by blkid) to UTF-8, using the locale-derived codepage. Pure
+ * ASCII labels need no conversion.
+ *
+ * Note: FAT volumes do not carry encoding metadata. The codepage is
+ * inferred from the daemon's locale, so this only guarantees correct
+ * round-tripping when the volume was written on a system with the same
+ * locale. A volume written under locale A and read under locale B may
+ * produce garbled (but valid UTF-8) text.
+ *
+ * Returns: (transfer full): the UTF-8 label, or the original bytes on
+ *          conversion failure. Never %NULL.
+ */
+static gchar *
+_vfat_label_from_codepage (const gchar *label) {
+    if (label == NULL || *label == '\0')
+        return g_strdup (label ? label : "");
+
+    if (g_str_is_ascii (label))
+        return g_strdup (label);
+
+    guint cp = _vfat_locale_codepage ();
+    gchar cp_name[16];
+    g_snprintf (cp_name, sizeof (cp_name), "CP%u", cp);
+
+    GError *conv_error = NULL;
+    gchar *utf8 = g_convert (label, -1, "UTF-8", cp_name, NULL, NULL, &conv_error);
+    if (utf8 != NULL)
+        return utf8;
+
+    /* Conversion failed; return a valid UTF-8 string instead of raw bytes
+     * that may not be valid UTF-8. */
+    g_error_free (conv_error);
+    return g_utf8_make_valid (label, -1);
+}
+
+/**
  * bd_fs_vfat_set_label:
  * @device: the device containing the file system to set label for
  * @label: label to set
  * @error: (out) (optional): place to store error (if any)
  *
- * Returns: whether the label of vfat file system on the @device was
- *          successfully set or not
+ * Sets the label of a VFAT filesystem. For labels containing non-ASCII
+ * characters, the OEM codepage matching the system locale is passed to
+ * fatlabel via the -c option, so that labels in CJK, Cyrillic and other
+ * non-Western-European scripts are encoded correctly.
+ *
+ * Note: the codepage is derived from the daemon's locale environment
+ * (LC_ALL/LC_CTYPE/LANG), not the calling user's session. fatlabel uses
+ * setlocale(LC_CTYPE, "") internally, so the daemon must be running under
+ * a UTF-8 locale whose glibc locale data has been generated (locale-gen);
+ * otherwise the conversion may fail with "Cannot convert input sequence".
+ *
+ * Returns: whether the label was successfully set or not
  *
  * Tech category: %BD_FS_TECH_VFAT-%BD_FS_TECH_MODE_SET_LABEL
  */
 gboolean bd_fs_vfat_set_label (const gchar *device, const gchar *label, GError **error) {
-    const gchar *args[4] = {"fatlabel", device, NULL, NULL};
+    /* "fatlabel" "-c" "<cp>" <device> <label> -- at most 5 non-NULL entries */
+    const gchar *args[6] = {"fatlabel", NULL, NULL, NULL, NULL, NULL};
     UtilDep dep = {"fatlabel", "4.2", "--version", "fatlabel\\s+([\\d\\.]+).+"};
     gchar *label_up = NULL;
+    gchar *codepage_str = NULL;
     gboolean new_vfat = FALSE;
     gboolean ret;
+    gint idx = 1;
 
     if (!check_deps (&avail_deps, DEPS_FATLABEL_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
+
+    /* For labels with non-ASCII characters, pass the OEM codepage matching
+     * the system locale to fatlabel so it can encode them correctly. */
+    if (label && *label && !g_str_is_ascii (label)) {
+        guint cp = _vfat_locale_codepage ();
+        codepage_str = g_strdup_printf ("%u", cp);
+        args[idx++] = "-c";
+        args[idx++] = codepage_str;
+    }
+
+    args[idx++] = device;
 
     if (!label || g_strcmp0 (label, "") == 0) {
         /* fatlabel >= 4.2 refuses to set empty label */
@@ -303,16 +525,17 @@ gboolean bd_fs_vfat_set_label (const gchar *device, const gchar *label, GError *
                                                 dep.ver_arg, dep.ver_regexp,
                                                 NULL);
         if (new_vfat)
-            args[2] = "--reset";
+            args[idx++] = "--reset";
+    } else {
+        /* forcefully convert the label uppercase; g_ascii_strup only
+         * uppercases a-z, leaving multi-byte UTF-8 sequences unchanged */
+        label_up = g_ascii_strup (label, -1);
+        args[idx++] = label_up;
     }
 
-    /* forcefully convert the label uppercase in case no reset was requested */
-    if (label && args[2] == NULL) {
-        label_up = g_ascii_strup (label, -1);
-        args[2] = label_up;
-    }
     ret = bd_utils_exec_and_report_error (args, NULL, error);
     g_free (label_up);
+    g_free (codepage_str);
 
     return ret;
 }
@@ -330,6 +553,12 @@ gboolean bd_fs_vfat_set_label (const gchar *device, const gchar *label, GError *
 gboolean bd_fs_vfat_check_label (const gchar *label, GError **error) {
     const gchar *forbidden = "\"*/:<>?\\|";
     guint n;
+
+    if (label == NULL) {
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                             "Label cannot be NULL.");
+        return FALSE;
+    }
 
     if (strlen (label) > 11) {
         g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
@@ -452,6 +681,14 @@ BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
         /* error is already populated */
         bd_fs_vfat_info_free (ret);
         return NULL;
+    }
+
+    /* blkid returns raw OEM codepage bytes; convert to UTF-8 so the label
+     * round-trips with bd_fs_vfat_set_label(). */
+    {
+        gchar *utf8_label = _vfat_label_from_codepage (ret->label);
+        g_free (ret->label);
+        ret->label = utf8_label;
     }
 
     success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
