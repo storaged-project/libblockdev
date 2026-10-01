@@ -489,6 +489,7 @@ GType bd_crypto_bitlk_info_get_type();
  * @uuid: UUID of the BITLK device
  * @backing_device: name of the underlying block device
  * @sector_size: size (in bytes) of encryption sector
+ * @has_clearkey: whether the device has a valid clear key protector
  */
 typedef struct BDCryptoBITLKInfo {
     gchar *cipher;
@@ -496,6 +497,7 @@ typedef struct BDCryptoBITLKInfo {
     gchar *uuid;
     gchar *backing_device;
     guint32 sector_size;
+    gboolean has_clearkey;
 } BDCryptoBITLKInfo;
 
 /**
@@ -532,6 +534,7 @@ BDCryptoBITLKInfo* bd_crypto_bitlk_info_copy (BDCryptoBITLKInfo *info) {
     new_info->uuid = g_strdup (info->uuid);
     new_info->backing_device = g_strdup (info->backing_device);
     new_info->sector_size = info->sector_size;
+    new_info->has_clearkey = info->has_clearkey;
 
     return new_info;
 }
@@ -1381,7 +1384,7 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
  * bd_crypto_bitlk_open:
  * @device: the device to open
  * @name: name for the BITLK device
- * @context: key slot context (passphrase/keyfile/token...) for this BITLK device
+ * @context: (nullable): key slot context (passphrase/keyfile/token...) for this BITLK device or %NULL for clear key
  * @read_only: whether to open as read-only or not (meaning read-write)
  * @error: (out) (optional): place to store error (if any)
  *
@@ -1397,7 +1400,7 @@ gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, BDCryptoK
  * bd_crypto_bitlk_open_flags:
  * @device: the device to open
  * @name: name for the BITLK device
- * @context: key slot context (passphrase/keyfile/token...) for this BITLK device
+ * @context: (nullable): key slot context (passphrase/keyfile/token...) for this BITLK device or %NULL for clear key
  * @flags: activation flags for the BITLK device
  * @error: (out) (optional): place to store error (if any)
  *

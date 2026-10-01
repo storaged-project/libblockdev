@@ -254,6 +254,7 @@ BDCryptoBITLKInfo* bd_crypto_bitlk_info_copy (BDCryptoBITLKInfo *info) {
     new_info->uuid = g_strdup (info->uuid);
     new_info->backing_device = g_strdup (info->backing_device);
     new_info->sector_size = info->sector_size;
+    new_info->has_clearkey = info->has_clearkey;
 
     return new_info;
 }
@@ -2730,6 +2731,7 @@ BDCryptoBITLKInfo* bd_crypto_bitlk_info (const gchar *device, GError **error) {
     info->backing_device = g_strdup (crypt_get_device_name (cd));
     ret = crypt_get_sector_size (cd);
     info->sector_size = ret > 0 ? ret : 0;
+    info->has_clearkey = (crypt_activate_by_passphrase (cd, NULL, CRYPT_ANY_SLOT, NULL, 0, 0) >= 0);
 
     crypt_free (cd);
 
@@ -3638,7 +3640,7 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
  * bd_crypto_bitlk_open_flags:
  * @device: the device to open
  * @name: name for the BITLK device
- * @context: key slot context (passphrase/keyfile/token...) for this BITLK device
+ * @context: (nullable): key slot context (passphrase/keyfile/token...) for this BITLK device or %NULL for clear key
  * @flags: activation flags for the BITLK device
  * @error: (out) (optional): place to store error (if any)
  *
@@ -3689,7 +3691,9 @@ gboolean bd_crypto_bitlk_open_flags (const gchar *device, const gchar *name, BDC
     if (flags & BD_CRYPTO_OPEN_READONLY)
         crypt_flags |= CRYPT_ACTIVATE_READONLY;
 
-    if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE) {
+    if (!context) {
+        ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT, NULL, 0, crypt_flags);
+    } else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE) {
         ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT,
                                             (const char *) context->u.passphrase.pass_data,
                                             context->u.passphrase.data_len,
@@ -3739,7 +3743,7 @@ gboolean bd_crypto_bitlk_open_flags (const gchar *device, const gchar *name, BDC
  * bd_crypto_bitlk_open:
  * @device: the device to open
  * @name: name for the BITLK device
- * @context: key slot context (passphrase/keyfile/token...) for this BITLK device
+ * @context: (nullable): key slot context (passphrase/keyfile/token...) for this BITLK device or %NULL for clear key
  * @read_only: whether to open as read-only or not (meaning read-write)
  * @error: (out) (optional): place to store error (if any)
  *
