@@ -37,6 +37,29 @@
 #include "nvme-private.h"
 
 
+static const gchar *get_extra_config_file (const BDExtraArg **extra, gboolean *use_config) {
+    const BDExtraArg **extra_i;
+    const gchar *config_file = NULL;
+
+    /* NULL means the libnvme default configuration file */
+    *use_config = TRUE;
+    if (!extra)
+        return NULL;
+
+    for (extra_i = extra; *extra_i; extra_i++)
+        if (g_strcmp0 ((*extra_i)->opt, "config") == 0) {
+            if (g_ascii_strcasecmp ((*extra_i)->val, "none") == 0) {
+                *use_config = FALSE;
+                config_file = NULL;
+            } else {
+                *use_config = TRUE;
+                config_file = (*extra_i)->val;
+            }
+        }
+
+    return config_file;
+}
+
 static void parse_extra_args (const BDExtraArg **extra, struct libnvmf_context *fctx, const gchar **hostkey, const gchar **ctrlkey, const gchar **hostsymname, const gchar **keyring, const gchar **tls_key) {
     const BDExtraArg **extra_i;
 
@@ -128,6 +151,54 @@ static void parse_extra_args (const BDExtraArg **extra, struct libnvmf_context *
 #undef SAFE_BOOL_CONV
 }
 
+struct config_match_data {
+    const gchar *subsysnqn;
+    const gchar *transport;
+    const gchar *transport_addr;
+    const gchar *transport_svcid;
+    const gchar *host_traddr;
+    const gchar *host_iface;
+    const gchar *host_nqn;
+    const struct libnvmf_config_conn *conn;
+};
+
+static void config_match_conn (const struct libnvmf_config_conn *conn, void *user_data) {
+    struct config_match_data *data = user_data;
+    const gchar *val;
+
+    /* first match wins */
+    if (data->conn)
+        return;
+
+    if (g_strcmp0 (libnvmf_config_conn_get_subsysnqn (conn), data->subsysnqn) != 0 ||
+        g_strcmp0 (libnvmf_config_conn_get_transport (conn), data->transport) != 0 ||
+        g_strcmp0 (libnvmf_config_conn_get_traddr (conn), data->transport_addr) != 0 ||
+        g_strcmp0 (libnvmf_config_conn_get_host_traddr (conn), data->host_traddr) != 0 ||
+        g_strcmp0 (libnvmf_config_conn_get_host_iface (conn), data->host_iface) != 0)
+        return;
+
+    /* unset values in the config file match anything */
+    val = libnvmf_config_conn_get_trsvcid (conn);
+    if (val && data->transport_svcid && g_strcmp0 (val, data->transport_svcid) != 0)
+        return;
+    val = libnvmf_config_conn_get_hostnqn (conn);
+    if (val && data->host_nqn && g_strcmp0 (val, data->host_nqn) != 0)
+        return;
+
+    data->conn = conn;
+}
+
+static const gchar *get_param_nonempty (const struct libnvmf_config_conn *conn, const gchar *key) {
+    const gchar *val;
+
+    if (!conn)
+        return NULL;
+    val = libnvmf_params_get (libnvmf_config_conn_get_params (conn), key);
+    if (val && *val == '\0')
+        return NULL;
+    return val;
+}
+
 
 /**
  * bd_nvme_connect:
@@ -153,12 +224,15 @@ static void parse_extra_args (const BDExtraArg **extra, struct libnvmf_context *
  * - `"loop"`: A NVMe over Fabrics target on the local host.
  *
  * In addition to the primary options it's possible to supply @extra arguments:
- * - `"config"`: Ignored, configuration files are not read anymore (see below).
+ * - `"config"`: Use the specified configuration file instead of the default file (see below) or
+ *               specify `"none"` to avoid reading any configuration file.
  * - `"kxchap_secret"`: NVMe In-band authentication (KX-HMAC-CHAP, formerly DH-HMAC-CHAP) host secret
  *                      in ASCII format as described in the NVMe specification. When not specified,
+ *                      the secret is taken from the configuration file, if present. Otherwise
  *                      no in-band authentication is attempted.
  * - `"kxchap_ctrl_secret"`: NVMe In-band authentication controller secret for bi-directional authentication.
- *                           When not specified, no bi-directional authentication is attempted.
+ *                           When not specified, the secret is taken from the configuration file, if present.
+ *                           Otherwise no bi-directional authentication is attempted.
  * - `"dhchap_key"`, `"dhchap_ctrl_key"`: Deprecated aliases for `"kxchap_secret"` and `"kxchap_ctrl_secret"`.
  * - `"nr_io_queues"`: The number of I/O queues.
  * - `"nr_write_queues"`: Number of additional queues that will be used for write I/O.
@@ -181,8 +255,15 @@ static void parse_extra_args (const BDExtraArg **extra, struct libnvmf_context *
  * Boolean values can be expressed by "0"/"1", "on"/"off" or "True"/"False" case-insensitive
  * strings. Failed numerical or boolean string conversions will result in the option being ignored.
  *
- * The JSON configuration file `/etc/nvme/config.json` is not supported by libnvme3 anymore
- * and is not read.
+ * By default additional options are read from the default configuration file `/etc/nvme/nvme-fabrics.conf`
+ * (and its `/etc/nvme/nvme-fabrics.conf.d/` drop-in directory). Parameters of the first connection
+ * entry matching the @subsysnqn, @transport, @transport_addr, @transport_svcid, @host_traddr
+ * and @host_iface arguments are applied, along with its host identity when @host_nqn or @host_id
+ * are not specified. Use the @extra `"config"` argument to either specify a different config file
+ * or disable use of it. The INI configuration file format is documented
+ * in [https://github.com/linux-nvme/nvme-cli/blob/master/libnvme/design/CONFIG.md](https://github.com/linux-nvme/nvme-cli/blob/master/libnvme/design/CONFIG.md),
+ * legacy JSON configuration files are not supported anymore.
+ * Any @extra option generally overrides particular option specified in a configuration file.
  *
  * Returns: %TRUE if the subsystem was connected successfully, %FALSE otherwise with @error set.
  *
@@ -190,6 +271,8 @@ static void parse_extra_args (const BDExtraArg **extra, struct libnvmf_context *
  */
 gboolean bd_nvme_connect (const gchar *subsysnqn, const gchar *transport, const gchar *transport_addr, const gchar *transport_svcid, const gchar *host_traddr, const gchar *host_iface, const gchar *host_nqn, const gchar *host_id, const BDExtraArg **extra, GError **error) {
     int ret;
+    const gchar *config_file;
+    gboolean use_config;
     gchar *host_nqn_val = NULL;
     gchar *host_id_val = NULL;
     const gchar *hostkey = NULL;
@@ -200,6 +283,8 @@ gboolean bd_nvme_connect (const gchar *subsysnqn, const gchar *transport, const 
     struct libnvme_global_ctx *ctx;
     struct libnvme_host *host;
     struct libnvmf_context *fctx = NULL;
+    struct libnvmf_config *config = NULL;
+    struct config_match_data match = ZERO_INIT;
     gboolean success = FALSE;
 
     if (subsysnqn == NULL) {
@@ -237,6 +322,42 @@ gboolean bd_nvme_connect (const gchar *subsysnqn, const gchar *transport, const 
         return FALSE;
     }
 
+    /* look up the connection in the configuration file */
+    config_file = get_extra_config_file (extra, &use_config);
+    if (use_config) {
+        ret = libnvmf_config_read (ctx, config_file, &config);
+        if (ret != 0) {
+            if (config_file) {
+                g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_INVALID_ARGUMENT,
+                             "Failed to read configuration file '%s': %s",
+                             config_file, libnvme_strerror (-ret));
+                goto out;
+            }
+            /* not fatal for the default configuration file */
+            bd_utils_log_format (BD_UTILS_LOG_WARNING,
+                                 "Failed to read the default NVMe-oF configuration file: %s",
+                                 libnvme_strerror (-ret));
+            config = NULL;
+        }
+    }
+    if (config) {
+        match.subsysnqn = subsysnqn;
+        match.transport = transport;
+        match.transport_addr = transport_addr;
+        match.transport_svcid = transport_svcid;
+        match.host_traddr = host_traddr;
+        match.host_iface = host_iface;
+        match.host_nqn = host_nqn;
+        libnvmf_config_conn_for_each (config, config_match_conn, &match);
+        if (match.conn) {
+            if (!host_nqn)
+                host_nqn = libnvmf_config_conn_get_hostnqn (match.conn);
+            if (!host_id)
+                host_id = libnvmf_config_conn_get_hostid (match.conn);
+            hostsymname = libnvmf_config_conn_get_hostsymname (match.conn);
+        }
+    }
+
     /* HostNQN and HostID, read from /etc/nvme/ or generated when not specified */
     ret = libnvmf_host_get_ids (ctx, host_nqn, host_id, &host_nqn_val, &host_id_val);
     if (ret != 0 || host_nqn_val == NULL || host_id_val == NULL) {
@@ -261,15 +382,23 @@ gboolean bd_nvme_connect (const gchar *subsysnqn, const gchar *transport, const 
         ret = libnvmf_context_set_connection (fctx, subsysnqn, transport, transport_addr, transport_svcid, host_traddr, host_iface);
     if (ret == 0)
         ret = libnvmf_context_set_hostnqn (fctx, host_nqn_val, host_id_val);
+    if (ret == 0 && match.conn)
+        ret = libnvmf_context_apply_params (fctx, libnvmf_config_conn_get_params (match.conn));
     if (ret != 0) {
         _nvme_fabrics_errno_to_gerror (ret, error);
         g_prefix_error (error, "Error creating the controller: ");
         goto out;
     }
 
+    /* any extra argument overrides values from the configuration file */
     parse_extra_args (extra, fctx, &hostkey, &ctrlkey, &hostsymname, &keyring, &tls_key);
     if (hostkey || ctrlkey || keyring || tls_key) {
-        ret = libnvmf_context_set_crypto (fctx, hostkey, ctrlkey, keyring, tls_key, NULL);
+        ret = libnvmf_context_set_crypto (fctx,
+                                          hostkey ? hostkey : get_param_nonempty (match.conn, "kxchap-secret"),
+                                          ctrlkey ? ctrlkey : get_param_nonempty (match.conn, "kxchap-ctrl-secret"),
+                                          keyring ? keyring : get_param_nonempty (match.conn, "keyring"),
+                                          tls_key /* NULL keeps the current key */,
+                                          get_param_nonempty (match.conn, "tls-key-identity"));
         if (ret != 0) {
             _nvme_fabrics_errno_to_gerror (ret, error);
             g_prefix_error (error, "Error setting the controller keys: ");
@@ -299,6 +428,7 @@ gboolean bd_nvme_connect (const gchar *subsysnqn, const gchar *transport, const 
 
 out:
     libnvmf_context_free (fctx);
+    libnvmf_config_free (config);
     libnvme_free_global_ctx (ctx);
     free (host_nqn_val);
     free (host_id_val);

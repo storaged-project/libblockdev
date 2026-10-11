@@ -1291,12 +1291,15 @@ gboolean bd_nvme_set_host_id (const gchar *host_id, GError **error);
  * - `"loop"`: A NVMe over Fabrics target on the local host.
  *
  * In addition to the primary options it's possible to supply @extra arguments:
- * - `"config"`: Ignored, configuration files are not read anymore (see below).
+ * - `"config"`: Use the specified configuration file instead of the default file (see below) or
+ *               specify `"none"` to avoid reading any configuration file.
  * - `"kxchap_secret"`: NVMe In-band authentication (KX-HMAC-CHAP, formerly DH-HMAC-CHAP) host secret
  *                      in ASCII format as described in the NVMe specification. When not specified,
+ *                      the secret is taken from the configuration file, if present. Otherwise
  *                      no in-band authentication is attempted.
  * - `"kxchap_ctrl_secret"`: NVMe In-band authentication controller secret for bi-directional authentication.
- *                           When not specified, no bi-directional authentication is attempted.
+ *                           When not specified, the secret is taken from the configuration file, if present.
+ *                           Otherwise no bi-directional authentication is attempted.
  * - `"dhchap_key"`, `"dhchap_ctrl_key"`: Deprecated aliases for `"kxchap_secret"` and `"kxchap_ctrl_secret"`.
  * - `"nr_io_queues"`: The number of I/O queues.
  * - `"nr_write_queues"`: Number of additional queues that will be used for write I/O.
@@ -1319,8 +1322,15 @@ gboolean bd_nvme_set_host_id (const gchar *host_id, GError **error);
  * Boolean values can be expressed by "0"/"1", "on"/"off" or "True"/"False" case-insensitive
  * strings. Failed numerical or boolean string conversions will result in the option being ignored.
  *
- * The JSON configuration file `/etc/nvme/config.json` is not supported by libnvme3 anymore
- * and is not read.
+ * By default additional options are read from the default configuration file `/etc/nvme/nvme-fabrics.conf`
+ * (and its `/etc/nvme/nvme-fabrics.conf.d/` drop-in directory). Parameters of the first connection
+ * entry matching the @subsysnqn, @transport, @transport_addr, @transport_svcid, @host_traddr
+ * and @host_iface arguments are applied, along with its host identity when @host_nqn or @host_id
+ * are not specified. Use the @extra `"config"` argument to either specify a different config file
+ * or disable use of it. The INI configuration file format is documented
+ * in [https://github.com/linux-nvme/nvme-cli/blob/master/libnvme/design/CONFIG.md](https://github.com/linux-nvme/nvme-cli/blob/master/libnvme/design/CONFIG.md),
+ * legacy JSON configuration files are not supported anymore.
+ * Any @extra option generally overrides particular option specified in a configuration file.
  *
  * Returns: %TRUE if the subsystem was connected successfully, %FALSE otherwise with @error set.
  *
