@@ -2,6 +2,7 @@ import unittest
 import os
 import re
 import shutil
+import tempfile
 import overrides_hack
 
 from utils import create_sparse_tempfile, create_nvmet_device, delete_nvmet_device, setup_nvme_target, teardown_nvme_target, find_nvme_ctrl_devs_for_subnqn, find_nvme_ns_devs_for_subnqn, get_nvme_hostnqn, run_command, TestTags, tag_test, read_file, write_file, required_plugins
@@ -310,11 +311,29 @@ class NVMeTestCase(NVMeTest):
 class NVMeFabricsTestCase(NVMeTest):
     SUBNQN = 'libblockdev_nvme'
     DISCOVERY_NQN = 'nqn.2014-08.org.nvmexpress.discovery'
+    DEFAULT_CONFIG = '/etc/nvme/nvme-fabrics.conf'
+    # marks a broken default configuration written by test_connect_config
+    BROKEN_CONFIG_MARKER = '# broken configuration written by the libblockdev test suite, safe to remove\n'
 
     def setUp(self):
         self.dev_files = []
         self.hostnqn = get_nvme_hostnqn()
         self.have_stable_nqn = os.path.exists('/sys/class/dmi/id/product_uuid')
+        # a leftover of an interrupted run would make every connect fail
+        self._remove_broken_default_config()
+
+    def _remove_broken_default_config(self):
+        try:
+            if read_file(self.DEFAULT_CONFIG).startswith(self.BROKEN_CONFIG_MARKER):
+                os.unlink(self.DEFAULT_CONFIG)
+        except FileNotFoundError:
+            pass
+
+    def _tempfile(self, suffix):
+        fd, path = tempfile.mkstemp(prefix="libblockdev-nvme-", suffix=suffix, dir=self.TMPDIR)
+        os.close(fd)
+        self.addCleanup(self._safe_unlink, path)
+        return path
 
     def _setup_target(self, num_devices):
         self.addCleanup(self._clean_up)
@@ -627,6 +646,78 @@ class NVMeFabricsTestCase(NVMeTest):
         self._safe_unlink(HOSTNQN_PATH)
         self._safe_unlink(HOSTID_PATH)
 
+
+    @tag_test(TestTags.CORE)
+    def test_connect_config(self):
+        """Test connecting with a fabrics configuration file"""
+
+        # the configuration file requires a valid NQN and a transport address
+        subnqn = "nqn.2014-08.org.storaged:libblockdev-nvme-config"
+        traddr = "1"
+        self.addCleanup(self._clean_up)
+        self.dev_files += [create_sparse_tempfile("nvmeof_test0", 1024**3, dir=self.TMPDIR)]
+        setup_nvme_target(self.dev_files, subnqn, traddr)
+        os.unlink(self.dev_files[0])
+
+        config = self._tempfile(".conf")
+        write_file(config, "[Subsystem]\n"
+                           "nqn = %s\n"
+                           "keep-alive-tmo = 17\n"
+                           "controller = transport=loop;traddr=%s\n" % (subnqn, traddr))
+
+        def connect_get_kato(extra):
+            ret = BlockDev.nvme_connect(subnqn, 'loop', traddr, None, None, None, None, None, extra)
+            self.assertTrue(ret)
+            self.addCleanup(self._nvme_disconnect, subnqn, ignore_errors=True)
+            ctrls = find_nvme_ctrl_devs_for_subnqn(subnqn)
+            self.assertEqual(len(ctrls), 1)
+            kato = read_file("/sys/class/nvme/%s/kato" % os.path.basename(ctrls[0])).strip()
+            BlockDev.nvme_disconnect(subnqn)
+            return kato
+
+        # parameters of the matching connection are applied
+        self.assertEqual(connect_get_kato([BlockDev.ExtraArg.new("config", config)]), "17")
+
+        # extra arguments take precedence
+        self.assertEqual(connect_get_kato([BlockDev.ExtraArg.new("config", config),
+                                           BlockDev.ExtraArg.new("keep_alive_tmo", "23")]), "23")
+
+        # no configuration file
+        self.assertNotEqual(connect_get_kato([BlockDev.ExtraArg.new("config", "none")]), "17")
+
+        # a missing configuration file is an error when explicitly requested
+        with self.assertRaisesRegex(GLib.GError, r"Failed to read configuration file"):
+            BlockDev.nvme_connect(subnqn, 'loop', traddr, None, None, None, None, None,
+                                  [BlockDev.ExtraArg.new("config", "/nonexistent/nvme-fabrics.conf")])
+        ctrls = find_nvme_ctrl_devs_for_subnqn(subnqn)
+        self.assertEqual(len(ctrls), 0)
+
+        # legacy JSON configuration files are not supported anymore
+        json_config = self._tempfile(".json")
+        write_file(json_config, '[{"hostnqn": "%s", "subsystems": []}]\n' % self.hostnqn)
+        with self.assertRaisesRegex(GLib.GError, r"legacy JSON configuration files are not supported"):
+            BlockDev.nvme_connect(subnqn, 'loop', traddr, None, None, None, None, None,
+                                  [BlockDev.ExtraArg.new("config", json_config)])
+        ctrls = find_nvme_ctrl_devs_for_subnqn(subnqn)
+        self.assertEqual(len(ctrls), 0)
+
+        # a configuration file that fails to parse is an error
+        broken_config = self._tempfile(".conf")
+        write_file(broken_config, "[Subsystem]\nthis is not a key value pair\n")
+        with self.assertRaisesRegex(GLib.GError, r"Failed to read configuration file"):
+            BlockDev.nvme_connect(subnqn, 'loop', traddr, None, None, None, None, None,
+                                  [BlockDev.ExtraArg.new("config", broken_config)])
+        ctrls = find_nvme_ctrl_devs_for_subnqn(subnqn)
+        self.assertEqual(len(ctrls), 0)
+
+        # including the default one, its settings must not be dropped silently
+        if not os.path.exists(self.DEFAULT_CONFIG):
+            write_file(self.DEFAULT_CONFIG, self.BROKEN_CONFIG_MARKER + "[Subsystem]\nthis is not a key value pair\n")
+            self.addCleanup(self._remove_broken_default_config)
+            with self.assertRaisesRegex(GLib.GError, r"Failed to read the default NVMe-oF configuration file"):
+                BlockDev.nvme_connect(subnqn, 'loop', traddr, None, None, None, None, None)
+            ctrls = find_nvme_ctrl_devs_for_subnqn(subnqn)
+            self.assertEqual(len(ctrls), 0)
 
     @tag_test(TestTags.CORE)
     def test_persistent_dc(self):
