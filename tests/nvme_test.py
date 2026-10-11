@@ -381,8 +381,13 @@ class NVMeFabricsTestCase(NVMeTest):
             self.assertTrue(re.match(r'/dev/nvme[0-9]+n[0-9]+', ns))
             self.assertTrue(os.path.exists(ns))
 
+        # an identical connection is refused unless explicitly requested
+        with self.assertRaisesRegex(GLib.GError, r"Error connecting the controller: already connected"):
+            BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, None, None)
+
         # make a duplicate connection
-        ret = BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, None, None)
+        ret = BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, None, None,
+                                    [BlockDev.ExtraArg.new("duplicate_connect", "True")])
         self.assertTrue(ret)
 
         # should see two controllers now
