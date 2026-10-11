@@ -395,7 +395,7 @@ gboolean bd_nvme_sanitize (const gchar *device, BDNVMESanitizeAction action, gbo
                             no_dealloc,
                             FALSE /* emvs */,
                             FALSE /* preq */,
-                            GUINT32_TO_LE (overwrite_pattern));
+                            overwrite_pattern);
     ret = libnvme_exec_admin_passthru (hdl, &cmd);
     if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
