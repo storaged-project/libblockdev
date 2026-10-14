@@ -368,9 +368,14 @@ gboolean bd_dm_map_exists (const gchar *map_name, gboolean live_only, gboolean a
         return FALSE;
     }
 
-    dm_task_run (task_list);
-    names = dm_task_get_names (task_list);
+    if (!dm_task_run (task_list)) {
+        g_set_error_literal (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
+                             "Failed to run DM task");
+        dm_task_destroy (task_list);
+        return FALSE;
+    }
 
+    names = dm_task_get_names (task_list);
     if (!names || !names->dev) {
         dm_task_destroy (task_list);
         return FALSE;
