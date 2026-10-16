@@ -20,6 +20,7 @@
 #include <string.h>
 #include <glib.h>
 #include <libcryptsetup.h>
+#include <libdevmapper.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/random.h>
@@ -30,6 +31,7 @@
 #include <sys/types.h>
 #include <keyutils.h>
 #include <blockdev/utils.h>
+#include <syslog.h>
 
 #ifdef WITH_BD_ESCROW
 #include <nss.h>
@@ -41,6 +43,7 @@
 #endif
 
 #include "crypto.h"
+#include "dm_logging.h"
 
 #ifdef __clang__
 #define ZERO_INIT {}
@@ -344,6 +347,13 @@ static void crypto_log_redirect (gint level, const gchar *msg, void *usrptr G_GN
  *
  */
 gboolean bd_crypto_init (void) {
+    dm_log_with_errno_init ((dm_log_with_errno_fn) redirect_dm_log);
+#ifdef DEBUG
+    dm_log_init_verbose (LOG_DEBUG);
+#else
+    dm_log_init_verbose (LOG_INFO);
+#endif
+
 #ifdef DEBUG
     crypt_set_debug_level (CRYPT_DEBUG_ALL);
 #endif
@@ -364,6 +374,8 @@ void bd_crypto_close (void) {
     c_locale = (locale_t) 0;
     crypt_set_log_callback (NULL, NULL, NULL);
     crypt_set_debug_level (CRYPT_DEBUG_NONE);
+    dm_log_with_errno_init (NULL);
+    dm_log_init_verbose (0);
 }
 
 /**
