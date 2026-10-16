@@ -32,6 +32,7 @@ GQuark bd_nvme_error_quark (void) {
  * @BD_NVME_ERROR_CONNECT_NODEV: Invalid interface.
  * @BD_NVME_ERROR_CONNECT_OPNOTSUPP: Operation not supported.
  * @BD_NVME_ERROR_CONNECT_REFUSED: Connection refused.
+ * @BD_NVME_ERROR_OWNED: The controller is not owned by the caller (see bd_nvme_disconnect()).
  */
 /* BpG-skip-end */
 typedef enum {
@@ -53,6 +54,7 @@ typedef enum {
     BD_NVME_ERROR_CONNECT_NODEV,
     BD_NVME_ERROR_CONNECT_OPNOTSUPP,
     BD_NVME_ERROR_CONNECT_REFUSED,
+    BD_NVME_ERROR_OWNED,
 } BDNVMEError;
 
 typedef enum {
@@ -1004,6 +1006,18 @@ typedef enum {
     BD_NVME_SANITIZE_ACTION_CRYPTO_ERASE = 3,
 } BDNVMESanitizeAction;
 
+/* BpG-skip */
+/**
+ * BDNVMEDisconnectFlags:
+ * @BD_NVME_DISCONNECT_NONE: No flags.
+ * @BD_NVME_DISCONNECT_FORCE: Disconnect controllers regardless of their owner in the libnvme controller ownership registry.
+ */
+/* BpG-skip-end */
+typedef enum {
+    BD_NVME_DISCONNECT_NONE  = 0,
+    BD_NVME_DISCONNECT_FORCE = 1 << 0,
+} BDNVMEDisconnectFlags;
+
 
 /**
  * bd_nvme_get_controller_info:
@@ -1291,14 +1305,16 @@ gboolean bd_nvme_set_host_id (const gchar *host_id, GError **error);
  * - `"loop"`: A NVMe over Fabrics target on the local host.
  *
  * In addition to the primary options it's possible to supply @extra arguments:
- * - `"config"`: Use the specified JSON configuration file instead of the default file (see below) or
+ * - `"config"`: Use the specified configuration file instead of the default file (see below) or
  *               specify `"none"` to avoid reading any configuration file.
- * - `"dhchap_key"`: NVMe In-band authentication secret in ASCII format as described
- *                      in the NVMe 2.0 specification. When not specified, the secret is by default read
- *                      from `/etc/nvme/hostkey`. In case that file does not exist no in-band authentication
- *                      is attempted.
- * - `"dhchap_ctrl_key"`: NVMe In-band authentication controller secret for bi-directional authentication.
- *                        When not specified, no bi-directional authentication is attempted.
+ * - `"kxchap_secret"`: NVMe In-band authentication (KX-HMAC-CHAP, formerly DH-HMAC-CHAP) host secret
+ *                      in ASCII format as described in the NVMe specification. When not specified,
+ *                      the secret is taken from the configuration file, if present. Otherwise
+ *                      no in-band authentication is attempted.
+ * - `"kxchap_ctrl_secret"`: NVMe In-band authentication controller secret for bi-directional authentication.
+ *                           When not specified, the secret is taken from the configuration file, if present.
+ *                           Otherwise no bi-directional authentication is attempted.
+ * - `"dhchap_key"`, `"dhchap_ctrl_key"`: Deprecated aliases for `"kxchap_secret"` and `"kxchap_ctrl_secret"`.
  * - `"nr_io_queues"`: The number of I/O queues.
  * - `"nr_write_queues"`: Number of additional queues that will be used for write I/O.
  * - `"nr_poll_queues"`: Number of additional queues that will be used for polling latency sensitive I/O.
@@ -1314,17 +1330,24 @@ gboolean bd_nvme_set_host_id (const gchar *host_id, GError **error);
  * - `"data_digest"`: Generates/verifies data digest (TCP). Boolean value.
  * - `"tls"`: Enable TLS encryption (TCP). Boolean value.
  * - `"hostsymname"`: TP8010: NVMe host symbolic name.
+ * - `"owner"`: Register a newly created controller with this owner in the libnvme controller ownership
+ *              registry (`/run/nvme/registry/`) instead of the default `"libblockdev"`, e.g. `"udisks"`.
+ *              An empty string leaves the controller without an owner. An already connected controller
+ *              keeps its owner. See bd_nvme_disconnect() and bd_nvme_disconnect_full().
  * - `"keyring"`: Keyring to store and lookup keys. String value.
  * - `"tls_key"`: TLS PSK for the connection. String value.
  *
  * Boolean values can be expressed by "0"/"1", "on"/"off" or "True"/"False" case-insensitive
  * strings. Failed numerical or boolean string conversions will result in the option being ignored.
  *
- * By default additional options are read from the default configuration file `/etc/nvme/config.json`.
- * This follows the default behaviour of `nvme-cli`. Use the @extra `"config"` argument
- * to either specify a different config file or disable use of it. The JSON configuration
- * file format is documented in [https://raw.githubusercontent.com/linux-nvme/libnvme/master/doc/config-schema.json](https://raw.githubusercontent.com/linux-nvme/libnvme/master/doc/config-schema.json).
- * As a rule @extra key names are kept consistent with the JSON config file schema.
+ * By default additional options are read from the default configuration file `/etc/nvme/nvme-fabrics.conf`
+ * (and its `/etc/nvme/nvme-fabrics.conf.d/` drop-in directory). Parameters of the first connection
+ * entry matching the @subsysnqn, @transport, @transport_addr, @transport_svcid, @host_traddr
+ * and @host_iface arguments are applied, along with its host identity when @host_nqn or @host_id
+ * are not specified. Use the @extra `"config"` argument to either specify a different config file
+ * or disable use of it. The INI configuration file format is documented
+ * in [https://github.com/linux-nvme/nvme-cli/blob/master/libnvme/design/CONFIG.md](https://github.com/linux-nvme/nvme-cli/blob/master/libnvme/design/CONFIG.md),
+ * legacy JSON configuration files are not supported anymore.
  * Any @extra option generally overrides particular option specified in a configuration file.
  *
  * Returns: %TRUE if the subsystem was connected successfully, %FALSE otherwise with @error set.
@@ -1342,8 +1365,16 @@ gboolean bd_nvme_connect (const gchar *subsysnqn, const gchar *transport, const 
  * This may disconnect multiple controllers with matching @subsysnqn and %TRUE
  * is only returned when all controllers were disconnected successfully.
  *
+ * Only controllers owned by libblockdev according to the libnvme controller ownership
+ * registry are disconnected, i.e. the ones connected by bd_nvme_connect() without
+ * a specific `"owner"`. Controllers connected by other components, e.g. boot volumes
+ * connected via NBFT or connections managed by a discovery daemon, are left untouched.
+ * See bd_nvme_disconnect_full() to disconnect controllers of a different owner.
+ *
  * Returns: %TRUE if all matching controllers were disconnected successfully, %FALSE with @error
  *          set in case of a disconnect error or when no matching controllers were found.
+ *          The #BD_NVME_ERROR_OWNED error is returned when none of the matching controllers
+ *          are owned by libblockdev.
  *
  * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
  */
@@ -1357,12 +1388,42 @@ gboolean bd_nvme_disconnect (const gchar *subsysnqn, GError **error);
  * Disconnects and removes a NVMe over Fabrics controller represented
  * by a block device path.
  *
+ * Only a controller owned by libblockdev according to the libnvme controller ownership
+ * registry is disconnected, see bd_nvme_disconnect() and bd_nvme_disconnect_full().
+ *
  * Returns: %TRUE if the controller was disconnected successfully,
  *          %FALSE otherwise with @error set.
  *
  * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
  */
 gboolean bd_nvme_disconnect_by_path (const gchar *path, GError **error);
+
+/**
+ * bd_nvme_disconnect_full:
+ * @subsysnqn: (nullable): The name of the NVMe subsystem to disconnect.
+ * @path: (nullable): NVMe controller device to disconnect (e.g. `/dev/nvme0`).
+ * @owner: (nullable): The owner of the controllers to disconnect or %NULL for libblockdev.
+ * @flags: Flags to control the disconnect.
+ * @error: (out) (nullable): Place to store error (if any).
+ *
+ * Disconnects and removes existing NVMe over Fabrics controllers matching @subsysnqn
+ * or the controller represented by @path. Exactly one of @subsysnqn and @path has to
+ * be specified.
+ *
+ * Only controllers registered to @owner in the libnvme controller ownership registry
+ * (`/run/nvme/registry/`) are disconnected, see the `"owner"` argument of bd_nvme_connect().
+ * With the #BD_NVME_DISCONNECT_FORCE flag all matching controllers are disconnected
+ * regardless of their owner, including controllers without any owner. Use with care,
+ * this may disconnect devices other components depend on, e.g. the root filesystem.
+ *
+ * Returns: %TRUE if all matching controllers were disconnected successfully, %FALSE with @error
+ *          set in case of a disconnect error or when no matching controllers were found.
+ *          The #BD_NVME_ERROR_OWNED error is returned when none of the matching controllers
+ *          are owned by @owner.
+ *
+ * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
+ */
+gboolean bd_nvme_disconnect_full (const gchar *subsysnqn, const gchar *path, const gchar *owner, BDNVMEDisconnectFlags flags, GError **error);
 
 /**
  * bd_nvme_find_ctrls_for_ns:

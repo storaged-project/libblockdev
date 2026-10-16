@@ -10,6 +10,7 @@ import gi
 gi.require_version('GLib', '2.0')
 gi.require_version('BlockDev', '3.0')
 from gi.repository import GLib, BlockDev
+from gi.module import get_introspection_module
 
 
 @required_plugins(("nvme", "loop"))
@@ -381,8 +382,13 @@ class NVMeFabricsTestCase(NVMeTest):
             self.assertTrue(re.match(r'/dev/nvme[0-9]+n[0-9]+', ns))
             self.assertTrue(os.path.exists(ns))
 
+        # an identical connection is refused unless explicitly requested
+        with self.assertRaisesRegex(GLib.GError, r"Error connecting the controller: already connected"):
+            BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, None, None)
+
         # make a duplicate connection
-        ret = BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, None, None)
+        ret = BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, None, None,
+                                    [BlockDev.ExtraArg.new("duplicate_connect", "True")])
         self.assertTrue(ret)
 
         # should see two controllers now
@@ -409,6 +415,150 @@ class NVMeFabricsTestCase(NVMeTest):
         self.assertEqual(len(namespaces), 0)
 
 
+    def _get_owner(self, ctrl):
+        ret, out, _err = run_command("nvme registry retrieve %s -a owner" % os.path.basename(ctrl))
+        return out.strip() if ret == 0 else None
+
+    def _connect_new_ctrl(self, connect_fn):
+        before = set(find_nvme_ctrl_devs_for_subnqn(self.SUBNQN, wait_for_ready=False))
+        connect_fn()
+        new = set(find_nvme_ctrl_devs_for_subnqn(self.SUBNQN)) - before
+        self.assertEqual(len(new), 1)
+        return new.pop()
+
+    def _bd_connect(self, owner=None, duplicate=False):
+        extra = []
+        if owner is not None:
+            extra.append(BlockDev.ExtraArg.new("owner", owner))
+        if duplicate:
+            extra.append(BlockDev.ExtraArg.new("duplicate_connect", "True"))
+        return self._connect_new_ctrl(lambda: self.assertTrue(
+            BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, None, None, extra)))
+
+    def _cli_connect(self, owner=None, duplicate=False):
+        cmd = "nvme connect --transport=loop --nqn=%s" % self.SUBNQN
+        if owner is not None:
+            cmd += " --owner=%s" % owner
+        if duplicate:
+            cmd += " --duplicate-connect"
+
+        def _connect():
+            ret, out, err = run_command(cmd)
+            if ret != 0:
+                raise RuntimeError("Error connecting '%s': '%s %s'" % (cmd, out, err))
+        return self._connect_new_ctrl(_connect)
+
+    def _assert_not_owned(self, fn, *args):
+        with self.assertRaisesRegex(GLib.GError, r"not disconnecting") as cm:
+            fn(*args)
+        # BlockDev.NVMEError is shadowed by the exception class from the overrides
+        self.assertEqual(cm.exception.code, get_introspection_module('BlockDev').NVMEError.OWNED)
+
+    @tag_test(TestTags.CORE)
+    def test_connect_owner(self):
+        """Test that libblockdev only disconnects its own controllers"""
+
+        self._setup_target(1)
+        self.addCleanup(self._nvme_disconnect, self.SUBNQN, ignore_errors=True)
+
+        # libblockdev is the default owner
+        own = self._bd_connect()
+        self.assertEqual(self._get_owner(own), "libblockdev")
+
+        # a custom owner
+        udisks = self._bd_connect(owner="udisks", duplicate=True)
+        self.assertEqual(self._get_owner(udisks), "udisks")
+
+        # an empty owner leaves the controller unowned
+        unowned = self._bd_connect(owner="", duplicate=True)
+        self.assertIsNone(self._get_owner(unowned))
+
+        # only the controller owned by libblockdev is disconnected, together with its registry entry
+        self.assertTrue(BlockDev.nvme_disconnect(self.SUBNQN))
+        self.assertFalse(os.path.exists(own))
+        self.assertIsNone(self._get_owner(own))
+        self.assertTrue(os.path.exists(udisks))
+        self.assertTrue(os.path.exists(unowned))
+
+        # nothing owned by libblockdev is left
+        self._assert_not_owned(BlockDev.nvme_disconnect, self.SUBNQN)
+        self._assert_not_owned(BlockDev.nvme_disconnect_by_path, udisks)
+        self._assert_not_owned(BlockDev.nvme_disconnect_by_path, unowned)
+        self._assert_not_owned(BlockDev.nvme_disconnect_full, self.SUBNQN, None, "someone-else",
+                               BlockDev.NVMEDisconnectFlags.NONE)
+        self.assertTrue(os.path.exists(udisks))
+        self.assertTrue(os.path.exists(unowned))
+
+        # the owner can disconnect its controllers
+        self.assertTrue(BlockDev.nvme_disconnect_full(None, udisks, "udisks", BlockDev.NVMEDisconnectFlags.NONE))
+        self.assertFalse(os.path.exists(udisks))
+        self.assertTrue(os.path.exists(unowned))
+
+        # force disconnects regardless of the owner
+        self.assertTrue(BlockDev.nvme_disconnect_full(self.SUBNQN, None, None, BlockDev.NVMEDisconnectFlags.FORCE))
+        self.assertFalse(os.path.exists(unowned))
+        self.assertEqual(len(find_nvme_ctrl_devs_for_subnqn(self.SUBNQN)), 0)
+
+        # owned by libblockdev again after a reconnect
+        own = self._bd_connect()
+        self.assertEqual(self._get_owner(own), "libblockdev")
+        self.assertTrue(BlockDev.nvme_disconnect_by_path(own))
+        self.assertFalse(os.path.exists(own))
+
+    @tag_test(TestTags.CORE)
+    def test_disconnect_foreign(self):
+        """Test that controllers connected by others are left alone"""
+
+        self._setup_target(1)
+        self.addCleanup(self._nvme_disconnect, self.SUBNQN, ignore_errors=True)
+
+        # e.g. a boot volume connected from the NBFT and a manual 'nvme connect'
+        nbft = self._cli_connect(owner="nbft")
+        manual = self._cli_connect(duplicate=True)
+        self.assertEqual(self._get_owner(nbft), "nbft")
+        self.assertIsNone(self._get_owner(manual))
+
+        # an already connected controller must not be claimed by libblockdev
+        with self.assertRaisesRegex(GLib.GError, r"Error connecting the controller: already connected"):
+            BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, None, None)
+        self.assertEqual(self._get_owner(nbft), "nbft")
+        self.assertIsNone(self._get_owner(manual))
+
+        self._assert_not_owned(BlockDev.nvme_disconnect, self.SUBNQN)
+        self._assert_not_owned(BlockDev.nvme_disconnect_by_path, nbft)
+        self._assert_not_owned(BlockDev.nvme_disconnect_by_path, manual)
+        self.assertTrue(os.path.exists(nbft))
+        self.assertTrue(os.path.exists(manual))
+
+        # a libblockdev controller next to them is disconnected without touching the others
+        own = self._bd_connect(duplicate=True)
+        self.assertTrue(BlockDev.nvme_disconnect(self.SUBNQN))
+        self.assertFalse(os.path.exists(own))
+        self.assertTrue(os.path.exists(nbft))
+        self.assertTrue(os.path.exists(manual))
+
+        # explicitly forced
+        self.assertTrue(BlockDev.nvme_disconnect_full(None, manual, None, BlockDev.NVMEDisconnectFlags.FORCE))
+        self.assertFalse(os.path.exists(manual))
+        self.assertTrue(BlockDev.nvme_disconnect_full(None, nbft, "nbft", BlockDev.NVMEDisconnectFlags.NONE))
+        self.assertFalse(os.path.exists(nbft))
+
+    @tag_test(TestTags.CORE)
+    def test_disconnect_full_args(self):
+        """Test argument validation of bd_nvme_disconnect_full()"""
+
+        msg = r"Exactly one of the subsystem NQN and the controller path has to be specified"
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.nvme_disconnect_full(None, None, None, BlockDev.NVMEDisconnectFlags.FORCE)
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.nvme_disconnect_full(self.SUBNQN, "/dev/nvme0", None, BlockDev.NVMEDisconnectFlags.NONE)
+
+        with self.assertRaisesRegex(GLib.GError, r"No subsystems matching '.*' NQN found."):
+            BlockDev.nvme_disconnect_full(self.SUBNQN + "xx", None, None, BlockDev.NVMEDisconnectFlags.FORCE)
+        with self.assertRaisesRegex(GLib.GError, r"No controllers matching the /dev/nvmexx device name found."):
+            BlockDev.nvme_disconnect_full(None, "/dev/nvmexx", None, BlockDev.NVMEDisconnectFlags.FORCE)
+
+
     @tag_test(TestTags.CORE)
     def test_connect_multiple_ns(self):
         """Test connect and disconnect multiple namespaces"""
@@ -431,7 +581,7 @@ class NVMeFabricsTestCase(NVMeTest):
         for c in ctrls:
             self.assertTrue(re.match(r'/dev/nvme[0-9]+', c))
             self.assertTrue(os.path.exists(c))
-        namespaces = find_nvme_ns_devs_for_subnqn(self.SUBNQN)
+        namespaces = find_nvme_ns_devs_for_subnqn(self.SUBNQN, num_expected=NUM_NS)
         self.assertEqual(len(namespaces), NUM_NS)
         for ns in namespaces:
             self.assertTrue(re.match(r'/dev/nvme[0-9]+n[0-9]+', ns))

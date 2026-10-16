@@ -37,119 +37,198 @@
 #include "nvme-private.h"
 
 
-/* nvme-cli defaults */
-#define PATH_NVMF_CONFIG  "/etc/nvme/config.json"
-#define MAX_DISC_RETRIES  10
+static const gchar *get_extra_config_file (const BDExtraArg **extra, gboolean *use_config) {
+    const BDExtraArg **extra_i;
+    const gchar *config_file = NULL;
 
+    /* NULL means the libnvme default configuration file */
+    *use_config = TRUE;
+    if (!extra)
+        return NULL;
 
-static void parse_extra_args (const BDExtraArg **extra, struct nvme_fabrics_config *cfg, const gchar **config_file, const gchar **hostkey, const gchar **ctrlkey, const gchar **hostsymname) {
+    for (extra_i = extra; *extra_i; extra_i++)
+        if (g_strcmp0 ((*extra_i)->opt, "config") == 0) {
+            if (g_ascii_strcasecmp ((*extra_i)->val, "none") == 0) {
+                *use_config = FALSE;
+                config_file = NULL;
+            } else {
+                *use_config = TRUE;
+                config_file = (*extra_i)->val;
+            }
+        }
+
+    return config_file;
+}
+
+static void parse_extra_args (const BDExtraArg **extra, struct libnvmf_context *fctx, const gchar **owner, const gchar **hostkey, const gchar **ctrlkey, const gchar **hostsymname, const gchar **keyring, const gchar **tls_key) {
     const BDExtraArg **extra_i;
 
     if (!extra)
         return;
 
-#define SAFE_INT_CONV(target) { \
+#define SAFE_INT_CONV(setter) { \
         gint64 v; \
         gchar *endptr = NULL; \
         \
         v = g_ascii_strtoll ((*extra_i)->val, &endptr, 0); \
-        if (endptr != (*extra_i)->val) \
-            target = v; \
+        if (fctx && endptr != (*extra_i)->val) \
+            setter (fctx, v); \
     }
-#define SAFE_BOOL_CONV(target) { \
+#define SAFE_BOOL_CONV(setter) { \
+        if (!fctx) \
+            ; \
+        else \
         if (g_ascii_strcasecmp ((*extra_i)->val, "on") == 0 || \
             g_ascii_strcasecmp ((*extra_i)->val, "1") == 0 || \
             g_ascii_strcasecmp ((*extra_i)->val, "true") == 0) \
-            target = TRUE; \
+            setter (fctx, TRUE); \
         else \
         if (g_ascii_strcasecmp ((*extra_i)->val, "off") == 0 || \
             g_ascii_strcasecmp ((*extra_i)->val, "0") == 0 || \
             g_ascii_strcasecmp ((*extra_i)->val, "false") == 0) \
-            target = FALSE; \
+            setter (fctx, FALSE); \
     }
 
     for (extra_i = extra; *extra_i; extra_i++) {
-        if (g_strcmp0 ((*extra_i)->opt, "config") == 0 && config_file) {
-            if (g_ascii_strcasecmp ((*extra_i)->val, "none") == 0)
-                *config_file = NULL;
-            else
-                *config_file = (*extra_i)->val;
-        } else
-        if (g_strcmp0 ((*extra_i)->opt, "dhchap_key") == 0 && hostkey)
+        if ((g_strcmp0 ((*extra_i)->opt, "kxchap_secret") == 0 ||
+             g_strcmp0 ((*extra_i)->opt, "dhchap_key") == 0 /* deprecated */) && hostkey)
             *hostkey = (*extra_i)->val;
         else
-        if (g_strcmp0 ((*extra_i)->opt, "dhchap_ctrl_key") == 0 && ctrlkey)
+        if ((g_strcmp0 ((*extra_i)->opt, "kxchap_ctrl_secret") == 0 ||
+             g_strcmp0 ((*extra_i)->opt, "dhchap_ctrl_key") == 0 /* deprecated */) && ctrlkey)
             *ctrlkey = (*extra_i)->val;
+        else
+        if (g_strcmp0 ((*extra_i)->opt, "owner") == 0 && owner)
+            *owner = (*extra_i)->val;
         else
         if (g_strcmp0 ((*extra_i)->opt, "hostsymname") == 0 && hostsymname)
             *hostsymname = (*extra_i)->val;
         else
+        if (g_strcmp0 ((*extra_i)->opt, "keyring") == 0 && keyring)
+            *keyring = (*extra_i)->val;
+        else
+        if (g_strcmp0 ((*extra_i)->opt, "tls_key") == 0 && tls_key)
+            *tls_key = (*extra_i)->val;
+        else
         if (g_strcmp0 ((*extra_i)->opt, "nr_io_queues") == 0)
-            SAFE_INT_CONV (cfg->nr_io_queues)
+            SAFE_INT_CONV (libnvmf_context_set_nr_io_queues)
         else
         if (g_strcmp0 ((*extra_i)->opt, "nr_write_queues") == 0)
-            SAFE_INT_CONV (cfg->nr_write_queues)
+            SAFE_INT_CONV (libnvmf_context_set_nr_write_queues)
         else
         if (g_strcmp0 ((*extra_i)->opt, "nr_poll_queues") == 0)
-            SAFE_INT_CONV (cfg->nr_poll_queues)
+            SAFE_INT_CONV (libnvmf_context_set_nr_poll_queues)
         else
         if (g_strcmp0 ((*extra_i)->opt, "queue_size") == 0)
-            SAFE_INT_CONV (cfg->queue_size)
+            SAFE_INT_CONV (libnvmf_context_set_queue_size)
         else
         if (g_strcmp0 ((*extra_i)->opt, "keep_alive_tmo") == 0)
-            SAFE_INT_CONV (cfg->keep_alive_tmo)
+            SAFE_INT_CONV (libnvmf_context_set_keep_alive_tmo)
         else
         if (g_strcmp0 ((*extra_i)->opt, "reconnect_delay") == 0)
-            SAFE_INT_CONV (cfg->reconnect_delay)
+            SAFE_INT_CONV (libnvmf_context_set_reconnect_delay)
         else
         if (g_strcmp0 ((*extra_i)->opt, "ctrl_loss_tmo") == 0)
-            SAFE_INT_CONV (cfg->ctrl_loss_tmo)
+            SAFE_INT_CONV (libnvmf_context_set_ctrl_loss_tmo)
         else
         if (g_strcmp0 ((*extra_i)->opt, "fast_io_fail_tmo") == 0)
-            SAFE_INT_CONV (cfg->fast_io_fail_tmo)
+            SAFE_INT_CONV (libnvmf_context_set_fast_io_fail_tmo)
         else
         if (g_strcmp0 ((*extra_i)->opt, "tos") == 0)
-            SAFE_INT_CONV (cfg->tos)
+            SAFE_INT_CONV (libnvmf_context_set_tos)
         else
         if (g_strcmp0 ((*extra_i)->opt, "duplicate_connect") == 0)
-            SAFE_BOOL_CONV (cfg->duplicate_connect)
+            SAFE_BOOL_CONV (libnvmf_context_set_duplicate_connect)
         else
         if (g_strcmp0 ((*extra_i)->opt, "disable_sqflow") == 0)
-            SAFE_BOOL_CONV (cfg->disable_sqflow)
+            SAFE_BOOL_CONV (libnvmf_context_set_disable_sqflow)
         else
         if (g_strcmp0 ((*extra_i)->opt, "hdr_digest") == 0)
-            SAFE_BOOL_CONV (cfg->hdr_digest)
+            SAFE_BOOL_CONV (libnvmf_context_set_hdr_digest)
         else
         if (g_strcmp0 ((*extra_i)->opt, "data_digest") == 0)
-            SAFE_BOOL_CONV (cfg->data_digest)
+            SAFE_BOOL_CONV (libnvmf_context_set_data_digest)
         else
         if (g_strcmp0 ((*extra_i)->opt, "tls") == 0)
-            SAFE_BOOL_CONV (cfg->tls)
-#ifdef HAVE_LIBNVME_1_4
-        else
-        if (g_strcmp0 ((*extra_i)->opt, "keyring") == 0) {
-            int keyring;
-
-            keyring = nvme_lookup_keyring ((*extra_i)->val);
-            if (keyring) {
-                cfg->keyring = keyring;
-                nvme_set_keyring (cfg->keyring);
-            }
-        } else
-        if (g_strcmp0 ((*extra_i)->opt, "tls_key") == 0) {
-            int key;
-
-            key = nvme_lookup_key ("psk", (*extra_i)->val);
-            if (key)
-                cfg->tls_key = key;
-        }
-#endif
+            SAFE_BOOL_CONV (libnvmf_context_set_tls)
     }
 
 #undef SAFE_INT_CONV
 #undef SAFE_BOOL_CONV
 }
 
+struct config_match_data {
+    const gchar *subsysnqn;
+    const gchar *transport;
+    const gchar *transport_addr;
+    const gchar *transport_svcid;
+    const gchar *host_traddr;
+    const gchar *host_iface;
+    const gchar *host_nqn;
+    const struct libnvmf_config_conn *conn;
+};
+
+static void config_match_conn (const struct libnvmf_config_conn *conn, void *user_data) {
+    struct config_match_data *data = user_data;
+    const gchar *val;
+
+    /* first match wins */
+    if (data->conn)
+        return;
+
+    if (g_strcmp0 (libnvmf_config_conn_get_subsysnqn (conn), data->subsysnqn) != 0 ||
+        g_strcmp0 (libnvmf_config_conn_get_transport (conn), data->transport) != 0 ||
+        g_strcmp0 (libnvmf_config_conn_get_traddr (conn), data->transport_addr) != 0 ||
+        g_strcmp0 (libnvmf_config_conn_get_host_traddr (conn), data->host_traddr) != 0 ||
+        g_strcmp0 (libnvmf_config_conn_get_host_iface (conn), data->host_iface) != 0)
+        return;
+
+    /* unset values in the config file match anything */
+    val = libnvmf_config_conn_get_trsvcid (conn);
+    if (val && data->transport_svcid && g_strcmp0 (val, data->transport_svcid) != 0)
+        return;
+    val = libnvmf_config_conn_get_hostnqn (conn);
+    if (val && data->host_nqn && g_strcmp0 (val, data->host_nqn) != 0)
+        return;
+
+    data->conn = conn;
+}
+
+static const gchar *get_param_nonempty (const struct libnvmf_config_conn *conn, const gchar *key) {
+    const gchar *val;
+
+    if (!conn)
+        return NULL;
+    val = libnvmf_params_get (libnvmf_config_conn_get_params (conn), key);
+    if (val && *val == '\0')
+        return NULL;
+    return val;
+}
+
+
+/* owner registered for new connections unless specified otherwise */
+#define DEFAULT_OWNER "libblockdev"
+
+struct connected_data {
+    struct libnvme_global_ctx *ctx;
+    const gchar *owner;
+};
+
+static void connected_hook (struct libnvmf_context *fctx G_GNUC_UNUSED, struct libnvme_ctrl *c, void *user_data) {
+    struct connected_data *data = user_data;
+    int ret;
+
+    /* Only called for a controller that has just been created. Registering the owner
+     * here rather than via libnvme_set_owner() avoids claiming an already connected
+     * controller that might be owned by someone else. */
+    if (*data->owner == '\0')
+        return;
+
+    ret = libnvmf_registry_update (data->ctx, libnvme_ctrl_get_name (c), "owner", data->owner);
+    if (ret != 0)
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to register owner '%s' for %s: %s",
+                             data->owner, libnvme_ctrl_get_name (c), libnvme_strerror (-ret));
+}
 
 /**
  * bd_nvme_connect:
@@ -175,14 +254,16 @@ static void parse_extra_args (const BDExtraArg **extra, struct nvme_fabrics_conf
  * - `"loop"`: A NVMe over Fabrics target on the local host.
  *
  * In addition to the primary options it's possible to supply @extra arguments:
- * - `"config"`: Use the specified JSON configuration file instead of the default file (see below) or
+ * - `"config"`: Use the specified configuration file instead of the default file (see below) or
  *               specify `"none"` to avoid reading any configuration file.
- * - `"dhchap_key"`: NVMe In-band authentication secret in ASCII format as described
- *                      in the NVMe 2.0 specification. When not specified, the secret is by default read
- *                      from `/etc/nvme/hostkey`. In case that file does not exist no in-band authentication
- *                      is attempted.
- * - `"dhchap_ctrl_key"`: NVMe In-band authentication controller secret for bi-directional authentication.
- *                        When not specified, no bi-directional authentication is attempted.
+ * - `"kxchap_secret"`: NVMe In-band authentication (KX-HMAC-CHAP, formerly DH-HMAC-CHAP) host secret
+ *                      in ASCII format as described in the NVMe specification. When not specified,
+ *                      the secret is taken from the configuration file, if present. Otherwise
+ *                      no in-band authentication is attempted.
+ * - `"kxchap_ctrl_secret"`: NVMe In-band authentication controller secret for bi-directional authentication.
+ *                           When not specified, the secret is taken from the configuration file, if present.
+ *                           Otherwise no bi-directional authentication is attempted.
+ * - `"dhchap_key"`, `"dhchap_ctrl_key"`: Deprecated aliases for `"kxchap_secret"` and `"kxchap_ctrl_secret"`.
  * - `"nr_io_queues"`: The number of I/O queues.
  * - `"nr_write_queues"`: Number of additional queues that will be used for write I/O.
  * - `"nr_poll_queues"`: Number of additional queues that will be used for polling latency sensitive I/O.
@@ -198,17 +279,24 @@ static void parse_extra_args (const BDExtraArg **extra, struct nvme_fabrics_conf
  * - `"data_digest"`: Generates/verifies data digest (TCP). Boolean value.
  * - `"tls"`: Enable TLS encryption (TCP). Boolean value.
  * - `"hostsymname"`: TP8010: NVMe host symbolic name.
+ * - `"owner"`: Register a newly created controller with this owner in the libnvme controller ownership
+ *              registry (`/run/nvme/registry/`) instead of the default `"libblockdev"`, e.g. `"udisks"`.
+ *              An empty string leaves the controller without an owner. An already connected controller
+ *              keeps its owner. See bd_nvme_disconnect() and bd_nvme_disconnect_full().
  * - `"keyring"`: Keyring to store and lookup keys. String value.
  * - `"tls_key"`: TLS PSK for the connection. String value.
  *
  * Boolean values can be expressed by "0"/"1", "on"/"off" or "True"/"False" case-insensitive
  * strings. Failed numerical or boolean string conversions will result in the option being ignored.
  *
- * By default additional options are read from the default configuration file `/etc/nvme/config.json`.
- * This follows the default behaviour of `nvme-cli`. Use the @extra `"config"` argument
- * to either specify a different config file or disable use of it. The JSON configuration
- * file format is documented in [https://raw.githubusercontent.com/linux-nvme/libnvme/master/doc/config-schema.json](https://raw.githubusercontent.com/linux-nvme/libnvme/master/doc/config-schema.json).
- * As a rule @extra key names are kept consistent with the JSON config file schema.
+ * By default additional options are read from the default configuration file `/etc/nvme/nvme-fabrics.conf`
+ * (and its `/etc/nvme/nvme-fabrics.conf.d/` drop-in directory). Parameters of the first connection
+ * entry matching the @subsysnqn, @transport, @transport_addr, @transport_svcid, @host_traddr
+ * and @host_iface arguments are applied, along with its host identity when @host_nqn or @host_id
+ * are not specified. Use the @extra `"config"` argument to either specify a different config file
+ * or disable use of it. The INI configuration file format is documented
+ * in [https://github.com/linux-nvme/nvme-cli/blob/master/libnvme/design/CONFIG.md](https://github.com/linux-nvme/nvme-cli/blob/master/libnvme/design/CONFIG.md),
+ * legacy JSON configuration files are not supported anymore.
  * Any @extra option generally overrides particular option specified in a configuration file.
  *
  * Returns: %TRUE if the subsystem was connected successfully, %FALSE otherwise with @error set.
@@ -217,16 +305,23 @@ static void parse_extra_args (const BDExtraArg **extra, struct nvme_fabrics_conf
  */
 gboolean bd_nvme_connect (const gchar *subsysnqn, const gchar *transport, const gchar *transport_addr, const gchar *transport_svcid, const gchar *host_traddr, const gchar *host_iface, const gchar *host_nqn, const gchar *host_id, const BDExtraArg **extra, GError **error) {
     int ret;
-    const gchar *config_file = PATH_NVMF_CONFIG;
-    gchar *host_nqn_val;
-    gchar *host_id_val;
+    const gchar *config_file;
+    gboolean use_config;
+    gchar *host_nqn_val = NULL;
+    gchar *host_id_val = NULL;
     const gchar *hostkey = NULL;
     const gchar *ctrlkey = NULL;
     const gchar *hostsymname = NULL;
-    nvme_root_t root;
-    nvme_host_t host;
-    nvme_ctrl_t ctrl;
-    struct nvme_fabrics_config cfg;
+    const gchar *keyring = NULL;
+    const gchar *tls_key = NULL;
+    const gchar *owner = NULL;
+    struct connected_data hook_data;
+    struct libnvme_global_ctx *ctx;
+    struct libnvme_host *host;
+    struct libnvmf_context *fctx = NULL;
+    struct libnvmf_config *config = NULL;
+    struct config_match_data match = ZERO_INIT;
+    gboolean success = FALSE;
 
     if (subsysnqn == NULL) {
         g_set_error_literal (error, BD_NVME_ERROR, BD_NVME_ERROR_INVALID_ARGUMENT,
@@ -244,61 +339,6 @@ gboolean bd_nvme_connect (const gchar *subsysnqn, const gchar *transport, const 
         return FALSE;
     }
 
-    /* HostNQN checks */
-    host_nqn_val = g_strdup (host_nqn);
-    host_id_val = g_strdup (host_id);
-    if (host_nqn_val == NULL)
-        host_nqn_val = nvmf_hostnqn_from_file ();
-    if (host_id_val == NULL)
-        host_id_val = nvmf_hostid_from_file ();
-    if (host_nqn_val == NULL)
-        host_nqn_val = nvmf_hostnqn_generate ();
-    if (host_nqn_val == NULL) {
-        g_set_error_literal (error, BD_NVME_ERROR, BD_NVME_ERROR_INVALID_ARGUMENT,
-                             "Could not determine HostNQN");
-        g_free (host_nqn_val);
-        g_free (host_id_val);
-        return FALSE;
-    }
-    if (host_id_val == NULL) {
-        /* derive hostid from hostnqn, newer kernels refuse empty hostid */
-        host_id_val = g_strrstr (host_nqn_val, "uuid:");
-        if (host_id_val)
-            host_id_val = g_strdup (host_id_val + strlen ("uuid:"));
-        /* TODO: in theory generating arbitrary uuid might work as a fallback */
-    }
-    if (host_id_val == NULL) {
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_INVALID_ARGUMENT,
-                     "Could not determine HostID value from HostNQN '%s'",
-                     host_nqn_val);
-        g_free (host_nqn_val);
-        return FALSE;
-    }
-
-    /* parse extra arguments */
-    nvmf_default_config (&cfg);
-    parse_extra_args (extra, &cfg, &config_file, &hostkey, &ctrlkey, &hostsymname);
-
-    root = nvme_scan (config_file);
-    g_assert (root != NULL);
-    nvme_init_logging (root, -1, false, false);
-    host = nvme_lookup_host (root, host_nqn_val, host_id_val);
-    if (host == NULL) {
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "Unable to lookup host for HostNQN '%s' and HostID '%s'",
-                     host_nqn_val, host_id_val);
-        g_free (host_nqn_val);
-        g_free (host_id_val);
-        nvme_free_tree (root);
-        return FALSE;
-    }
-    g_free (host_nqn_val);
-    g_free (host_id_val);
-    if (hostkey)
-        nvme_host_set_dhchap_key (host, hostkey);
-    if (hostsymname)
-        nvme_host_set_hostsymname (host, hostsymname);
-
     /* tr_svcid defaults */
     if (!transport_svcid) {
         if (g_strcmp0 (transport, "tcp") == 0) {
@@ -311,69 +351,130 @@ gboolean bd_nvme_connect (const gchar *subsysnqn, const gchar *transport, const 
             transport_svcid = G_STRINGIFY (NVME_RDMA_IP_PORT);
     }
 
-    ctrl = nvme_create_ctrl (root, subsysnqn, transport, transport_addr, host_traddr, host_iface, transport_svcid);
-    if (ctrl == NULL) {
-        _nvme_fabrics_errno_to_gerror (-1, errno, error);
-        g_prefix_error (error, "Error creating the controller: ");
-        nvme_free_tree (root);
+    ctx = libnvme_create_global_ctx ();
+    if (ctx == NULL) {
+        g_set_error_literal (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
+                             "Failed to create libnvme context");
         return FALSE;
     }
-    if (ctrlkey)
-        nvme_ctrl_set_dhchap_key (ctrl, ctrlkey);
 
-    ret = nvmf_add_ctrl (host, ctrl, &cfg);
-    if (ret != 0) {
-        _nvme_fabrics_errno_to_gerror (ret, errno, error);
-        g_prefix_error (error, "Error connecting the controller: ");
-        nvme_free_ctrl (ctrl);
-        nvme_free_tree (root);
-        return FALSE;
+    /* look up the connection in the configuration file */
+    config_file = get_extra_config_file (extra, &use_config);
+    if (use_config) {
+        ret = libnvmf_config_read (ctx, config_file, &config);
+        if (ret != 0) {
+            if (config_file) {
+                g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_INVALID_ARGUMENT,
+                             "Failed to read configuration file '%s': %s",
+                             config_file, libnvme_strerror (-ret));
+                goto out;
+            }
+            /* not fatal for the default configuration file */
+            bd_utils_log_format (BD_UTILS_LOG_WARNING,
+                                 "Failed to read the default NVMe-oF configuration file: %s",
+                                 libnvme_strerror (-ret));
+            config = NULL;
+        }
     }
-    nvme_free_ctrl (ctrl);
-    nvme_free_tree (root);
-
-    return TRUE;
-}
-
-static gboolean _disconnect (const gchar *subsysnqn, const gchar *path, GError **error, gboolean *found) {
-    nvme_root_t root;
-    nvme_host_t host;
-    nvme_subsystem_t subsys;
-    nvme_ctrl_t ctrl;
-    int ret;
-
-    root = nvme_create_root (NULL, -1);
-    if (root == NULL) {
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "Failed to create topology root: %s",
-                     strerror_l (errno, _C_LOCALE));
-        return FALSE;
+    if (config) {
+        match.subsysnqn = subsysnqn;
+        match.transport = transport;
+        match.transport_addr = transport_addr;
+        match.transport_svcid = transport_svcid;
+        match.host_traddr = host_traddr;
+        match.host_iface = host_iface;
+        match.host_nqn = host_nqn;
+        libnvmf_config_conn_for_each (config, config_match_conn, &match);
+        if (match.conn) {
+            if (!host_nqn)
+                host_nqn = libnvmf_config_conn_get_hostnqn (match.conn);
+            if (!host_id)
+                host_id = libnvmf_config_conn_get_hostid (match.conn);
+            hostsymname = libnvmf_config_conn_get_hostsymname (match.conn);
+        }
     }
-    ret = nvme_scan_topology (root, NULL, NULL);
+
+    /* HostNQN and HostID, read from /etc/nvme/ or generated when not specified */
+    ret = libnvmf_host_get_ids (ctx, host_nqn, host_id, &host_nqn_val, &host_id_val);
+    if (ret != 0 || host_nqn_val == NULL || host_id_val == NULL) {
+        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_INVALID_ARGUMENT,
+                     "Could not determine HostNQN or HostID: %s",
+                     ret != 0 ? libnvme_strerror (-ret) : "unknown error");
+        goto out;
+    }
+
+    /* existing controllers need to be known to detect duplicate connections */
+    libnvme_skip_namespaces (ctx);
+    ret = libnvme_scan_topology (ctx, NULL, NULL);
     if (ret < 0) {
         g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
                      "Failed to scan topology: %s",
-                     strerror_l (errno, _C_LOCALE));
-        nvme_free_tree (root);
-        return FALSE;
+                     strerror_l (-ret, _C_LOCALE));
+        goto out;
     }
-    nvme_for_each_host (root, host)
-        nvme_for_each_subsystem (host, subsys)
-            if (!subsysnqn || g_strcmp0 (nvme_subsystem_get_nqn (subsys), subsysnqn) == 0)
-                nvme_subsystem_for_each_ctrl (subsys, ctrl)
-                    if (!path || g_strcmp0 (nvme_ctrl_get_name (ctrl), path) == 0) {
-                        ret = nvme_disconnect_ctrl (ctrl);
-                        if (ret != 0) {
-                            g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                                         "Error disconnecting the controller: %s",
-                                         strerror_l (errno, _C_LOCALE));
-                            nvme_free_tree (root);
-                            return FALSE;
-                        }
-                        *found = TRUE;
-                    }
-    nvme_free_tree (root);
-    return TRUE;
+
+    /* the owner is needed in the hook, look it up early */
+    parse_extra_args (extra, NULL, &owner, NULL, NULL, NULL, NULL, NULL);
+    hook_data.ctx = ctx;
+    hook_data.owner = owner ? owner : DEFAULT_OWNER;
+
+    ret = libnvmf_context_create (ctx, NULL, connected_hook, NULL, &hook_data, &fctx);
+    if (ret == 0)
+        ret = libnvmf_context_set_connection (fctx, subsysnqn, transport, transport_addr, transport_svcid, host_traddr, host_iface);
+    if (ret == 0)
+        ret = libnvmf_context_set_hostnqn (fctx, host_nqn_val, host_id_val);
+    if (ret == 0 && match.conn)
+        ret = libnvmf_context_apply_params (fctx, libnvmf_config_conn_get_params (match.conn));
+    if (ret != 0) {
+        _nvme_fabrics_errno_to_gerror (ret, error);
+        g_prefix_error (error, "Error creating the controller: ");
+        goto out;
+    }
+
+    /* any extra argument overrides values from the configuration file */
+    parse_extra_args (extra, fctx, NULL, &hostkey, &ctrlkey, &hostsymname, &keyring, &tls_key);
+    if (hostkey || ctrlkey || keyring || tls_key) {
+        ret = libnvmf_context_set_crypto (fctx,
+                                          hostkey ? hostkey : get_param_nonempty (match.conn, "kxchap-secret"),
+                                          ctrlkey ? ctrlkey : get_param_nonempty (match.conn, "kxchap-ctrl-secret"),
+                                          keyring ? keyring : get_param_nonempty (match.conn, "keyring"),
+                                          tls_key /* NULL keeps the current key */,
+                                          get_param_nonempty (match.conn, "tls-key-identity"));
+        if (ret != 0) {
+            _nvme_fabrics_errno_to_gerror (ret, error);
+            g_prefix_error (error, "Error setting the controller keys: ");
+            goto out;
+        }
+    }
+
+    if (hostsymname) {
+        ret = libnvme_get_host (ctx, host_nqn_val, host_id_val, &host);
+        if (ret != 0) {
+            g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
+                         "Unable to lookup host for HostNQN '%s' and HostID '%s': %s",
+                         host_nqn_val, host_id_val, libnvme_strerror (-ret));
+            goto out;
+        }
+        libnvme_host_set_hostsymname (host, hostsymname);
+    }
+
+    ret = libnvmf_connect (ctx, fctx);
+    if (ret != 0) {
+        _nvme_fabrics_errno_to_gerror (ret, error);
+        g_prefix_error (error, "Error connecting the controller: ");
+        goto out;
+    }
+
+    success = TRUE;
+
+out:
+    libnvmf_context_free (fctx);
+    libnvmf_config_free (config);
+    libnvme_free_global_ctx (ctx);
+    free (host_nqn_val);
+    free (host_id_val);
+
+    return success;
 }
 
 /**
@@ -385,23 +486,21 @@ static gboolean _disconnect (const gchar *subsysnqn, const gchar *path, GError *
  * This may disconnect multiple controllers with matching @subsysnqn and %TRUE
  * is only returned when all controllers were disconnected successfully.
  *
+ * Only controllers owned by libblockdev according to the libnvme controller ownership
+ * registry are disconnected, i.e. the ones connected by bd_nvme_connect() without
+ * a specific `"owner"`. Controllers connected by other components, e.g. boot volumes
+ * connected via NBFT or connections managed by a discovery daemon, are left untouched.
+ * See bd_nvme_disconnect_full() to disconnect controllers of a different owner.
+ *
  * Returns: %TRUE if all matching controllers were disconnected successfully, %FALSE with @error
  *          set in case of a disconnect error or when no matching controllers were found.
+ *          The #BD_NVME_ERROR_OWNED error is returned when none of the matching controllers
+ *          are owned by libblockdev.
  *
  * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
  */
 gboolean bd_nvme_disconnect (const gchar *subsysnqn, GError **error) {
-    gboolean found = FALSE;
-
-    if (!_disconnect (subsysnqn, NULL, error, &found))
-        return FALSE;
-
-    if (!found) {
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_NO_MATCH,
-                     "No subsystems matching '%s' NQN found.", subsysnqn);
-        return FALSE;
-    }
-    return TRUE;
+    return bd_nvme_disconnect_full (subsysnqn, NULL, NULL, BD_NVME_DISCONNECT_NONE, error);
 }
 
 /**
@@ -412,28 +511,145 @@ gboolean bd_nvme_disconnect (const gchar *subsysnqn, GError **error) {
  * Disconnects and removes a NVMe over Fabrics controller represented
  * by a block device path.
  *
+ * Only a controller owned by libblockdev according to the libnvme controller ownership
+ * registry is disconnected, see bd_nvme_disconnect() and bd_nvme_disconnect_full().
+ *
  * Returns: %TRUE if the controller was disconnected successfully,
  *          %FALSE otherwise with @error set.
  *
  * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
  */
 gboolean bd_nvme_disconnect_by_path (const gchar *path, GError **error) {
-    const gchar *p;
+    return bd_nvme_disconnect_full (NULL, path, NULL, BD_NVME_DISCONNECT_NONE, error);
+}
+
+/**
+ * bd_nvme_disconnect_full:
+ * @subsysnqn: (nullable): The name of the NVMe subsystem to disconnect.
+ * @path: (nullable): NVMe controller device to disconnect (e.g. `/dev/nvme0`).
+ * @owner: (nullable): The owner of the controllers to disconnect or %NULL for libblockdev.
+ * @flags: Flags to control the disconnect.
+ * @error: (out) (nullable): Place to store error (if any).
+ *
+ * Disconnects and removes existing NVMe over Fabrics controllers matching @subsysnqn
+ * or the controller represented by @path. Exactly one of @subsysnqn and @path has to
+ * be specified.
+ *
+ * Only controllers registered to @owner in the libnvme controller ownership registry
+ * (`/run/nvme/registry/`) are disconnected, see the `"owner"` argument of bd_nvme_connect().
+ * With the #BD_NVME_DISCONNECT_FORCE flag all matching controllers are disconnected
+ * regardless of their owner, including controllers without any owner. Use with care,
+ * this may disconnect devices other components depend on, e.g. the root filesystem.
+ *
+ * Returns: %TRUE if all matching controllers were disconnected successfully, %FALSE with @error
+ *          set in case of a disconnect error or when no matching controllers were found.
+ *          The #BD_NVME_ERROR_OWNED error is returned when none of the matching controllers
+ *          are owned by @owner.
+ *
+ * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
+ */
+gboolean bd_nvme_disconnect_full (const gchar *subsysnqn, const gchar *path, const gchar *owner, BDNVMEDisconnectFlags flags, GError **error) {
+    struct libnvme_global_ctx *ctx;
+    struct libnvme_host *host;
+    struct libnvme_subsystem *subsys;
+    struct libnvme_ctrl *ctrl;
+    const gchar *name = NULL;
+    gchar *ctrl_name;
     gboolean found = FALSE;
+    gboolean disconnected = FALSE;
+    gchar *skipped_owner = NULL;
+    gboolean success = FALSE;
+    int ret;
 
-    p = path;
-    if (g_str_has_prefix (p, "/dev/"))
-        p += 5;
-
-    if (!_disconnect (NULL, p, error, &found))
-        return FALSE;
-
-    if (!found) {
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_NO_MATCH,
-                     "No controllers matching the %s device name found.", path);
+    if ((subsysnqn == NULL) == (path == NULL)) {
+        g_set_error_literal (error, BD_NVME_ERROR, BD_NVME_ERROR_INVALID_ARGUMENT,
+                             "Exactly one of the subsystem NQN and the controller path has to be specified");
         return FALSE;
     }
-    return TRUE;
+    if (path) {
+        name = path;
+        if (g_str_has_prefix (name, "/dev/"))
+            name += 5;
+    }
+    if (!owner)
+        owner = DEFAULT_OWNER;
+
+    ctx = libnvme_create_global_ctx ();
+    if (ctx == NULL) {
+        g_set_error_literal (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
+                             "Failed to create libnvme context");
+        return FALSE;
+    }
+    ret = libnvme_scan_topology (ctx, NULL, NULL);
+    if (ret < 0) {
+        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
+                     "Failed to scan topology: %s",
+                     strerror_l (-ret, _C_LOCALE));
+        goto out;
+    }
+
+    libnvme_for_each_host (ctx, host)
+        libnvme_for_each_subsystem (host, subsys)
+            libnvme_subsystem_for_each_ctrl (subsys, ctrl) {
+                if (subsysnqn && g_strcmp0 (libnvme_subsystem_get_subsysnqn (subsys), subsysnqn) != 0)
+                    continue;
+                if (name && g_strcmp0 (libnvme_ctrl_get_name (ctrl), name) != 0)
+                    continue;
+                found = TRUE;
+
+                /* a registry read error does not count as a match, never disconnect on error */
+                if (!(flags & BD_NVME_DISCONNECT_FORCE) &&
+                    libnvmf_registry_attr_equal (ctx, libnvme_ctrl_get_name (ctrl), "owner", owner) != 0) {
+                    if (!skipped_owner)
+                        libnvmf_registry_retrieve (ctx, libnvme_ctrl_get_name (ctrl), "owner", &skipped_owner);
+                    continue;
+                }
+
+                /* the name is cleared by the disconnect */
+                ctrl_name = g_strdup (libnvme_ctrl_get_name (ctrl));
+                ret = libnvmf_disconnect_ctrl (ctrl);
+                if (ret != 0) {
+                    g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
+                                 "Error disconnecting the controller: %s",
+                                 strerror_l (-ret, _C_LOCALE));
+                    g_free (ctrl_name);
+                    goto out;
+                }
+                /* the udev rule shipped with libnvme removes it as well, don't wait for it */
+                libnvmf_registry_delete (ctx, ctrl_name);
+                g_free (ctrl_name);
+                disconnected = TRUE;
+            }
+
+    if (!found) {
+        if (subsysnqn)
+            g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_NO_MATCH,
+                         "No subsystems matching '%s' NQN found.", subsysnqn);
+        else
+            g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_NO_MATCH,
+                         "No controllers matching the %s device name found.", path);
+        goto out;
+    }
+    if (!disconnected) {
+        gchar *what = subsysnqn ? g_strdup_printf ("Controllers of the '%s' subsystem are", subsysnqn)
+                                : g_strdup_printf ("The %s controller is", path);
+
+        if (skipped_owner)
+            g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_OWNED,
+                         "%s owned by '%s' instead of '%s', not disconnecting.",
+                         what, skipped_owner, owner);
+        else
+            g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_OWNED,
+                         "%s not owned by '%s', not disconnecting.", what, owner);
+        g_free (what);
+        goto out;
+    }
+    success = TRUE;
+
+out:
+    free (skipped_owner);
+    libnvme_free_global_ctx (ctx);
+    return success;
 }
 
 
@@ -455,11 +671,12 @@ gboolean bd_nvme_disconnect_by_path (const gchar *path, GError **error) {
  */
 gchar ** bd_nvme_find_ctrls_for_ns (const gchar *ns_sysfs_path, const gchar *subsysnqn, const gchar *host_nqn, const gchar *host_id, GError **error G_GNUC_UNUSED) {
     GPtrArray *ptr_array;
-    nvme_root_t root;
-    nvme_host_t h;
-    nvme_subsystem_t s;
-    nvme_ctrl_t c;
-    nvme_ns_t n;
+    struct libnvme_global_ctx *ctx;
+    struct libnvme_host *h;
+    struct libnvme_subsystem *s;
+    struct libnvme_ctrl *c;
+    struct libnvme_ns *n;
+    int ret;
     char realp[PATH_MAX];
     gchar *subsysnqn_p;
 
@@ -470,33 +687,41 @@ gchar ** bd_nvme_find_ctrls_for_ns (const gchar *ns_sysfs_path, const gchar *sub
 
     ptr_array = g_ptr_array_new ();
 
-    root = nvme_scan (NULL);
-    g_warn_if_fail (root != NULL);
+    ctx = libnvme_create_global_ctx ();
+    if (ctx == NULL) {
+        g_ptr_array_add (ptr_array, NULL);  /* trailing NULL element */
+        g_free (subsysnqn_p);
+        return (gchar **) g_ptr_array_free (ptr_array, FALSE);
+    }
+    ret = libnvme_scan_topology (ctx, NULL, NULL);
+    if (ret < 0)
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to scan topology: %s",
+                             strerror_l (-ret, _C_LOCALE));
 
-    nvme_for_each_host (root, h) {
-        if (host_nqn && g_strcmp0 (nvme_host_get_hostnqn (h), host_nqn) != 0)
+    libnvme_for_each_host (ctx, h) {
+        if (host_nqn && g_strcmp0 (libnvme_host_get_hostnqn (h), host_nqn) != 0)
             continue;
-        if (host_id && g_strcmp0 (nvme_host_get_hostid (h), host_id) != 0)
+        if (host_id && g_strcmp0 (libnvme_host_get_hostid (h), host_id) != 0)
             continue;
 
-        nvme_for_each_subsystem (h, s) {
+        libnvme_for_each_subsystem (h, s) {
             gboolean found = FALSE;
 
-            if (subsysnqn && g_strcmp0 (nvme_subsystem_get_nqn (s), subsysnqn_p) != 0)
+            if (subsysnqn && g_strcmp0 (libnvme_subsystem_get_subsysnqn (s), subsysnqn_p) != 0)
                 continue;
 
-            nvme_subsystem_for_each_ctrl (s, c)
-                nvme_ctrl_for_each_ns (c, n)
-                    if (realpath (nvme_ns_get_sysfs_dir (n), realp) &&
+            libnvme_subsystem_for_each_ctrl (s, c)
+                libnvme_ctrl_for_each_ns (c, n)
+                    if (realpath (libnvme_ns_get_sysfs_dir (n), realp) &&
                         g_strcmp0 (realp, ns_sysfs_path) == 0) {
-                        if (realpath (nvme_ctrl_get_sysfs_dir (c), realp)) {
+                        if (realpath (libnvme_ctrl_get_sysfs_dir (c), realp)) {
                             g_ptr_array_add (ptr_array, g_strdup (realp));
                             break;
                         }
                     }
 
-            nvme_subsystem_for_each_ns (s, n)
-                if (realpath (nvme_ns_get_sysfs_dir (n), realp) &&
+            libnvme_subsystem_for_each_ns (s, n)
+                if (realpath (libnvme_ns_get_sysfs_dir (n), realp) &&
                     g_strcmp0 (realp, ns_sysfs_path) == 0) {
                     found = TRUE;
                     /* at least one of the namespaces match, don't care about the rest */
@@ -505,14 +730,14 @@ gchar ** bd_nvme_find_ctrls_for_ns (const gchar *ns_sysfs_path, const gchar *sub
 
             if (found)
                 /* add all controllers in the subsystem */
-                nvme_subsystem_for_each_ctrl (s, c) {
-                    if (realpath (nvme_ctrl_get_sysfs_dir (c), realp)) {
+                libnvme_subsystem_for_each_ctrl (s, c) {
+                    if (realpath (libnvme_ctrl_get_sysfs_dir (c), realp)) {
                         g_ptr_array_add (ptr_array, g_strdup (realp));
                     }
                 }
         }
     }
-    nvme_free_tree (root);
+    libnvme_free_global_ctx (ctx);
     g_free (subsysnqn_p);
 
     g_ptr_array_add (ptr_array, NULL);  /* trailing NULL element */
@@ -538,11 +763,12 @@ gchar ** bd_nvme_find_ctrls_for_ns (const gchar *ns_sysfs_path, const gchar *sub
  */
 gchar ** bd_nvme_find_namespaces_for_ctrl (const gchar *ctrl_sysfs_path, const gchar *subsysnqn, const gchar *host_nqn, const gchar *host_id, GError **error G_GNUC_UNUSED) {
     GPtrArray *ptr_array;
-    nvme_root_t root;
-    nvme_host_t h;
-    nvme_subsystem_t s;
-    nvme_ctrl_t c;
-    nvme_ns_t n;
+    struct libnvme_global_ctx *ctx;
+    struct libnvme_host *h;
+    struct libnvme_subsystem *s;
+    struct libnvme_ctrl *c;
+    struct libnvme_ns *n;
+    int ret;
     char realp[PATH_MAX];
     gchar *subsysnqn_p;
 
@@ -553,31 +779,39 @@ gchar ** bd_nvme_find_namespaces_for_ctrl (const gchar *ctrl_sysfs_path, const g
 
     ptr_array = g_ptr_array_new ();
 
-    root = nvme_scan (NULL);
-    g_warn_if_fail (root != NULL);
+    ctx = libnvme_create_global_ctx ();
+    if (ctx == NULL) {
+        g_ptr_array_add (ptr_array, NULL);  /* trailing NULL element */
+        g_free (subsysnqn_p);
+        return (gchar **) g_ptr_array_free (ptr_array, FALSE);
+    }
+    ret = libnvme_scan_topology (ctx, NULL, NULL);
+    if (ret < 0)
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to scan topology: %s",
+                             strerror_l (-ret, _C_LOCALE));
 
-    nvme_for_each_host (root, h) {
-        if (host_nqn && g_strcmp0 (nvme_host_get_hostnqn (h), host_nqn) != 0)
+    libnvme_for_each_host (ctx, h) {
+        if (host_nqn && g_strcmp0 (libnvme_host_get_hostnqn (h), host_nqn) != 0)
             continue;
-        if (host_id && g_strcmp0 (nvme_host_get_hostid (h), host_id) != 0)
+        if (host_id && g_strcmp0 (libnvme_host_get_hostid (h), host_id) != 0)
             continue;
 
-        nvme_for_each_subsystem (h, s) {
-            if (subsysnqn && g_strcmp0 (nvme_subsystem_get_nqn (s), subsysnqn_p) != 0)
+        libnvme_for_each_subsystem (h, s) {
+            if (subsysnqn && g_strcmp0 (libnvme_subsystem_get_subsysnqn (s), subsysnqn_p) != 0)
                 continue;
 
-            nvme_subsystem_for_each_ctrl (s, c) {
-                if (realpath (nvme_ctrl_get_sysfs_dir (c), realp) &&
+            libnvme_subsystem_for_each_ctrl (s, c) {
+                if (realpath (libnvme_ctrl_get_sysfs_dir (c), realp) &&
                     g_strcmp0 (realp, ctrl_sysfs_path) == 0) {
                     /* Found matching controller, add all its namespaces */
-                    nvme_ctrl_for_each_ns (c, n) {
-                        if (realpath (nvme_ns_get_sysfs_dir (n), realp)) {
+                    libnvme_ctrl_for_each_ns (c, n) {
+                        if (realpath (libnvme_ns_get_sysfs_dir (n), realp)) {
                             g_ptr_array_add (ptr_array, g_strdup (realp));
                         }
                     }
                     /* Also check subsystem-level namespaces */
-                    nvme_subsystem_for_each_ns (s, n) {
-                        if (realpath (nvme_ns_get_sysfs_dir (n), realp)) {
+                    libnvme_subsystem_for_each_ns (s, n) {
+                        if (realpath (libnvme_ns_get_sysfs_dir (n), realp)) {
                             g_ptr_array_add (ptr_array, g_strdup (realp));
                         }
                     }
@@ -586,7 +820,7 @@ gchar ** bd_nvme_find_namespaces_for_ctrl (const gchar *ctrl_sysfs_path, const g
             }
         }
     }
-    nvme_free_tree (root);
+    libnvme_free_global_ctx (ctx);
     g_free (subsysnqn_p);
 
     g_ptr_array_add (ptr_array, NULL);  /* trailing NULL element */
@@ -605,11 +839,19 @@ gchar ** bd_nvme_find_namespaces_for_ctrl (const gchar *ctrl_sysfs_path, const g
  *
  * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
  */
-gchar * bd_nvme_get_host_nqn (G_GNUC_UNUSED GError **error) {
+gchar * bd_nvme_get_host_nqn (GError **error) {
+    struct libnvme_global_ctx *ctx;
     char *hostnqn;
 
+    ctx = libnvme_create_global_ctx ();
+    if (ctx == NULL) {
+        g_set_error_literal (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
+                             "Failed to create libnvme context");
+        return NULL;
+    }
     /* FIXME: libnvme SYSCONFDIR might be different from PACKAGE_SYSCONF_DIR */
-    hostnqn = nvmf_hostnqn_from_file ();
+    hostnqn = libnvmf_read_hostnqn (ctx);
+    libnvme_free_global_ctx (ctx);
     return hostnqn ? hostnqn : g_strdup ("");
 }
 
@@ -626,9 +868,17 @@ gchar * bd_nvme_get_host_nqn (G_GNUC_UNUSED GError **error) {
  * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
  */
 gchar * bd_nvme_generate_host_nqn (GError **error) {
+    struct libnvme_global_ctx *ctx;
     char *nqn;
 
-    nqn = nvmf_hostnqn_generate ();
+    ctx = libnvme_create_global_ctx ();
+    if (ctx == NULL) {
+        g_set_error_literal (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
+                             "Failed to create libnvme context");
+        return NULL;
+    }
+    nqn = libnvmf_generate_hostnqn (ctx);
+    libnvme_free_global_ctx (ctx);
     if (!nqn)
         g_set_error_literal (error, BD_NVME_ERROR, BD_NVME_ERROR_INVALID_ARGUMENT,
                              "Unable to generate Host NQN.");
@@ -647,10 +897,18 @@ gchar * bd_nvme_generate_host_nqn (GError **error) {
  *
  * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
  */
-gchar * bd_nvme_get_host_id (G_GNUC_UNUSED GError **error) {
+gchar * bd_nvme_get_host_id (GError **error) {
+    struct libnvme_global_ctx *ctx;
     char *hostid;
 
-    hostid = nvmf_hostid_from_file ();
+    ctx = libnvme_create_global_ctx ();
+    if (ctx == NULL) {
+        g_set_error_literal (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
+                             "Failed to create libnvme context");
+        return NULL;
+    }
+    hostid = libnvmf_read_hostid (ctx);
+    libnvme_free_global_ctx (ctx);
     return hostid ? hostid : g_strdup ("");
 }
 
