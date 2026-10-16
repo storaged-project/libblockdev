@@ -751,6 +751,14 @@ bd_s390_zfcp_sanitize_lun_input
 bd_s390_zfcp_online
 bd_s390_zfcp_scsi_offline
 bd_s390_zfcp_offline
+bd_s390_zkey_generate
+BDS390ZkeyInfo
+bd_s390_zkey_info_copy
+bd_s390_zkey_info_free
+bd_s390_zkey_list
+bd_s390_zkey_remove
+bd_s390_zkey_cryptsetup_setvp
+bd_s390_zkey_cryptsetup_validate
 BDS390Tech
 BDS390TechMode
 bd_s390_is_tech_avail
