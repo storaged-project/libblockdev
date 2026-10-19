@@ -64,15 +64,15 @@ endif
 
 if WITH_CRYPTO
 if WITH_ESCROW
-libbd_crypto_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(CRYPTSETUP_CFLAGS) $(BLKID_CFLAGS) $(NSS_CFLAGS) -Wall -Wextra -Werror
-libbd_crypto_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS) $(GIO_LIBS) $(CRYPTSETUP_LIBS) $(NSS_LIBS) $(BLKID_LIBS) -lkeyutils -lvolume_key
+libbd_crypto_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(CRYPTSETUP_CFLAGS) $(DEVMAPPER_CFLAGS) $(BLKID_CFLAGS) $(NSS_CFLAGS) -Wall -Wextra -Werror
+libbd_crypto_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS) $(GIO_LIBS) $(CRYPTSETUP_LIBS) $(DEVMAPPER_LIBS) $(NSS_LIBS) $(BLKID_LIBS) -lkeyutils -lvolume_key
 else
-libbd_crypto_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(CRYPTSETUP_CFLAGS) $(BLKID_CFLAGS) -Wall -Wextra -Werror
-libbd_crypto_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS) $(GIO_LIBS) $(CRYPTSETUP_LIBS) $(BLKID_LIBS) -lkeyutils
+libbd_crypto_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(CRYPTSETUP_CFLAGS) $(DEVMAPPER_CFLAGS) $(BLKID_CFLAGS) -Wall -Wextra -Werror
+libbd_crypto_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS) $(GIO_LIBS) $(CRYPTSETUP_LIBS) $(DEVMAPPER_LIBS) $(BLKID_LIBS) -lkeyutils
 endif
 libbd_crypto_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 3:0:0 -Wl,--no-undefined -export-symbols-regex '^bd_.*'
 libbd_crypto_la_CPPFLAGS = -I${builddir}/../../include/
-libbd_crypto_la_SOURCES = crypto.c crypto.h
+libbd_crypto_la_SOURCES = crypto.c crypto.h dm_logging.c dm_logging.h
 endif
 
 if WITH_DM
