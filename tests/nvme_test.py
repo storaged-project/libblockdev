@@ -12,6 +12,12 @@ gi.require_version('BlockDev', '3.0')
 from gi.repository import GLib, BlockDev
 
 
+def plugin_uses_libnvme3():
+    """ Whether the loaded nvme plugin has been built against libnvme3 """
+    with open("/proc/self/maps") as f:
+        return "libnvme3.so" in f.read()
+
+
 @required_plugins(("nvme", "loop"))
 class NVMeTest(unittest.TestCase):
     requested_plugins = BlockDev.plugin_specs_from_names(("nvme", "loop"))
@@ -623,6 +629,65 @@ class NVMeFabricsTestCase(NVMeTest):
         self._safe_unlink(HOSTNQN_PATH)
         self._safe_unlink(HOSTID_PATH)
 
+
+    @tag_test(TestTags.CORE)
+    def test_connect_config(self):
+        """Test connecting with a libnvme3 fabrics configuration file"""
+
+        if not plugin_uses_libnvme3():
+            self.skipTest("the INI configuration file is only supported with libnvme3")
+
+        # the configuration file requires a valid NQN and a transport address
+        subnqn = "nqn.2014-08.org.storaged:libblockdev-nvme-config"
+        traddr = "1"
+        self.addCleanup(self._clean_up)
+        self.dev_files += [create_sparse_tempfile("nvmeof_test0", 1024**3, dir=self.TMPDIR)]
+        setup_nvme_target(self.dev_files, subnqn, traddr)
+        os.unlink(self.dev_files[0])
+
+        config = os.path.join(self.TMPDIR, "libblockdev-nvme-fabrics.conf")
+        write_file(config, "[Subsystem]\n"
+                           "nqn = %s\n"
+                           "keep-alive-tmo = 17\n"
+                           "controller = transport=loop;traddr=%s\n" % (subnqn, traddr))
+        self.addCleanup(self._safe_unlink, config)
+
+        def connect_get_kato(extra):
+            ret = BlockDev.nvme_connect(subnqn, 'loop', traddr, None, None, None, None, None, extra)
+            self.assertTrue(ret)
+            self.addCleanup(self._nvme_disconnect, subnqn, ignore_errors=True)
+            ctrls = find_nvme_ctrl_devs_for_subnqn(subnqn)
+            self.assertEqual(len(ctrls), 1)
+            kato = read_file("/sys/class/nvme/%s/kato" % os.path.basename(ctrls[0])).strip()
+            BlockDev.nvme_disconnect(subnqn)
+            return kato
+
+        # parameters of the matching connection are applied
+        self.assertEqual(connect_get_kato([BlockDev.ExtraArg.new("config", config)]), "17")
+
+        # extra arguments take precedence
+        self.assertEqual(connect_get_kato([BlockDev.ExtraArg.new("config", config),
+                                           BlockDev.ExtraArg.new("keep_alive_tmo", "23")]), "23")
+
+        # no configuration file
+        self.assertNotEqual(connect_get_kato([BlockDev.ExtraArg.new("config", "none")]), "17")
+
+        # a missing configuration file is an error when explicitly requested
+        with self.assertRaisesRegex(GLib.GError, r"Failed to read configuration file"):
+            BlockDev.nvme_connect(subnqn, 'loop', traddr, None, None, None, None, None,
+                                  [BlockDev.ExtraArg.new("config", "/nonexistent/nvme-fabrics.conf")])
+        ctrls = find_nvme_ctrl_devs_for_subnqn(subnqn)
+        self.assertEqual(len(ctrls), 0)
+
+        # legacy JSON configuration files are not supported anymore
+        json_config = os.path.join(self.TMPDIR, "libblockdev-nvme-config.json")
+        write_file(json_config, '[{"hostnqn": "%s", "subsystems": []}]\n' % self.hostnqn)
+        self.addCleanup(self._safe_unlink, json_config)
+        with self.assertRaisesRegex(GLib.GError, r"legacy JSON configuration files are not supported"):
+            BlockDev.nvme_connect(subnqn, 'loop', traddr, None, None, None, None, None,
+                                  [BlockDev.ExtraArg.new("config", json_config)])
+        ctrls = find_nvme_ctrl_devs_for_subnqn(subnqn)
+        self.assertEqual(len(ctrls), 0)
 
     @tag_test(TestTags.CORE)
     def test_persistent_dc(self):

@@ -401,13 +401,14 @@ def get_nvme_hostnqn():
     return hostnqn.strip()
 
 
-def setup_nvme_target(dev_paths, subnqn):
+def setup_nvme_target(dev_paths, subnqn, traddr=""):
     """
     Sets up a new NVMe target loop device (using nvmetcli) on top of the
     :param:`dev_paths` backing block devices.
 
     :param set dev_paths: set of backing block device paths
     :param str subnqn: Subsystem NQN
+    :param str traddr: transport address of the loop port, matched by the host when specified
     """
 
     # modprobe required nvme target modules
@@ -436,7 +437,7 @@ def setup_nvme_target(dev_paths, subnqn):
     {
       "addr": {
         "adrfam": "",
-        "traddr": "",
+        "traddr": "%s",
         "treq": "not specified",
         "trsvcid": "",
         "trtype": "loop"
@@ -461,7 +462,7 @@ def setup_nvme_target(dev_paths, subnqn):
   ]
 }
 """
-        tmp.write(json_str % (subnqn, namespaces, subnqn))
+        tmp.write(json_str % (traddr, subnqn, namespaces, subnqn))
 
     # export the loop device on the target
     ret, out, err = run_command("nvmetcli restore %s" % tcli_json_file)

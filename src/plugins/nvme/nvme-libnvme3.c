@@ -304,7 +304,59 @@ NVMeTopoSubsys **_nvme_be_scan_topology (void) {
     return (NVMeTopoSubsys **) g_ptr_array_free (subsystems, FALSE);
 }
 
-static int _apply_params (struct libnvmf_context *fctx, const NVMeConnectParams *params) {
+struct config_match_data {
+    const NVMeConnectParams *params;
+    const struct libnvmf_config_conn *conn;
+};
+
+static void config_match_conn (const struct libnvmf_config_conn *conn, void *user_data) {
+    struct config_match_data *data = user_data;
+    const NVMeConnectParams *params = data->params;
+    const gchar *val;
+
+    /* first match wins */
+    if (data->conn)
+        return;
+
+    if (g_strcmp0 (libnvmf_config_conn_get_subsysnqn (conn), params->subsysnqn) != 0 ||
+        g_strcmp0 (libnvmf_config_conn_get_transport (conn), params->transport) != 0 ||
+        g_strcmp0 (libnvmf_config_conn_get_traddr (conn), params->transport_addr) != 0 ||
+        g_strcmp0 (libnvmf_config_conn_get_host_traddr (conn), params->host_traddr) != 0 ||
+        g_strcmp0 (libnvmf_config_conn_get_host_iface (conn), params->host_iface) != 0)
+        return;
+
+    /* unset values in the config file match anything */
+    val = libnvmf_config_conn_get_trsvcid (conn);
+    if (val && params->transport_svcid && g_strcmp0 (val, params->transport_svcid) != 0)
+        return;
+    val = libnvmf_config_conn_get_hostnqn (conn);
+    if (val && params->host_nqn && g_strcmp0 (val, params->host_nqn) != 0)
+        return;
+
+    data->conn = conn;
+}
+
+static const gchar *get_param_nonempty (const struct libnvmf_config_conn *conn, const gchar *key) {
+    const gchar *val;
+
+    if (!conn)
+        return NULL;
+    val = libnvmf_params_get (libnvmf_config_conn_get_params (conn), key);
+    if (val && *val == '\0')
+        return NULL;
+    return val;
+}
+
+/* applies the extra arguments on top of the configuration file entry @conn */
+static int _apply_params (struct libnvmf_context *fctx, const NVMeConnectParams *params, const struct libnvmf_config_conn *conn) {
+    int ret;
+
+    if (conn) {
+        ret = libnvmf_context_apply_params (fctx, libnvmf_config_conn_get_params (conn));
+        if (ret != 0)
+            return ret;
+    }
+
 #define APPLY_OPT(opt) { \
         if (params->opt.set) \
             libnvmf_context_set_##opt (fctx, params->opt.val); \
@@ -326,18 +378,48 @@ static int _apply_params (struct libnvmf_context *fctx, const NVMeConnectParams 
 #undef APPLY_OPT
 
     if (params->hostkey || params->ctrlkey || params->keyring || params->tls_key)
-        return libnvmf_context_set_crypto (fctx, params->hostkey, params->ctrlkey,
-                                           params->keyring, params->tls_key, NULL);
+        return libnvmf_context_set_crypto (fctx,
+                                           params->hostkey ? params->hostkey : get_param_nonempty (conn, "kxchap-secret"),
+                                           params->ctrlkey ? params->ctrlkey : get_param_nonempty (conn, "kxchap-ctrl-secret"),
+                                           params->keyring ? params->keyring : get_param_nonempty (conn, "keyring"),
+                                           params->tls_key /* NULL keeps the current key */,
+                                           get_param_nonempty (conn, "tls-key-identity"));
     return 0;
+}
+
+/* Warns about a legacy JSON configuration that nvme-cli would convert to the INI format
+ * on its first fabrics command. libnvme3 doesn't read it and libblockdev doesn't convert it,
+ * its options and keys would be silently ignored otherwise. */
+static void _warn_legacy_config (void) {
+    /* FIXME: libnvme SYSCONFDIR might be different from PACKAGE_SYSCONF_DIR */
+    gchar *ini = g_build_filename (PACKAGE_SYSCONF_DIR, "nvme", "nvme-fabrics.conf", NULL);
+    gchar *json = g_build_filename (PACKAGE_SYSCONF_DIR, "nvme", "config.json", NULL);
+    gchar *marker = g_strconcat (json, ".converted", NULL);
+
+    if (!g_file_test (ini, G_FILE_TEST_EXISTS) &&
+        g_file_test (json, G_FILE_TEST_EXISTS) &&
+        !g_file_test (marker, G_FILE_TEST_EXISTS))
+        bd_utils_log_format (BD_UTILS_LOG_WARNING,
+                             "The legacy NVMe-oF configuration file %s is not supported by libnvme3 and is ignored, "
+                             "run 'nvme config-convert' to convert it to %s", json, ini);
+
+    g_free (ini);
+    g_free (json);
+    g_free (marker);
 }
 
 gboolean _nvme_be_connect (const NVMeConnectParams *params, GError **error) {
     int ret;
+    const gchar *host_nqn;
+    const gchar *host_id;
+    const gchar *hostsymname;
     gchar *host_nqn_val = NULL;
     gchar *host_id_val = NULL;
     struct libnvme_global_ctx *ctx;
     struct libnvme_host *host;
     struct libnvmf_context *fctx = NULL;
+    struct libnvmf_config *config = NULL;
+    struct config_match_data match = ZERO_INIT;
     gboolean success = FALSE;
 
     ctx = libnvme_create_global_ctx ();
@@ -347,8 +429,54 @@ gboolean _nvme_be_connect (const NVMeConnectParams *params, GError **error) {
         return FALSE;
     }
 
+    /* look up the connection in the configuration file */
+    if (params->use_config) {
+        /* libnvme treats a missing file as an empty configuration, which is only fine for the default */
+        if (params->config_file && !g_file_test (params->config_file, G_FILE_TEST_EXISTS)) {
+            g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_INVALID_ARGUMENT,
+                         "Failed to read configuration file '%s': %s",
+                         params->config_file, strerror_l (ENOENT, _C_LOCALE));
+            goto out;
+        }
+        if (!params->config_file)
+            _warn_legacy_config ();
+        /* NULL means the libnvme default configuration file */
+        ret = libnvmf_config_read (ctx, params->config_file, &config);
+        if (ret != 0) {
+            if (params->config_file) {
+                g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_INVALID_ARGUMENT,
+                             "Failed to read configuration file '%s': %s%s",
+                             params->config_file, libnvme_strerror (-ret),
+                             g_str_has_suffix (params->config_file, ".json") ?
+                                 " (legacy JSON configuration files are not supported with libnvme3, "
+                                 "convert it with 'nvme config-convert')" : "");
+                goto out;
+            }
+            /* not fatal for the default configuration file */
+            bd_utils_log_format (BD_UTILS_LOG_WARNING,
+                                 "Failed to read the default NVMe-oF configuration file: %s",
+                                 libnvme_strerror (-ret));
+            config = NULL;
+        }
+    }
+    host_nqn = params->host_nqn;
+    host_id = params->host_id;
+    hostsymname = params->hostsymname;
+    if (config) {
+        match.params = params;
+        libnvmf_config_conn_for_each (config, config_match_conn, &match);
+        if (match.conn) {
+            if (!host_nqn)
+                host_nqn = libnvmf_config_conn_get_hostnqn (match.conn);
+            if (!host_id)
+                host_id = libnvmf_config_conn_get_hostid (match.conn);
+            if (!hostsymname)
+                hostsymname = libnvmf_config_conn_get_hostsymname (match.conn);
+        }
+    }
+
     /* HostNQN and HostID, read from /etc/nvme/ or generated when not specified */
-    ret = libnvmf_host_get_ids (ctx, params->host_nqn, params->host_id, &host_nqn_val, &host_id_val);
+    ret = libnvmf_host_get_ids (ctx, host_nqn, host_id, &host_nqn_val, &host_id_val);
     if (ret != 0 || host_nqn_val == NULL || host_id_val == NULL) {
         g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_INVALID_ARGUMENT,
                      "Could not determine HostNQN or HostID: %s",
@@ -374,14 +502,14 @@ gboolean _nvme_be_connect (const NVMeConnectParams *params, GError **error) {
     if (ret == 0)
         ret = libnvmf_context_set_hostnqn (fctx, host_nqn_val, host_id_val);
     if (ret == 0)
-        ret = _apply_params (fctx, params);
+        ret = _apply_params (fctx, params, match.conn);
     if (ret != 0) {
         _nvme_fabrics_errno_to_gerror (ret, error);
         g_prefix_error (error, "Error creating the controller: ");
         goto out;
     }
 
-    if (params->hostsymname) {
+    if (hostsymname) {
         ret = libnvme_get_host (ctx, host_nqn_val, host_id_val, &host);
         if (ret != 0) {
             g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
@@ -389,7 +517,7 @@ gboolean _nvme_be_connect (const NVMeConnectParams *params, GError **error) {
                          host_nqn_val, host_id_val, libnvme_strerror (-ret));
             goto out;
         }
-        libnvme_host_set_hostsymname (host, params->hostsymname);
+        libnvme_host_set_hostsymname (host, hostsymname);
     }
 
     ret = libnvmf_connect (ctx, fctx);
@@ -403,6 +531,7 @@ gboolean _nvme_be_connect (const NVMeConnectParams *params, GError **error) {
 
 out:
     libnvmf_context_free (fctx);
+    libnvmf_config_free (config);
     libnvme_free_global_ctx (ctx);
     free (host_nqn_val);
     free (host_id_val);
