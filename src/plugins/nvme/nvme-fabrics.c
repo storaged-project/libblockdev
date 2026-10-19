@@ -304,6 +304,13 @@ static gboolean _disconnect (const gchar *subsysnqn, const gchar *path, const gc
     gchar *skipped_owner = NULL;
     gchar *what;
 
+    /* the backends treat a NULL selector as "match all", never disconnect everything by accident */
+    if ((subsysnqn == NULL) == (path == NULL)) {
+        g_set_error_literal (error, BD_NVME_ERROR, BD_NVME_ERROR_INVALID_ARGUMENT,
+                             "Exactly one of the subsystem NQN and the controller path has to be specified");
+        return FALSE;
+    }
+
     if (path) {
         name = path;
         if (g_str_has_prefix (name, "/dev/"))
@@ -419,12 +426,6 @@ gboolean bd_nvme_disconnect_by_path (const gchar *path, GError **error) {
  * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
  */
 gboolean bd_nvme_disconnect_full (const gchar *subsysnqn, const gchar *path, const gchar *owner, BDNVMEDisconnectFlags flags, GError **error) {
-    if ((subsysnqn == NULL) == (path == NULL)) {
-        g_set_error_literal (error, BD_NVME_ERROR, BD_NVME_ERROR_INVALID_ARGUMENT,
-                             "Exactly one of the subsystem NQN and the controller path has to be specified");
-        return FALSE;
-    }
-
     return _disconnect (subsysnqn, path, owner, flags, error);
 }
 
