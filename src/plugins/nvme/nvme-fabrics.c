@@ -100,10 +100,12 @@ static void parse_extra_args (const BDExtraArg **extra, NVMeConnectParams *param
                 params->config_file = (*extra_i)->val;
             }
         } else
-        if (g_strcmp0 ((*extra_i)->opt, "dhchap_key") == 0)
+        if (g_strcmp0 ((*extra_i)->opt, "kxchap_secret") == 0 ||
+            g_strcmp0 ((*extra_i)->opt, "dhchap_key") == 0 /* deprecated */)
             params->hostkey = (*extra_i)->val;
         else
-        if (g_strcmp0 ((*extra_i)->opt, "dhchap_ctrl_key") == 0)
+        if (g_strcmp0 ((*extra_i)->opt, "kxchap_ctrl_secret") == 0 ||
+            g_strcmp0 ((*extra_i)->opt, "dhchap_ctrl_key") == 0 /* deprecated */)
             params->ctrlkey = (*extra_i)->val;
         else
         if (g_strcmp0 ((*extra_i)->opt, "hostsymname") == 0)
@@ -189,12 +191,14 @@ static void parse_extra_args (const BDExtraArg **extra, NVMeConnectParams *param
  * In addition to the primary options it's possible to supply @extra arguments:
  * - `"config"`: Use the specified JSON configuration file instead of the default file (see below) or
  *               specify `"none"` to avoid reading any configuration file.
- * - `"dhchap_key"`: NVMe In-band authentication secret in ASCII format as described
- *                      in the NVMe 2.0 specification. When not specified, the secret is by default read
- *                      from `/etc/nvme/hostkey`. In case that file does not exist no in-band authentication
- *                      is attempted.
- * - `"dhchap_ctrl_key"`: NVMe In-band authentication controller secret for bi-directional authentication.
- *                        When not specified, no bi-directional authentication is attempted.
+ * - `"kxchap_secret"`: NVMe In-band authentication (KX-HMAC-CHAP, formerly DH-HMAC-CHAP) host secret
+ *                      in ASCII format as described in the NVMe specification. When not specified,
+ *                      the secret is taken from the configuration file or, with libnvme-1.x, read from
+ *                      `/etc/nvme/hostkey`, if present. Otherwise no in-band authentication is attempted.
+ * - `"kxchap_ctrl_secret"`: NVMe In-band authentication controller secret for bi-directional authentication.
+ *                           When not specified, the secret is taken from the configuration file, if present.
+ *                           Otherwise no bi-directional authentication is attempted.
+ * - `"dhchap_key"`, `"dhchap_ctrl_key"`: Deprecated aliases for `"kxchap_secret"` and `"kxchap_ctrl_secret"`.
  * - `"nr_io_queues"`: The number of I/O queues.
  * - `"nr_write_queues"`: Number of additional queues that will be used for write I/O.
  * - `"nr_poll_queues"`: Number of additional queues that will be used for polling latency sensitive I/O.
@@ -216,8 +220,8 @@ static void parse_extra_args (const BDExtraArg **extra, NVMeConnectParams *param
  * Boolean values can be expressed by "0"/"1", "on"/"off" or "True"/"False" case-insensitive
  * strings. Failed numerical or boolean string conversions will result in the option being ignored.
  *
- * By default additional options are read from the default configuration file `/etc/nvme/config.json`.
- * This follows the default behaviour of `nvme-cli`. Use the @extra `"config"` argument
+ * With libnvme-1.x, additional options are by default read from the configuration file `/etc/nvme/config.json`.
+ * This follows the default behaviour of `nvme-cli` 2.x. Configuration files are not supported with libnvme3 yet. Use the @extra `"config"` argument
  * to either specify a different config file or disable use of it. The JSON configuration
  * file format is documented in [https://raw.githubusercontent.com/linux-nvme/libnvme/master/doc/config-schema.json](https://raw.githubusercontent.com/linux-nvme/libnvme/master/doc/config-schema.json).
  * As a rule @extra key names are kept consistent with the JSON config file schema.

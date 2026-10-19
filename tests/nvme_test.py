@@ -381,8 +381,9 @@ class NVMeFabricsTestCase(NVMeTest):
             self.assertTrue(re.match(r'/dev/nvme[0-9]+n[0-9]+', ns))
             self.assertTrue(os.path.exists(ns))
 
-        # make a duplicate connection
-        ret = BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, None, None)
+        # make a duplicate connection, libnvme3 refuses it unless explicitly requested
+        ret = BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, None, None,
+                                    [BlockDev.ExtraArg.new("duplicate_connect", "True")])
         self.assertTrue(ret)
 
         # should see two controllers now

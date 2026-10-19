@@ -12,14 +12,18 @@ libbd_nvme_la_SOURCES = \
 	nvme.c \
 	nvme-private.h \
 	nvme-backend.h \
-	nvme-libnvme1.h \
-	nvme-libnvme1.c \
 	nvme-info.c \
 	nvme-error.c \
 	nvme-op.c \
 	nvme-fabrics.c \
 	../check_deps.c \
 	../check_deps.h
+
+if WITH_LIBNVME3
+libbd_nvme_la_SOURCES += nvme-libnvme3.h nvme-libnvme3.c
+else
+libbd_nvme_la_SOURCES += nvme-libnvme1.h nvme-libnvme1.c
+endif
 
 libbd_nvmeincludedir = $(includedir)/blockdev
 libbd_nvmeinclude_HEADERS = nvme.h

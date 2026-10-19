@@ -24,7 +24,8 @@
  * (nvme-info.c, nvme-op.c, nvme-fabrics.c, nvme-error.c) only uses the NVMe
  * specification types, constants and static inline helpers provided by the
  * libnvme headers. Every call into the library itself goes through the
- * functions declared here, implemented by nvme-libnvme1.c.
+ * functions declared here, implemented by either nvme-libnvme1.c or
+ * nvme-libnvme3.c as selected by configure.
  *
  * Unless stated otherwise, functions returning int return 0 on success,
  * a negative errno value on failure or a positive NVMe status value.
@@ -33,7 +34,11 @@
 #include <glib.h>
 #include <blockdev/utils.h>
 
+#ifdef HAVE_LIBNVME3
+#include "nvme-libnvme3.h"
+#else
 #include "nvme-libnvme1.h"
+#endif
 
 #ifndef BD_NVME_BACKEND
 #define BD_NVME_BACKEND
