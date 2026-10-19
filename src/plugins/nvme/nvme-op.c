@@ -363,7 +363,7 @@ gboolean bd_nvme_sanitize (const gchar *device, BDNVMESanitizeAction action, gbo
         .owpass = overwrite_pass_count,
         .oipbp = overwrite_invert_pattern,
         .nodas = no_dealloc,
-        .ovrpat = GUINT32_TO_LE (overwrite_pattern),
+        .ovrpat = overwrite_pattern,
     };
 
     switch (action) {
