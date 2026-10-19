@@ -55,6 +55,10 @@ if WITH_NVME
 PLUGINS += nvme
 endif
 
+if WITH_S390
+PLUGINS += s390
+endif
+
 if WITH_SMART
 PLUGINS += smart
 endif
