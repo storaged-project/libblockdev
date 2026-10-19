@@ -431,7 +431,7 @@ class NVMeFabricsTestCase(NVMeTest):
         for c in ctrls:
             self.assertTrue(re.match(r'/dev/nvme[0-9]+', c))
             self.assertTrue(os.path.exists(c))
-        namespaces = find_nvme_ns_devs_for_subnqn(self.SUBNQN)
+        namespaces = find_nvme_ns_devs_for_subnqn(self.SUBNQN, num_expected=NUM_NS)
         self.assertEqual(len(namespaces), NUM_NS)
         for ns in namespaces:
             self.assertTrue(re.match(r'/dev/nvme[0-9]+n[0-9]+', ns))

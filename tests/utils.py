@@ -10,7 +10,6 @@ import dbus
 import unittest
 import time
 import sys
-import json
 import uuid
 from contextlib import contextmanager
 from enum import Enum
@@ -313,95 +312,73 @@ def find_nvme_ctrl_devs_for_subnqn(subnqn, wait_for_ready=True):
     :param bool wait_for_ready: whether to wait for controllers to be ready (default: True)
     """
 
-    def _check_subsys(subsys, dev_paths):
-        if subsys['SubsystemNQN'] == subnqn:
-            for ctrl in subsys['Controllers']:
-                if ctrl['Transport'] != 'loop':
-                    continue
-                path = os.path.join('/dev/', ctrl['Controller'])
-                try:
-                    st = os.lstat(path)
-                    # nvme controller node is a character device
-                    if stat.S_ISCHR(st.st_mode):
-                        dev_paths += [path]
-                except:
-                    pass
-
     # Wait for controllers to be ready if requested
     if wait_for_ready:
         _wait_for_nvme_controllers_ready(subnqn)
-    ret, out, err = run_command("nvme list --output-format=json --verbose")
-    if ret != 0:
-        raise RuntimeError("Error getting NVMe list: '%s %s'" % (out, err))
 
-    decoder = json.JSONDecoder()
-    decoded = decoder.decode(out)
-    if not decoded or 'Devices' not in decoded:
-        return []
-
+    # read sysfs directly, the 'nvme list' JSON output differs between nvme-cli versions
     dev_paths = []
-    for dev in decoded['Devices']:
-        # nvme-cli 2.x
-        if 'Subsystems' in dev:
-            for subsys in dev['Subsystems']:
-                _check_subsys(subsys, dev_paths)
-        # nvme-cli 1.x
-        if 'SubsystemNQN' in dev:
-            _check_subsys(dev, dev_paths)
+    for ctrl_path in sorted(glob.glob("/sys/class/nvme/nvme*")):
+        try:
+            if read_file(os.path.join(ctrl_path, "subsysnqn")).strip() != subnqn:
+                continue
+            if read_file(os.path.join(ctrl_path, "transport")).strip() != "loop":
+                continue
+            path = os.path.join('/dev/', os.path.basename(ctrl_path))
+            # nvme controller node is a character device
+            if stat.S_ISCHR(os.lstat(path).st_mode):
+                dev_paths += [path]
+        except:
+            pass
 
     return dev_paths
 
 
-def find_nvme_ns_devs_for_subnqn(subnqn, wait_for_ready=True):
+def find_nvme_ns_devs_for_subnqn(subnqn, wait_for_ready=True, num_expected=None, timeout=5):
     """
     Find NVMe namespace block devices for the specified subsystem nqn
 
     :param str subnqn: subsystem nqn
     :param bool wait_for_ready: whether to wait for controllers to be ready (default: True)
+    :param int num_expected: wait until this many namespaces show up (default: don't wait)
+    :param int timeout: timeout in seconds when waiting for @num_expected namespaces (default: 5)
     """
 
-    def _check_namespaces(node, ns_dev_paths):
-        for ns in node['Namespaces']:
-            path = os.path.join('/dev/', ns['NameSpace'])
+    if wait_for_ready:
+        _wait_for_nvme_controllers_ready(subnqn)
+
+    # the kernel scans namespaces asynchronously after the controller went live
+    start_time = time.time()
+    ns_dev_paths = _find_nvme_ns_devs_for_subnqn(subnqn)
+    while num_expected is not None and len(ns_dev_paths) < num_expected and time.time() - start_time < timeout:
+        time.sleep(0.5)
+        os.system("udevadm settle")
+        ns_dev_paths = _find_nvme_ns_devs_for_subnqn(subnqn)
+
+    return ns_dev_paths
+
+
+def _find_nvme_ns_devs_for_subnqn(subnqn):
+    # namespaces are listed under the subsystem with native NVMe multipath
+    # and under the controllers otherwise
+    parents = glob.glob("/sys/class/nvme-subsystem/nvme-subsys*") + glob.glob("/sys/class/nvme/nvme*")
+    ns_dev_paths = []
+    for parent in parents:
+        try:
+            if read_file(os.path.join(parent, "subsysnqn")).strip() != subnqn:
+                continue
+        except:
+            continue
+        for ns_path in glob.glob(os.path.join(parent, "nvme*n*")):
+            path = os.path.join('/dev/', os.path.basename(ns_path))
             try:
-                st = os.lstat(path)
-                if stat.S_ISBLK(st.st_mode):
+                # skips the hidden per-path nvmeXcYnZ nodes
+                if stat.S_ISBLK(os.lstat(path).st_mode) and path not in ns_dev_paths:
                     ns_dev_paths += [path]
             except:
                 pass
 
-    def _check_subsys(subsys, ns_dev_paths):
-        if subsys['SubsystemNQN'] == subnqn:
-            if 'Namespaces' in subsys:
-                _check_namespaces(subsys, ns_dev_paths)
-            # kernel 4.18
-            if 'Controllers' in subsys:
-                for ctrl in subsys['Controllers']:
-                    if 'Namespaces' in ctrl:
-                        _check_namespaces(ctrl, ns_dev_paths)
-
-    if wait_for_ready:
-        _wait_for_nvme_controllers_ready(subnqn)
-    ret, out, err = run_command("nvme list --output-format=json --verbose")
-    if ret != 0:
-        raise RuntimeError("Error getting NVMe list: '%s %s'" % (out, err))
-
-    decoder = json.JSONDecoder()
-    decoded = decoder.decode(out)
-    if not decoded or 'Devices' not in decoded:
-        return []
-
-    ns_dev_paths = []
-    for dev in decoded['Devices']:
-        # nvme-cli 2.x
-        if 'Subsystems' in dev:
-            for subsys in dev['Subsystems']:
-                _check_subsys(subsys, ns_dev_paths)
-        # nvme-cli 1.x
-        if 'SubsystemNQN' in dev:
-            _check_subsys(dev, ns_dev_paths)
-
-    return ns_dev_paths
+    return sorted(ns_dev_paths)
 
 
 def get_nvme_hostnqn():
