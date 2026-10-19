@@ -27,8 +27,6 @@
 #include <fcntl.h>
 #include <malloc.h>
 
-#include <libnvme.h>
-
 #include <blockdev/utils.h>
 #include <check_deps.h>
 #include "nvme.h"

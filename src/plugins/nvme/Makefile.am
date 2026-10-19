@@ -11,6 +11,9 @@ libbd_nvme_la_SOURCES = \
 	nvme.h \
 	nvme.c \
 	nvme-private.h \
+	nvme-backend.h \
+	nvme-libnvme1.h \
+	nvme-libnvme1.c \
 	nvme-info.c \
 	nvme-error.c \
 	nvme-op.c \

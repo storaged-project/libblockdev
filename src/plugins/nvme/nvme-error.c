@@ -27,12 +27,11 @@
 #include <fcntl.h>
 #include <malloc.h>
 
-#include <libnvme.h>
-
 #include <blockdev/utils.h>
 #include <check_deps.h>
 #include "nvme.h"
 #include "nvme-private.h"
+#include "nvme-backend.h"
 
 
 /**
@@ -55,8 +54,8 @@ void _nvme_status_to_error (gint status, gboolean fabrics, GError **error)
     }
 
     if (status < 0) {
-        /* generic errno errors */
-        switch (errno) {
+        /* generic errno errors, returned as negative values */
+        switch (-status) {
             case EWOULDBLOCK:
                 code = BD_NVME_ERROR_BUSY;
                 break;
@@ -64,7 +63,7 @@ void _nvme_status_to_error (gint status, gboolean fabrics, GError **error)
                 code = BD_NVME_ERROR_FAILED;
         }
         g_set_error_literal (error, BD_NVME_ERROR, code,
-                             strerror_l (errno, _C_LOCALE));
+                             strerror_l (-status, _C_LOCALE));
         return;
     } else {
         /* NVMe status codes */
@@ -87,15 +86,16 @@ void _nvme_status_to_error (gint status, gboolean fabrics, GError **error)
             default:
                 code = BD_NVME_ERROR_SC_GENERIC;
         }
-        g_set_error_literal (error, BD_NVME_ERROR, code, nvme_status_to_string (status, fabrics));
+        g_set_error_literal (error, BD_NVME_ERROR, code, _nvme_be_status_to_string (status, fabrics));
         return;
     }
     g_warn_if_reached ();
 }
 
-void _nvme_fabrics_errno_to_gerror (int result, int _errno, GError **error)
+void _nvme_fabrics_errno_to_gerror (int result, GError **error)
 {
     gint code;
+    int _errno = -result;
 
     if (error == NULL)
         return;
@@ -143,17 +143,17 @@ void _nvme_fabrics_errno_to_gerror (int result, int _errno, GError **error)
             default:
                 code = BD_NVME_ERROR_CONNECT;
         }
-        g_set_error_literal (error, BD_NVME_ERROR, code, nvme_errno_to_string (_errno));
+        g_set_error_literal (error, BD_NVME_ERROR, code, _nvme_be_fabrics_errno_to_string (_errno));
         return;
     } else {
-        switch (errno) {
+        switch (_errno) {
             case EWOULDBLOCK:
                 code = BD_NVME_ERROR_BUSY;
                 break;
             default:
                 code = BD_NVME_ERROR_FAILED;
         }
-        g_set_error_literal (error, BD_NVME_ERROR, code, strerror_l (errno, _C_LOCALE));
+        g_set_error_literal (error, BD_NVME_ERROR, code, strerror_l (_errno, _C_LOCALE));
         return;
     }
     g_warn_if_reached ();
