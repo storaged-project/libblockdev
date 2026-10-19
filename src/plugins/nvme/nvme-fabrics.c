@@ -117,6 +117,9 @@ static void parse_extra_args (const BDExtraArg **extra, NVMeConnectParams *param
         if (g_strcmp0 ((*extra_i)->opt, "tls_key") == 0)
             params->tls_key = (*extra_i)->val;
         else
+        if (g_strcmp0 ((*extra_i)->opt, "owner") == 0)
+            params->owner = (*extra_i)->val;
+        else
         if (g_strcmp0 ((*extra_i)->opt, "nr_io_queues") == 0)
             SAFE_INT_CONV (params->nr_io_queues)
         else
@@ -214,6 +217,11 @@ static void parse_extra_args (const BDExtraArg **extra, NVMeConnectParams *param
  * - `"data_digest"`: Generates/verifies data digest (TCP). Boolean value.
  * - `"tls"`: Enable TLS encryption (TCP). Boolean value.
  * - `"hostsymname"`: TP8010: NVMe host symbolic name.
+ * - `"owner"`: Register a newly created controller with this owner in the libnvme controller ownership
+ *              registry (`/run/nvme/registry/`) instead of the default `"libblockdev"`, e.g. `"udisks"`.
+ *              An empty string leaves the controller without an owner. An already connected controller
+ *              keeps its owner. See bd_nvme_disconnect() and bd_nvme_disconnect_full().
+ *              Only supported with libnvme3, ignored with libnvme-1.x.
  * - `"keyring"`: Keyring to store and lookup keys. String value.
  * - `"tls_key"`: TLS PSK for the connection. String value.
  *
@@ -289,6 +297,52 @@ gboolean bd_nvme_connect (const gchar *subsysnqn, const gchar *transport, const 
     return _nvme_be_connect (&params, error);
 }
 
+static gboolean _disconnect (const gchar *subsysnqn, const gchar *path, const gchar *owner, BDNVMEDisconnectFlags flags, GError **error) {
+    const gchar *name = NULL;
+    gboolean found = FALSE;
+    gboolean disconnected = FALSE;
+    gchar *skipped_owner = NULL;
+    gchar *what;
+
+    if (path) {
+        name = path;
+        if (g_str_has_prefix (name, "/dev/"))
+            name += 5;
+    }
+    if (!owner)
+        owner = NVME_DEFAULT_OWNER;
+
+    if (!_nvme_be_disconnect (subsysnqn, name, owner, flags & BD_NVME_DISCONNECT_FORCE,
+                              &found, &disconnected, &skipped_owner, error))
+        return FALSE;
+
+    if (!found) {
+        if (path)
+            g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_NO_MATCH,
+                         "No controllers matching the %s device name found.", path);
+        else
+            g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_NO_MATCH,
+                         "No subsystems matching '%s' NQN found.", subsysnqn);
+        return FALSE;
+    }
+    if (!disconnected) {
+        what = path ? g_strdup_printf ("The %s controller is", path)
+                    : g_strdup_printf ("Controllers of the '%s' subsystem are", subsysnqn);
+        if (skipped_owner)
+            g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_OWNED,
+                         "%s owned by '%s' instead of '%s', not disconnecting.",
+                         what, skipped_owner, owner);
+        else
+            g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_OWNED,
+                         "%s not owned by '%s', not disconnecting.", what, owner);
+        g_free (what);
+        g_free (skipped_owner);
+        return FALSE;
+    }
+    g_free (skipped_owner);
+    return TRUE;
+}
+
 /**
  * bd_nvme_disconnect:
  * @subsysnqn: The name of the NVMe subsystem to disconnect.
@@ -298,23 +352,22 @@ gboolean bd_nvme_connect (const gchar *subsysnqn, const gchar *transport, const 
  * This may disconnect multiple controllers with matching @subsysnqn and %TRUE
  * is only returned when all controllers were disconnected successfully.
  *
+ * With libnvme3, only controllers owned by libblockdev according to the libnvme controller
+ * ownership registry are disconnected, i.e. the ones connected by bd_nvme_connect() without
+ * a specific `"owner"`. Controllers connected by other components, e.g. boot volumes
+ * connected via NBFT or connections managed by a discovery daemon, are left untouched.
+ * See bd_nvme_disconnect_full() to disconnect controllers of a different owner.
+ * libnvme-1.x has no ownership registry, all matching controllers are disconnected.
+ *
  * Returns: %TRUE if all matching controllers were disconnected successfully, %FALSE with @error
  *          set in case of a disconnect error or when no matching controllers were found.
+ *          The #BD_NVME_ERROR_OWNED error is returned when none of the matching controllers
+ *          are owned by libblockdev.
  *
  * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
  */
 gboolean bd_nvme_disconnect (const gchar *subsysnqn, GError **error) {
-    gboolean found = FALSE;
-
-    if (!_nvme_be_disconnect (subsysnqn, NULL, &found, error))
-        return FALSE;
-
-    if (!found) {
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_NO_MATCH,
-                     "No subsystems matching '%s' NQN found.", subsysnqn);
-        return FALSE;
-    }
-    return TRUE;
+    return _disconnect (subsysnqn, NULL, NULL, BD_NVME_DISCONNECT_NONE, error);
 }
 
 /**
@@ -325,28 +378,54 @@ gboolean bd_nvme_disconnect (const gchar *subsysnqn, GError **error) {
  * Disconnects and removes a NVMe over Fabrics controller represented
  * by a block device path.
  *
+ * With libnvme3, only a controller owned by libblockdev according to the libnvme controller
+ * ownership registry is disconnected, see bd_nvme_disconnect() and bd_nvme_disconnect_full().
+ *
  * Returns: %TRUE if the controller was disconnected successfully,
  *          %FALSE otherwise with @error set.
  *
  * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
  */
 gboolean bd_nvme_disconnect_by_path (const gchar *path, GError **error) {
-    const gchar *p;
-    gboolean found = FALSE;
+    return _disconnect (NULL, path, NULL, BD_NVME_DISCONNECT_NONE, error);
+}
 
-    p = path;
-    if (g_str_has_prefix (p, "/dev/"))
-        p += 5;
-
-    if (!_nvme_be_disconnect (NULL, p, &found, error))
-        return FALSE;
-
-    if (!found) {
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_NO_MATCH,
-                     "No controllers matching the %s device name found.", path);
+/**
+ * bd_nvme_disconnect_full:
+ * @subsysnqn: (nullable): The name of the NVMe subsystem to disconnect.
+ * @path: (nullable): NVMe controller device to disconnect (e.g. `/dev/nvme0`).
+ * @owner: (nullable): The owner of the controllers to disconnect or %NULL for libblockdev.
+ * @flags: Flags to control the disconnect.
+ * @error: (out) (nullable): Place to store error (if any).
+ *
+ * Disconnects and removes existing NVMe over Fabrics controllers matching @subsysnqn
+ * or the controller represented by @path. Exactly one of @subsysnqn and @path has to
+ * be specified.
+ *
+ * Only controllers registered to @owner in the libnvme controller ownership registry
+ * (`/run/nvme/registry/`) are disconnected, see the `"owner"` argument of bd_nvme_connect().
+ * With the #BD_NVME_DISCONNECT_FORCE flag all matching controllers are disconnected
+ * regardless of their owner, including controllers without any owner. Use with care,
+ * this may disconnect devices other components depend on, e.g. the root filesystem.
+ *
+ * libnvme-1.x has no ownership registry, @owner and @flags are ignored and all matching
+ * controllers are disconnected, same as with bd_nvme_disconnect().
+ *
+ * Returns: %TRUE if all matching controllers were disconnected successfully, %FALSE with @error
+ *          set in case of a disconnect error or when no matching controllers were found.
+ *          The #BD_NVME_ERROR_OWNED error is returned when none of the matching controllers
+ *          are owned by @owner.
+ *
+ * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
+ */
+gboolean bd_nvme_disconnect_full (const gchar *subsysnqn, const gchar *path, const gchar *owner, BDNVMEDisconnectFlags flags, GError **error) {
+    if ((subsysnqn == NULL) == (path == NULL)) {
+        g_set_error_literal (error, BD_NVME_ERROR, BD_NVME_ERROR_INVALID_ARGUMENT,
+                             "Exactly one of the subsystem NQN and the controller path has to be specified");
         return FALSE;
     }
-    return TRUE;
+
+    return _disconnect (subsysnqn, path, owner, flags, error);
 }
 
 

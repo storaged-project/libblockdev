@@ -153,6 +153,7 @@ typedef struct {
     const gchar *hostsymname;
     const gchar *keyring;
     const gchar *tls_key;
+    const gchar *owner;        /* %NULL for the default owner, "" for no owner */
     NVMeOptInt nr_io_queues;
     NVMeOptInt nr_write_queues;
     NVMeOptInt nr_poll_queues;
@@ -172,9 +173,19 @@ typedef struct {
 G_GNUC_INTERNAL
 gboolean _nvme_be_connect (const NVMeConnectParams *params, GError **error);
 
-/* Disconnects all controllers matching @subsysnqn and/or the kernel controller @name.
- * Sets @found when at least one matching controller has been disconnected. */
+/* owner registered for new connections unless specified otherwise */
+#define NVME_DEFAULT_OWNER "libblockdev"
+
+/* Disconnects all controllers matching @subsysnqn and/or the kernel controller @name
+ * that are owned by @owner, or all matching controllers when @force is set.
+ * Sets @found when at least one controller matches and @disconnected when at least
+ * one has been disconnected. @skipped_owner is set to the owner of a matching
+ * controller that has been skipped, if any, free with g_free().
+ *
+ * Backends without an ownership registry (libnvme-1.x) ignore @owner and @force
+ * and disconnect all matching controllers. */
 G_GNUC_INTERNAL
-gboolean _nvme_be_disconnect (const gchar *subsysnqn, const gchar *name, gboolean *found, GError **error);
+gboolean _nvme_be_disconnect (const gchar *subsysnqn, const gchar *name, const gchar *owner, gboolean force,
+                              gboolean *found, gboolean *disconnected, gchar **skipped_owner, GError **error);
 
 #endif  /* BD_NVME_BACKEND */

@@ -835,6 +835,7 @@ bd_nvme_get_sanitize_log
 bd_nvme_sanitize_log_free
 bd_nvme_sanitize_log_copy
 BDNVMESanitizeAction
+BDNVMEDisconnectFlags
 bd_nvme_sanitize
 bd_nvme_get_host_nqn
 bd_nvme_get_host_id
@@ -844,6 +845,7 @@ bd_nvme_set_host_id
 bd_nvme_connect
 bd_nvme_disconnect
 bd_nvme_disconnect_by_path
+bd_nvme_disconnect_full
 bd_nvme_find_ctrls_for_ns
 bd_nvme_find_namespaces_for_ctrl
 </SECTION>

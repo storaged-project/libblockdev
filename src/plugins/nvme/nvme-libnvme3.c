@@ -408,6 +408,27 @@ static void _warn_legacy_config (void) {
     g_free (marker);
 }
 
+struct connected_data {
+    struct libnvme_global_ctx *ctx;
+    const gchar *owner;
+};
+
+static void connected_hook (struct libnvmf_context *fctx G_GNUC_UNUSED, struct libnvme_ctrl *c, void *user_data) {
+    struct connected_data *data = user_data;
+    int ret;
+
+    /* Only called for a controller that has just been created. Registering the owner
+     * here rather than via libnvme_set_owner() avoids claiming an already connected
+     * controller that might be owned by someone else. */
+    if (*data->owner == '\0')
+        return;
+
+    ret = libnvmf_registry_update (data->ctx, libnvme_ctrl_get_name (c), "owner", data->owner);
+    if (ret != 0)
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to register owner '%s' for %s: %s",
+                             data->owner, libnvme_ctrl_get_name (c), libnvme_strerror (-ret));
+}
+
 gboolean _nvme_be_connect (const NVMeConnectParams *params, GError **error) {
     int ret;
     const gchar *host_nqn;
@@ -420,6 +441,7 @@ gboolean _nvme_be_connect (const NVMeConnectParams *params, GError **error) {
     struct libnvmf_context *fctx = NULL;
     struct libnvmf_config *config = NULL;
     struct config_match_data match = ZERO_INIT;
+    struct connected_data hook_data;
     gboolean success = FALSE;
 
     ctx = libnvme_create_global_ctx ();
@@ -494,7 +516,9 @@ gboolean _nvme_be_connect (const NVMeConnectParams *params, GError **error) {
         goto out;
     }
 
-    ret = libnvmf_context_create (ctx, NULL, NULL, NULL, NULL, &fctx);
+    hook_data.ctx = ctx;
+    hook_data.owner = params->owner ? params->owner : NVME_DEFAULT_OWNER;
+    ret = libnvmf_context_create (ctx, NULL, connected_hook, NULL, &hook_data, &fctx);
     if (ret == 0)
         ret = libnvmf_context_set_connection (fctx, params->subsysnqn, params->transport,
                                               params->transport_addr, params->transport_svcid,
@@ -539,11 +563,14 @@ out:
     return success;
 }
 
-gboolean _nvme_be_disconnect (const gchar *subsysnqn, const gchar *name, gboolean *found, GError **error) {
+gboolean _nvme_be_disconnect (const gchar *subsysnqn, const gchar *name, const gchar *owner, gboolean force,
+                              gboolean *found, gboolean *disconnected, gchar **skipped_owner, GError **error) {
     struct libnvme_global_ctx *ctx;
     struct libnvme_host *host;
     struct libnvme_subsystem *subsys;
     struct libnvme_ctrl *ctrl;
+    gchar *ctrl_name;
+    gchar *ctrl_owner;
     int ret;
 
     ctx = libnvme_create_global_ctx ();
@@ -562,19 +589,40 @@ gboolean _nvme_be_disconnect (const gchar *subsysnqn, const gchar *name, gboolea
     }
     libnvme_for_each_host (ctx, host)
         libnvme_for_each_subsystem (host, subsys)
-            if (!subsysnqn || g_strcmp0 (libnvme_subsystem_get_subsysnqn (subsys), subsysnqn) == 0)
-                libnvme_subsystem_for_each_ctrl (subsys, ctrl)
-                    if (!name || g_strcmp0 (libnvme_ctrl_get_name (ctrl), name) == 0) {
-                        ret = libnvmf_disconnect_ctrl (ctrl);
-                        if (ret != 0) {
-                            g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                                         "Error disconnecting the controller: %s",
-                                         strerror_l (-ret, _C_LOCALE));
-                            libnvme_free_global_ctx (ctx);
-                            return FALSE;
-                        }
-                        *found = TRUE;
+            libnvme_subsystem_for_each_ctrl (subsys, ctrl) {
+                if (subsysnqn && g_strcmp0 (libnvme_subsystem_get_subsysnqn (subsys), subsysnqn) != 0)
+                    continue;
+                if (name && g_strcmp0 (libnvme_ctrl_get_name (ctrl), name) != 0)
+                    continue;
+                *found = TRUE;
+
+                /* a registry read error does not count as a match, never disconnect on error */
+                if (!force && libnvmf_registry_attr_equal (ctx, libnvme_ctrl_get_name (ctrl), "owner", owner) != 0) {
+                    if (*skipped_owner == NULL) {
+                        ctrl_owner = NULL;
+                        if (libnvmf_registry_retrieve (ctx, libnvme_ctrl_get_name (ctrl), "owner", &ctrl_owner) == 0 && ctrl_owner)
+                            *skipped_owner = g_strdup (ctrl_owner);
+                        free (ctrl_owner);
                     }
+                    continue;
+                }
+
+                /* the name is cleared by the disconnect */
+                ctrl_name = g_strdup (libnvme_ctrl_get_name (ctrl));
+                ret = libnvmf_disconnect_ctrl (ctrl);
+                if (ret != 0) {
+                    g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
+                                 "Error disconnecting the controller: %s",
+                                 strerror_l (-ret, _C_LOCALE));
+                    g_free (ctrl_name);
+                    libnvme_free_global_ctx (ctx);
+                    return FALSE;
+                }
+                /* the udev rule shipped with libnvme removes it as well, don't wait for it */
+                libnvmf_registry_delete (ctx, ctrl_name);
+                g_free (ctrl_name);
+                *disconnected = TRUE;
+            }
     libnvme_free_global_ctx (ctx);
     return TRUE;
 }

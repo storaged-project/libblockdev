@@ -28,6 +28,7 @@ GQuark bd_nvme_error_quark (void);
  * @BD_NVME_ERROR_CONNECT_NODEV: Invalid interface.
  * @BD_NVME_ERROR_CONNECT_OPNOTSUPP: Operation not supported.
  * @BD_NVME_ERROR_CONNECT_REFUSED: Connection refused.
+ * @BD_NVME_ERROR_OWNED: The controller is not owned by the caller (see bd_nvme_disconnect()).
  */
 typedef enum {
     BD_NVME_ERROR_TECH_UNAVAIL,
@@ -48,6 +49,7 @@ typedef enum {
     BD_NVME_ERROR_CONNECT_NODEV,
     BD_NVME_ERROR_CONNECT_OPNOTSUPP,
     BD_NVME_ERROR_CONNECT_REFUSED,
+    BD_NVME_ERROR_OWNED,
 } BDNVMEError;
 
 typedef enum {
@@ -536,6 +538,16 @@ typedef enum {
     BD_NVME_SANITIZE_ACTION_CRYPTO_ERASE = 3,
 } BDNVMESanitizeAction;
 
+/**
+ * BDNVMEDisconnectFlags:
+ * @BD_NVME_DISCONNECT_NONE: No flags.
+ * @BD_NVME_DISCONNECT_FORCE: Disconnect controllers regardless of their owner in the libnvme controller ownership registry.
+ */
+typedef enum {
+    BD_NVME_DISCONNECT_NONE  = 0,
+    BD_NVME_DISCONNECT_FORCE = 1 << 0,
+} BDNVMEDisconnectFlags;
+
 
 void bd_nvme_controller_info_free (BDNVMEControllerInfo *info);
 BDNVMEControllerInfo * bd_nvme_controller_info_copy (BDNVMEControllerInfo *info);
@@ -621,6 +633,11 @@ gboolean               bd_nvme_connect               (const gchar       *subsysn
 gboolean               bd_nvme_disconnect            (const gchar       *subsysnqn,
                                                       GError           **error);
 gboolean               bd_nvme_disconnect_by_path    (const gchar       *path,
+                                                      GError           **error);
+gboolean               bd_nvme_disconnect_full       (const gchar       *subsysnqn,
+                                                      const gchar       *path,
+                                                      const gchar       *owner,
+                                                      BDNVMEDisconnectFlags flags,
                                                       GError           **error);
 
 gchar **               bd_nvme_find_ctrls_for_ns     (const gchar       *ns_sysfs_path,

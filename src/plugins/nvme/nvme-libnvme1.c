@@ -386,7 +386,8 @@ gboolean _nvme_be_connect (const NVMeConnectParams *params, GError **error) {
     return TRUE;
 }
 
-gboolean _nvme_be_disconnect (const gchar *subsysnqn, const gchar *name, gboolean *found, GError **error) {
+gboolean _nvme_be_disconnect (const gchar *subsysnqn, const gchar *name, const gchar *owner G_GNUC_UNUSED, gboolean force G_GNUC_UNUSED,
+                              gboolean *found, gboolean *disconnected, gchar **skipped_owner G_GNUC_UNUSED, GError **error) {
     nvme_root_t root;
     nvme_host_t host;
     nvme_subsystem_t subsys;
@@ -422,6 +423,7 @@ gboolean _nvme_be_disconnect (const gchar *subsysnqn, const gchar *name, gboolea
                             return FALSE;
                         }
                         *found = TRUE;
+                        *disconnected = TRUE;
                     }
     nvme_free_tree (root);
     return TRUE;
