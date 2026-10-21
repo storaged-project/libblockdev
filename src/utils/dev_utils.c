@@ -21,6 +21,7 @@
 #include <libudev.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <stdlib.h>
 
 #include "dev_utils.h"
 
@@ -94,7 +95,15 @@ gchar* bd_utils_resolve_device (const gchar *dev_spec, GError **error) {
     }
     g_free (path);
 
-    if (g_str_has_prefix (symlink, "../"))
+    if (g_path_is_absolute (symlink)) {
+        /* the target may be another symlink, resolve it completely */
+        path = realpath (symlink, NULL);
+        if (!path) {
+            g_set_error (error, BD_UTILS_DEV_UTILS_ERROR, BD_UTILS_DEV_UTILS_ERROR_FAILED,
+                         "Failed to resolve '%s': %s", dev_spec, strerror_l (errno, _C_LOCALE));
+            return NULL;
+        }
+    } else if (g_str_has_prefix (symlink, "../"))
         path = g_strdup_printf ("/dev/%s", symlink + 3);
     else
         path = g_strdup_printf ("/dev/%s", symlink);

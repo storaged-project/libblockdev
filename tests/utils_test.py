@@ -468,6 +468,13 @@ class UtilsDevUtilsTestCase(UtilsStorageTestCase):
         # should resolve the other symlink even without the "/dev" prefix
         self.assertEqual(BlockDev.utils_resolve_device(dev_link2[5:]), dev_node)
 
+        # should resolve a symlink with an absolute target
+        abs_link = "/dev/utilsTestAbsoluteLink"
+        os.symlink(dev_node, abs_link)
+        self.addCleanup(os.unlink, abs_link)
+        self.assertEqual(BlockDev.utils_resolve_device(abs_link), dev_node)
+        self.assertEqual(BlockDev.utils_resolve_device(abs_link[5:]), dev_node)
+
         # vg is not a block device, shouldn't be resolved
         with self.assertRaisesRegex(GLib.GError, "not a block device"):
             BlockDev.utils_resolve_device("/dev/utilsTestVG")
