@@ -150,6 +150,11 @@ AC_ARG_WITH([nvme],
     [],
     [with_nvme=yes])
 
+AC_ARG_WITH([libnvme],
+    AS_HELP_STRING([--with-libnvme=auto|libnvme3|libnvme1], [libnvme flavour to use for the nvme plugin @<:@default=auto@:>@]),
+    [],
+    [with_libnvme=auto])
+
 AC_SUBST([WITH_NVME], [0])
 AM_CONDITIONAL(WITH_NVME, test "x$with_nvme" != "xno")
 AS_IF([test "x$with_nvme" != "xno"],
@@ -279,11 +284,19 @@ AS_IF([test "x$with_nvdimm" != "xno"],
       [])
 
 AS_IF([test "x$with_nvme" != "xno"],
-      [LIBBLOCKDEV_PKG_CHECK_MODULES([NVME], [libnvme >= 1.3])
-      AS_IF([$PKG_CONFIG --atleast-version=1.4 libnvme],
-            [AC_DEFINE([HAVE_LIBNVME_1_4])], [])
+      [AS_IF([test "x$with_libnvme" = "xauto"],
+             [PKG_CHECK_EXISTS([libnvme3 >= 3.2], [with_libnvme=libnvme3], [with_libnvme=libnvme1])])
+       AS_CASE([$with_libnvme],
+               [libnvme3], [LIBBLOCKDEV_PKG_CHECK_MODULES([NVME], [libnvme3 >= 3.2])
+                            AC_DEFINE([HAVE_LIBNVME3], [], [Define if the nvme plugin uses libnvme3])],
+               [libnvme1], [LIBBLOCKDEV_PKG_CHECK_MODULES([NVME], [libnvme >= 1.3])
+                            AS_IF([$PKG_CONFIG --atleast-version=1.4 libnvme],
+                                  [AC_DEFINE([HAVE_LIBNVME_1_4])], [])],
+               [AC_MSG_ERROR([Invalid value '$with_libnvme' for --with-libnvme, use auto, libnvme3 or libnvme1])])
       ],
       [])
+AM_CONDITIONAL(WITH_LIBNVME3, test "x$with_nvme" != "xno" -a "x$with_libnvme" = "xlibnvme3")
+AS_IF([test "x$with_nvme" != "xno"], [nvme_info="yes ($with_libnvme)"], [nvme_info="no"])
 
 AS_IF([test "x$with_smart" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([SMART], [libatasmart >= 0.17])
@@ -393,7 +406,7 @@ echo "
         MDRAID plugin:                ${with_mdraid}
         MPath plugin                  ${with_mpath}
         NVDIMM plugin (deprecated):   ${with_nvdimm}
-        NVMe plugin:                  ${with_nvme}
+        NVMe plugin:                  ${nvme_info}
         Part plugin:                  ${with_part}
         S390 plugin:                  ${s390_info}
         SMART plugin (libatasmart):   ${with_smart}
