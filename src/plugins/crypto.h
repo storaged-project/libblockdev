@@ -214,6 +214,7 @@ BDCryptoLUKSInfo* bd_crypto_luks_info_copy (BDCryptoLUKSInfo *info);
  * @uuid: UUID of the BITLK device
  * @backing_device: name of the underlying block device
  * @sector_size: size (in bytes) of encryption sector
+ * @has_clearkey: whether the device has a valid clear key protector
  */
 typedef struct BDCryptoBITLKInfo {
     gchar *cipher;
@@ -221,6 +222,7 @@ typedef struct BDCryptoBITLKInfo {
     gchar *uuid;
     gchar *backing_device;
     guint32 sector_size;
+    gboolean has_clearkey;
 } BDCryptoBITLKInfo;
 
 void bd_crypto_bitlk_info_free (BDCryptoBITLKInfo *info);
