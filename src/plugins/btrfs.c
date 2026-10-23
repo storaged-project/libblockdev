@@ -314,9 +314,9 @@ static BDBtrfsFilesystemInfo* get_filesystem_info_from_match (GMatchInfo *match_
  */
 gboolean bd_btrfs_create_volume (const gchar **devices, const gchar *label, const gchar *data_level, const gchar *md_level, const BDExtraArg **extra, GError **error) {
     const gchar **device_p = NULL;
-    guint8 num_args = 0;
+    guint num_args = 0;
     const gchar **argv = NULL;
-    guint8 next_arg = 1;
+    guint next_arg = 1;
     gboolean success = FALSE;
 
     if (!check_deps (&avail_deps, DEPS_BTRFS_MASK, deps, DEPS_LAST, &deps_check_lock, error) ||
