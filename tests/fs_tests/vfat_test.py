@@ -1,5 +1,8 @@
+import os
 import re
+import subprocess
 import tempfile
+import unittest
 
 from packaging.version import Version
 
@@ -21,6 +24,15 @@ def _get_dosfstools_version():
 
 
 DOSFSTOOLS_VERSION = _get_dosfstools_version()
+
+
+def _has_codepage(cp):
+    """Check whether the given DOS codepage is available via iconv."""
+    try:
+        p = subprocess.run(["iconv", "-l"], capture_output=True, text=True)
+        return "CP%d" % cp in p.stdout or "CP%d//" % cp in p.stdout
+    except Exception:
+        return False
 
 
 class VfatNoDevTestCase(FSNoDevTestCase):
@@ -279,6 +291,118 @@ class VfatSetUUID(VfatTestCase):
 
         with self.assertRaisesRegex(GLib.GError, "must fit into 32 bits."):
             BlockDev.fs_vfat_check_uuid(10 * "f")
+
+
+class VfatCheckLabel(VfatNoDevTestCase):
+    """Tests for bd_fs_vfat_check_label (no device needed)."""
+
+    def test_vfat_check_label_byte_limit(self):
+        """The limit is 11 bytes, not 11 characters.
+
+        A 4-character CJK label (12 UTF-8 bytes) exceeds the 11-byte limit
+        and must be rejected, even though it is only 4 characters long.
+        """
+        succ = BlockDev.fs_vfat_check_label("a" * 11)
+        self.assertTrue(succ)
+
+        with self.assertRaisesRegex(GLib.GError, "at most 11 characters long."):
+            BlockDev.fs_vfat_check_label("a" * 12)
+
+    def test_vfat_check_label_non_ascii_byte_count(self):
+        """Non-ASCII labels are checked by byte count, not character count."""
+        # 3 CJK chars + 1 ASCII char = 10 UTF-8 bytes <= 11
+        succ = BlockDev.fs_vfat_check_label("测试U盘")
+        self.assertTrue(succ)
+
+        # 4 CJK chars = 12 UTF-8 bytes > 11
+        with self.assertRaisesRegex(GLib.GError, "at most 11 characters long."):
+            BlockDev.fs_vfat_check_label("测试优盘")
+
+    def test_vfat_check_label_forbidden_chars(self):
+        """Forbidden characters must still be rejected."""
+        for ch in '"*/:<>?\\|':
+            with self.assertRaisesRegex(GLib.GError, "not supported in VFAT labels"):
+                BlockDev.fs_vfat_check_label("A" + ch + "B")
+
+
+@unittest.skipUnless(_has_codepage(936),
+                    "DOS codepage 936 (GBK) not available via iconv")
+class VfatSetLabelNonAscii(VfatTestCase):
+    """Tests for non-ASCII (CJK) VFAT labels using locale-derived codepage."""
+
+    @classmethod
+    def setUpClass(cls):
+        super(VfatSetLabelNonAscii, cls).setUpClass()
+        cls._saved_env = {}
+        for var in ("LC_ALL", "LC_CTYPE", "LANG"):
+            cls._saved_env[var] = os.environ.get(var)
+
+    @classmethod
+    def tearDownClass(cls):
+        for var, val in cls._saved_env.items():
+            if val is None:
+                os.environ.pop(var, None)
+            else:
+                os.environ[var] = val
+        super(VfatSetLabelNonAscii, cls).tearDownClass()
+
+    def setUp(self):
+        super(VfatSetLabelNonAscii, self).setUp()
+        # _vfat_locale_codepage reads LC_ALL > LC_CTYPE > LANG from the
+        # environment; set a CJK locale so it maps to codepage 936 (GBK).
+        os.environ["LC_ALL"] = "zh_CN.UTF-8"
+
+    def tearDown(self):
+        for var, val in self._saved_env.items():
+            if val is None:
+                os.environ.pop(var, None)
+            else:
+                os.environ[var] = val
+        super(VfatSetLabelNonAscii, self).tearDown()
+
+    def test_vfat_set_non_ascii_label_roundtrip(self):
+        """Set a CJK label and verify get_info reads it back as UTF-8."""
+
+        succ = BlockDev.fs_vfat_mkfs(self.loop_devs[0], self._mkfs_options)
+        self.assertTrue(succ)
+
+        label = "测试U盘"  # 4 CJK/Latin chars, 7 GBK bytes, 10 UTF-8 bytes
+        succ = BlockDev.fs_vfat_set_label(self.loop_devs[0], label)
+        self.assertTrue(succ)
+
+        fi = BlockDev.fs_vfat_get_info(self.loop_devs[0])
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, label)
+
+    def test_vfat_set_ascii_label_unchanged(self):
+        """Pure-ASCII labels must not be affected by the codepage change."""
+
+        succ = BlockDev.fs_vfat_mkfs(self.loop_devs[0], self._mkfs_options)
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_vfat_set_label(self.loop_devs[0], "HELLO")
+        self.assertTrue(succ)
+
+        fi = BlockDev.fs_vfat_get_info(self.loop_devs[0])
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "HELLO")
+
+    def test_vfat_set_label_max_cjk(self):
+        """5 CJK characters (10 GBK bytes) fit in 11 DOS bytes; 6 do not."""
+
+        succ = BlockDev.fs_vfat_mkfs(self.loop_devs[0], self._mkfs_options)
+        self.assertTrue(succ)
+
+        # 5 CJK chars = 10 GBK bytes <= 11 -- should succeed
+        five = "测" * 5
+        succ = BlockDev.fs_vfat_set_label(self.loop_devs[0], five)
+        self.assertTrue(succ)
+        fi = BlockDev.fs_vfat_get_info(self.loop_devs[0])
+        self.assertEqual(fi.label, five)
+
+        # 6 CJK chars = 12 GBK bytes > 11 -- should fail
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_vfat_set_label(self.loop_devs[0], "测" * 6)
 
 
 @utils.required_plugins(("tools",))
