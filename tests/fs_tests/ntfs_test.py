@@ -204,6 +204,17 @@ class NTFSSetLabel(NTFSTestCase):
         self.assertTrue(fi)
         self.assertEqual(fi.label, "TEST_LABEL2")
 
+        # Labels starting with '-' must not be interpreted as options.
+        for label in ("-f", "--force", "--help", "--"):
+            with self.subTest(label=label):
+                with self.assertRaisesRegex(GLib.GError, "cannot start with '-'"):
+                    BlockDev.fs_ntfs_check_label(label)
+                with self.assertRaisesRegex(GLib.GError, "cannot start with '-'"):
+                    BlockDev.fs_ntfs_set_label(self.loop_devs[0], label)
+                fi = BlockDev.fs_ntfs_get_info(self.loop_devs[0])
+                self.assertTrue(fi)
+                self.assertEqual(fi.label, "TEST_LABEL2")
+
         succ = BlockDev.fs_ntfs_set_label(self.loop_devs[0], "")
         self.assertTrue(succ)
         fi = BlockDev.fs_ntfs_get_info(self.loop_devs[0])
