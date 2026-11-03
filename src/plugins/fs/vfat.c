@@ -51,7 +51,7 @@ void _fs_vfat_reset_avail_deps (void) {
 
 static const UtilDep deps[DEPS_LAST] = {
     {"mkfs.vfat", NULL, NULL, NULL},
-    {"fatlabel", NULL, NULL, NULL},
+    {"fatlabel", "4.2", "--version", "fatlabel\\s+([\\d\\.]+).+"},
     {"fsck.vfat", NULL, NULL, NULL},
     {"vfat-resize", NULL, NULL, NULL},
     {"fatlabel", "4.2", "--version", "fatlabel\\s+([\\d\\.]+).+"},
@@ -288,33 +288,24 @@ gboolean bd_fs_vfat_repair (const gchar *device, const BDExtraArg **extra, GErro
  * Tech category: %BD_FS_TECH_VFAT-%BD_FS_TECH_MODE_SET_LABEL
  */
 gboolean bd_fs_vfat_set_label (const gchar *device, const gchar *label, GError **error) {
-    const gchar *args[4] = {"fatlabel", device, NULL, NULL};
-    UtilDep dep = {"fatlabel", "4.2", "--version", "fatlabel\\s+([\\d\\.]+).+"};
-    gchar *label_up = NULL;
-    gboolean new_vfat = FALSE;
-    gboolean ret;
+    const gchar *args[5] = {"fatlabel", "--", device, label, NULL};
+    g_autofree gchar *label_up = NULL;
 
     if (!check_deps (&avail_deps, DEPS_FATLABEL_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
 
     if (!label || g_strcmp0 (label, "") == 0) {
-        /* fatlabel >= 4.2 refuses to set empty label */
-        new_vfat = bd_utils_check_util_version (dep.name, dep.version,
-                                                dep.ver_arg, dep.ver_regexp,
-                                                NULL);
-        if (new_vfat)
-            args[2] = "--reset";
-    }
-
-    /* forcefully convert the label uppercase in case no reset was requested */
-    if (label && args[2] == NULL) {
+        /* fatlabel >= 4.2 refuses to set an empty label, use --reset instead */
+        args[1] = "--reset";
+        args[2] = "--";
+        args[3] = device;
+    } else {
+        /* forcefully convert a non-empty label uppercase */
         label_up = g_ascii_strup (label, -1);
-        args[2] = label_up;
+        args[3] = label_up;
     }
-    ret = bd_utils_exec_and_report_error (args, NULL, error);
-    g_free (label_up);
 
-    return ret;
+    return bd_utils_exec_and_report_error (args, NULL, error);
 }
 
 /**

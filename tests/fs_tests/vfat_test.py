@@ -219,6 +219,15 @@ class VfatSetLabel(VfatTestCase):
         self.assertTrue(fi)
         self.assertEqual(fi.label, "TEST_LABEL2")
 
+        # Labels starting with '-' must not be interpreted as options.
+        for label in ("-f", "-V", "--help", "--reset", "--"):
+            with self.subTest(label=label):
+                succ = BlockDev.fs_vfat_set_label(self.loop_devs[0], label)
+                self.assertTrue(succ)
+                fi = BlockDev.fs_vfat_get_info(self.loop_devs[0])
+                self.assertTrue(fi)
+                self.assertEqual(fi.label, label.upper())
+
         succ = BlockDev.fs_vfat_set_label(self.loop_devs[0], "")
         self.assertTrue(succ)
         fi = BlockDev.fs_vfat_get_info(self.loop_devs[0])
