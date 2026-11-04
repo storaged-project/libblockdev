@@ -294,6 +294,7 @@ gboolean bd_crypto_device_is_luks (const gchar *device, GError **error);
 const gchar* bd_crypto_luks_status (const gchar *luks_device, GError **error);
 
 gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint64 key_size, BDCryptoKeyslotContext *context, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra,GError **error);
+gboolean bd_crypto_luks_format_volume_key (const gchar *device, const gchar *cipher, guint64 key_size, BDCryptoKeyslotContext *context, BDCryptoKeyslotContext *volume_key, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra, GError **error);
 gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, gboolean read_only, GError **error);
 gboolean bd_crypto_luks_open_flags (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, BDCryptoOpenFlags flags, GError **error);
 gboolean bd_crypto_luks_close (const gchar *luks_device, GError **error);

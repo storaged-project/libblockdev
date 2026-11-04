@@ -310,6 +310,12 @@ def crypto_luks_format(device, cipher=None, key_size=0, context=None, min_entrop
     return _crypto_luks_format(device, cipher, key_size, context, min_entropy, luks_version, extra)
 __all__.append("crypto_luks_format")
 
+_crypto_luks_format_volume_key = BlockDev.crypto_luks_format_volume_key
+@override(BlockDev.crypto_luks_format_volume_key)
+def crypto_luks_format_volume_key(device, cipher=None, key_size=0, context=None, volume_key=None, min_entropy=0, luks_version=BlockDev.CryptoLUKSVersion.LUKS2, extra=None):
+    return _crypto_luks_format_volume_key(device, cipher, key_size, context, volume_key, min_entropy, luks_version, extra)
+__all__.append("crypto_luks_format_volume_key")
+
 _crypto_luks_open = BlockDev.crypto_luks_open
 @override(BlockDev.crypto_luks_open)
 def crypto_luks_open(device, name, context, read_only=False):

@@ -269,6 +269,44 @@ class CryptoTestFormat(CryptoTestCase):
         self.assertEqual(m.group(1), "pbkdf2")
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_luks2_format_volume_key(self):
+        """Verify that formatting device as LUKS 2 with a specified volume key works"""
+
+        volume_key = secrets.token_bytes(64)
+        pw_ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
+        vk_ctx = BlockDev.CryptoKeyslotContext(volume_key=list(volume_key))
+
+        # key_size (in bits) must match the size of the provided volume key
+        with self.assertRaisesRegex(GLib.GError, "does not match"):
+            BlockDev.crypto_luks_format_volume_key(self.loop_devs[0], "aes-xts-plain64", 256,
+                                                   pw_ctx, vk_ctx, 0,
+                                                   BlockDev.CryptoLUKSVersion.LUKS2, None)
+
+        # only 'volume key' context type is valid for the volume key argument
+        with self.assertRaisesRegex(GLib.GError, "Only 'volume key' context type is valid"):
+            BlockDev.crypto_luks_format_volume_key(self.loop_devs[0], "aes-xts-plain64", 0,
+                                                   pw_ctx, pw_ctx, 0,
+                                                   BlockDev.CryptoLUKSVersion.LUKS2, None)
+
+        # format with the volume key, letting key_size default to the volume key size
+        succ = BlockDev.crypto_luks_format_volume_key(self.loop_devs[0], "aes-xts-plain64", 0,
+                                                      pw_ctx, vk_ctx, 0,
+                                                      BlockDev.CryptoLUKSVersion.LUKS2, None)
+        self.assertTrue(succ)
+
+        # verify the volume key stored in the LUKS header is the one we specified
+        vk_dir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, vk_dir)
+        vk_path = os.path.join(vk_dir, "volume_key")
+        p = subprocess.run(["cryptsetup", "luksDump", "--dump-volume-key",
+                            "--volume-key-file", vk_path, self.loop_devs[0]],
+                           input=PASSWD.encode("utf-8"),
+                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.assertEqual(p.returncode, 0, msg=p.stderr)
+        with open(vk_path, "rb") as f:
+            self.assertEqual(f.read(), volume_key)
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
     def test_luks1_format_pbkdf_options(self):
         """Verify that formatting device as LUKS 1 with extra PBKDF arguments works"""
 
