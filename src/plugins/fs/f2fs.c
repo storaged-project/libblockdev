@@ -376,7 +376,8 @@ BDFSF2FSInfo* bd_fs_f2fs_get_info (const gchar *device, GError **error) {
  * Tech category: %BD_FS_TECH_F2FS-%BD_FS_TECH_MODE_RESIZE
  */
 gboolean bd_fs_f2fs_resize (const gchar *device, guint64 new_size, gboolean safe, const BDExtraArg **extra, GError **error) {
-    const gchar *args[6] = {"resize.f2fs", NULL, NULL, NULL, NULL, NULL};
+    const gchar *args[7] = {"resize.f2fs", NULL, NULL, NULL, NULL, NULL, NULL};
+    UtilDep dep = {"resize.f2fs", "1.17.0", "-V", "resize.f2fs\\s+([\\d\\.]+).+"};
     gchar *size_str = NULL;
     gboolean ret = FALSE;
     guint next_arg = 1;
@@ -409,6 +410,10 @@ gboolean bd_fs_f2fs_resize (const gchar *device, guint64 new_size, gboolean safe
         return FALSE;
     }
     bd_fs_f2fs_info_free (info);
+
+    /* f2fs-tools >= 1.17.0 requires -F to avoid an interactive prompt. */
+    if (bd_utils_check_util_version (dep.name, dep.version, dep.ver_arg, dep.ver_regexp, NULL))
+        args[next_arg++] = "-F";
 
     if (safe) {
         args[next_arg++] = "-s";
