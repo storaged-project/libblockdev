@@ -228,6 +228,9 @@ gboolean bd_fs_ntfs_set_label (const gchar *device, const gchar *label, GError *
     if (!check_deps (&avail_deps, DEPS_NTFSLABEL_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
 
+    if (!bd_fs_ntfs_check_label (label, error))
+        return FALSE;
+
     return bd_utils_exec_and_report_error (args, NULL, error);
 }
 
@@ -242,6 +245,19 @@ gboolean bd_fs_ntfs_set_label (const gchar *device, const gchar *label, GError *
  * Tech category: always available
  */
 gboolean bd_fs_ntfs_check_label (const gchar *label, GError **error) {
+    if (!label) {
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                             "Label cannot be NULL.");
+        return FALSE;
+    }
+
+    /* ntfslabel does not reliably support '--' to terminate option parsing. */
+    if (label[0] == '-') {
+        g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                             "Label for NTFS filesystem cannot start with '-'.");
+        return FALSE;
+    }
+
     if (strlen (label) > 128) {
         g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
                              "Label for NTFS filesystem must be at most 128 characters long.");
