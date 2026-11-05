@@ -19,7 +19,7 @@
   when: ansible_facts['distribution'] == 'Fedora'
 
 - name: Install build dependencies (Fedora)
-  command: "dnf -y builddep libblockdev --nogpgcheck"
+  command: "dnf -y builddep libblockdev --nogpgcheck --allow-vendor-change"
   when: ansible_facts['distribution'] == 'Fedora'
 
 - name: Install build dependencies not covered by dnf builddep (Fedora)
