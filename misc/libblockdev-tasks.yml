@@ -110,6 +110,7 @@
       - device-mapper-multipath
       - dosfstools
       - e2fsprogs
+      - exfatprogs
       - glibc-all-langpacks
       - lvm2-dbusd
       - mdadm
