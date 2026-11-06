@@ -413,7 +413,7 @@ with the libblockdev-nvdimm plugin/library.
 
 %if %{with_nvme}
 %package nvme
-BuildRequires: libnvme-devel
+BuildRequires: pkgconfig(libnvme3) >= 3.2
 BuildRequires: libuuid-devel
 Summary:     The NVMe plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} = %{version}-%{release}
