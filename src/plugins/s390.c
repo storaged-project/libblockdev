@@ -1405,7 +1405,7 @@ gboolean bd_s390_zkey_remove (const gchar *name, GError **error) {
  * Tech category: %BD_S390_TECH_PAES-%BD_S390_TECH_MODE_MODIFY
  */
 gboolean bd_s390_zkey_cryptsetup_setvp (const gchar *device, const gchar *key_file, const BDExtraArg **extra, GError **error) {
-    const gchar *argv[6] = {"zkey-cryptsetup", "setvp", "--key-file", key_file, device, NULL};
+    const gchar *argv[6] = {"zkey-cryptsetup", "setvp", device, "--key-file", key_file, NULL};
 
     if (!check_deps (&avail_deps, DEPS_ZKEY_CRYPTSETUP_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
@@ -1443,7 +1443,7 @@ gboolean bd_s390_zkey_cryptsetup_setvp (const gchar *device, const gchar *key_fi
  * Tech category: %BD_S390_TECH_PAES-%BD_S390_TECH_MODE_QUERY
  */
 gboolean bd_s390_zkey_cryptsetup_validate (const gchar *device, const gchar *key_file, const BDExtraArg **extra, GError **error) {
-    const gchar *argv[6] = {"zkey-cryptsetup", "validate", "--key-file", key_file, device, NULL};
+    const gchar *argv[6] = {"zkey-cryptsetup", "validate", device, "--key-file", key_file, NULL};
 
     if (!check_deps (&avail_deps, DEPS_ZKEY_CRYPTSETUP_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
