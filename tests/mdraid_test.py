@@ -478,7 +478,7 @@ class MDTestNameNodeBijection(MDTestCase):
 
 
 class MDTestSetBitmapLocation(MDTestCase):
-    @tag_test(TestTags.SLOW, TestTags.UNSTABLE)
+    @tag_test(TestTags.SLOW)
     def test_set_bitmap_location(self):
         """Verify we can change bitmap location for an existing MD array"""
 
@@ -508,8 +508,9 @@ class MDTestSetBitmapLocation(MDTestCase):
         loc = BlockDev.md_get_bitmap_location("bd_test_md")
         self.assertEqual(loc, "none")
 
-        succ = BlockDev.md_set_bitmap_location("bd_test_md", "internal")
-        self.assertTrue(succ)
+        with wait_for_action("resync"):
+            succ = BlockDev.md_set_bitmap_location("bd_test_md", "internal")
+            self.assertTrue(succ)
 
         loc = BlockDev.md_get_bitmap_location("bd_test_md")
         self.assertIn(loc, ("+8", "+2"))
@@ -523,8 +524,9 @@ class MDTestSetBitmapLocation(MDTestCase):
         node = BlockDev.md_node_from_name("bd_test_md")
         self.assertIsNotNone(node)
 
-        succ = BlockDev.md_set_bitmap_location(node, "internal")
-        self.assertTrue(succ)
+        with wait_for_action("resync"):
+            succ = BlockDev.md_set_bitmap_location(node, "internal")
+            self.assertTrue(succ)
 
         succ = BlockDev.md_set_bitmap_location("/dev/%s" % node, "none")
         self.assertTrue(succ)
