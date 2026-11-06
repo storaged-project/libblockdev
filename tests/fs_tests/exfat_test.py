@@ -1,6 +1,7 @@
 import os
 import re
 import tempfile
+import unittest
 
 from packaging.version import Version
 
@@ -21,9 +22,6 @@ def _get_exfatprogs_version():
     return Version(m.groups()[0])
 
 
-EXFATPROGS_VERSION = _get_exfatprogs_version()
-
-
 class ExfatNoDevTestCase(FSNoDevTestCase):
     def setUp(self):
         super(ExfatNoDevTestCase, self).setUp()
@@ -33,18 +31,22 @@ class ExfatNoDevTestCase(FSNoDevTestCase):
 
 
 class ExfatTestCase(FSTestCase):
-    def setUp(self):
-        if not self.exfat_avail:
-            self.skipTest("skipping exFAT: not available")
+    @classmethod
+    def setUpClass(cls):
+        super(ExfatTestCase, cls).setUpClass()
 
+        if not cls.exfat_avail:
+            raise unittest.SkipTest("skipping exFAT: not available")
+
+        if _get_exfatprogs_version() < Version("1.4.0"):
+            cls._mkfs_options = None
+        else:
+            cls._mkfs_options = [BlockDev.ExtraArg.new("-P", "none")]
+
+    def setUp(self):
         super(ExfatTestCase, self).setUp()
 
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="exfat_test")
-
-        if EXFATPROGS_VERSION < Version("1.4.0"):
-            self._mkfs_options = None
-        else:
-            self._mkfs_options = [BlockDev.ExtraArg.new("-P", "none")]
 
 
 class ExfatTestAvailability(ExfatNoDevTestCase):

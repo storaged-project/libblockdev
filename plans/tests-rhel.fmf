@@ -5,6 +5,12 @@ adjust+:
     enabled: false
   - when: distro == fedora
     enabled: false
+  - when: fips == yes
+    summary: Run tests in FIPS mode
+    prepare+:
+      - name: fips
+        how: feature
+        fips: enabled
 
 prepare:
   - name: copr
