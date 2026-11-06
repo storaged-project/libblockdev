@@ -1307,7 +1307,8 @@ BDS390ZkeyInfo** bd_s390_zkey_list (const gchar *name, GError **error) {
         } else if (cur_info == NULL) {
             /* a field line before any "Key" line -- ignore it */
         } else if (g_strcmp0 (label, "Description") == 0) {
-            cur_info->description = g_strdup (value);
+            if (*value != '\0')
+                cur_info->description = g_strdup (value);
         } else if (g_strcmp0 (label, "Secure key size") == 0) {
             cur_info->secure_key_size = g_ascii_strtoull (value, NULL, 0);
         } else if (g_strcmp0 (label, "Clear key size") == 0) {

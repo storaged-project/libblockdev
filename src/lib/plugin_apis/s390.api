@@ -208,7 +208,7 @@ GType bd_s390_zkey_info_get_type();
 /**
  * BDS390ZkeyInfo:
  * @name: name of the secure key in the secure key repository;
- * @description: user provided description of the key (empty if none was set);
+ * @description: (nullable): user provided description of the key or %NULL if none was set;
  * @secure_key_size: size of the secure key in bytes;
  * @clear_key_size: size of the effective (clear) key in bits;
  * @xts: whether the key is an XTS type key or not;

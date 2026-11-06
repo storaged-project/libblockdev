@@ -99,7 +99,7 @@ class S390TestCase(unittest.TestCase):
         self.assertEqual(len(keys), 2)
 
         self.assertEqual(keys[0].name, "secure_xtskey1")
-        self.assertEqual(keys[0].description, "")
+        self.assertIsNone(keys[0].description)
         self.assertEqual(keys[0].secure_key_size, 272)
         self.assertEqual(keys[0].clear_key_size, 512)
         self.assertTrue(keys[0].xts)
