@@ -945,6 +945,7 @@ gboolean _crypto_luks_format (const gchar *device,
                               const gchar *cipher,
                               guint64 key_size,
                               BDCryptoKeyslotContext *context,
+                              BDCryptoKeyslotContext *volume_key,
                               guint64 min_entropy,
                               BDCryptoLUKSVersion luks_version,
                               BDCryptoLUKSExtra *extra,
@@ -965,6 +966,7 @@ gboolean _crypto_luks_format (const gchar *device,
     guint64 progress_id = 0;
     gchar *msg = NULL;
     const gchar* crypt_version = NULL;
+    const gchar *format_vk = NULL;
     GError *l_error = NULL;
     struct crypt_pbkdf_type *pbkdf = NULL;
 
@@ -990,6 +992,25 @@ gboolean _crypto_luks_format (const gchar *device,
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
+    }
+
+    if (volume_key) {
+        if (volume_key->type != BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_VOLUME_KEY) {
+            g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                                 "Only 'volume key' context type is valid for the volume key.");
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
+            return FALSE;
+        }
+#ifdef LIBCRYPTSETUP_27
+        if (hw_encryption == BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_ONLY || hw_encryption == BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_AND_SW) {
+            g_set_error_literal (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_PARAMS,
+                                 "Specifying the volume key is not supported for OPAL LUKS format.");
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
+            return FALSE;
+        }
+#endif
     }
 
     ret = crypt_init (&cd, device);
@@ -1030,6 +1051,25 @@ gboolean _crypto_luks_format (const gchar *device,
 
     /* key_size should be in bytes */
     key_size = key_size / 8;
+
+    if (volume_key) {
+        /* use the provided volume key instead of letting cryptsetup generate
+           a random one -- the key_size must match the volume key length */
+        if (key_size == 0)
+            key_size = volume_key->u.volume_key.volume_key_size;
+        else if (key_size != volume_key->u.volume_key.volume_key_size) {
+            g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_PARAMS,
+                         "Specified key size (%"G_GUINT64_FORMAT" bytes) does not match the "
+                         "provided volume key size (%"G_GSIZE_FORMAT" bytes).",
+                         key_size, volume_key->u.volume_key.volume_key_size);
+            crypt_free (cd);
+            g_strfreev (cipher_specs);
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
+            return FALSE;
+        }
+        format_vk = (const gchar *) volume_key->u.volume_key.volume_key;
+    }
 
     /* wait for enough random data entropy (if requested) */
     if (min_entropy > 0) {
@@ -1143,7 +1183,7 @@ gboolean _crypto_luks_format (const gchar *device,
             params.data_alignment = extra->data_alignment;
             params.data_device = extra->data_device;
             ret = crypt_format (cd, crypt_version, cipher_specs[0], cipher_specs[1],
-                                NULL, NULL, key_size, &params);
+                                NULL, format_vk, key_size, &params);
             g_free (pbkdf);
         }
         else if (luks_version == BD_CRYPTO_LUKS_VERSION_LUKS2) {
@@ -1175,7 +1215,7 @@ gboolean _crypto_luks_format (const gchar *device,
             else
 #endif
                 ret = crypt_format (cd, crypt_version, cipher_specs[0], cipher_specs[1],
-                                    NULL, NULL, key_size, &params);
+                                    NULL, format_vk, key_size, &params);
             g_free (pbkdf);
         }
     } else {
@@ -1188,7 +1228,7 @@ gboolean _crypto_luks_format (const gchar *device,
         } else
 #endif
             ret = crypt_format (cd, crypt_version, cipher_specs[0], cipher_specs[1],
-                                NULL, NULL, key_size, NULL);
+                                NULL, format_vk, key_size, NULL);
     }
     g_strfreev (cipher_specs);
 
@@ -1278,7 +1318,39 @@ gboolean _crypto_luks_format (const gchar *device,
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_CREATE
  */
 gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint64 key_size, BDCryptoKeyslotContext *context, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra,GError **error) {
-    return _crypto_luks_format (device, cipher, key_size, context, min_entropy, luks_version, extra, BD_CRYPTO_LUKS_HW_ENCRYPTION_SW_ONLY, NULL, error);
+    return _crypto_luks_format (device, cipher, key_size, context, NULL, min_entropy, luks_version, extra, BD_CRYPTO_LUKS_HW_ENCRYPTION_SW_ONLY, NULL, error);
+}
+
+/**
+ * bd_crypto_luks_format_volume_key:
+ * @device: a device to format as LUKS
+ * @cipher: (nullable): cipher specification (type-mode, e.g. "aes-xts-plain64") or %NULL to use the default
+ * @key_size: size of the volume key in bits or 0 to use the size of @volume_key
+ * @context: key slot context (passphrase/keyfile...) for this LUKS device
+ * @volume_key: volume key context (created by %bd_crypto_keyslot_context_new_volume_key) to use
+ *              as the LUKS volume (master) key instead of a randomly generated one
+ * @min_entropy: minimum random data entropy (in bits) required to format @device as LUKS
+ * @luks_version: whether to use LUKS v1 or LUKS v2
+ * @extra: (nullable): extra arguments for LUKS format creation
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Formats the given @device as LUKS according to the other parameters given, using the
+ * provided @volume_key as the LUKS volume (master) key instead of letting cryptsetup
+ * generate a random one. This is primarily useful for pervasive encryption on IBM Z where
+ * the volume key is a secure key token generated by the 'zkey' utility and the cipher is
+ * "paes-xts-plain64". If @key_size is 0, the size of @volume_key is used. The @context is
+ * used for the key slot (passphrase/key file) as with %bd_crypto_luks_format.
+ *
+ * Supported @context types for this function: passphrase, key file
+ * Supported @volume_key context types for this function: volume key
+ *
+ * Returns: whether the given @device was successfully formatted as LUKS or not
+ * (the @error) contains the error in such cases)
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_CREATE
+ */
+gboolean bd_crypto_luks_format_volume_key (const gchar *device, const gchar *cipher, guint64 key_size, BDCryptoKeyslotContext *context, BDCryptoKeyslotContext *volume_key, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra, GError **error) {
+    return _crypto_luks_format (device, cipher, key_size, context, volume_key, min_entropy, luks_version, extra, BD_CRYPTO_LUKS_HW_ENCRYPTION_SW_ONLY, NULL, error);
 }
 
 static gboolean _is_dm_name_valid (const gchar *name, GError **error) {
@@ -4125,7 +4197,7 @@ gboolean bd_crypto_opal_format (const gchar *device, const gchar *cipher, guint6
         return FALSE;
     }
 
-    return _crypto_luks_format (device, cipher, key_size, context, min_entropy, BD_CRYPTO_LUKS_VERSION_LUKS2, extra, hw_encryption, opal_context, error);
+    return _crypto_luks_format (device, cipher, key_size, context, NULL, min_entropy, BD_CRYPTO_LUKS_VERSION_LUKS2, extra, hw_encryption, opal_context, error);
 }
 #endif
 
