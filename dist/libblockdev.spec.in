@@ -958,7 +958,7 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
-* Mon Apr 27 2026 Vojtech Trefny <vtrefny@redhat.com> - 3.4.1-1
+* Mon Apr 27 2026 Vojtech Trefny <vtrefny@redhat.com> - 3.5.0-1
 - Fix gtk-doc warnings for docstrings and sections file (vtrefny)
 - btrfs: Add bd_btrfs_delete_subvolume_recursive function (vtrefny)
 - btrfs: Add bd_btrfs_device_stats() to expose per-device error stats (vtrefny)
