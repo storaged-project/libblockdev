@@ -1,3 +1,72 @@
+Libblockdev 3.6.0
+------------------
+
+New minor release of the libblockdev library with multiple fixes and new features. See below
+for details.
+
+**Notable changes**
+
+- CVE-2026-111581: NTFS and VFAT labels starting with a dash were interpreted as command-line options.
+- s390: Pervasive encryption support using zkey.
+- loop: _from_fd variants of existing functions operating on an already-open fd, avoiding races.
+
+**Full list of changes**
+
+Geert Geurts (1):
+
+- utils: Resolve symlinks with an absolute target in bd_utils_resolve_device
+
+Kou Wenqi (1):
+
+- btrfs: fix integer overflow in bd_btrfs_create_volume argument counter
+
+Ruslan Kossak (1):
+
+- tests: Fix race condition in test_set_bitmap_location
+
+Vojtech Trefny (34):
+
+- README: Update location for libblockdev docs on storaged.org
+- NEWS: Fix formatting
+- ci: Add GitHub action to check RST files
+- utils: Fail early when calling bd_utils_resolve_device with NULL
+- ci: Run csmock with both default and rawhide mock config
+- fs: Fix parsing tune.exfat output with variable whitespace
+- fs: Adjust to new mkfs.exfat behaviour in exfatprogs >= 1.4.0
+- utils: Fix typo libkmod log messages prefix
+- lvm: Add warning when user specifies invalid VDO index memory size
+- misc: Use ansible_facts instead of deprecated top-level fact variables
+- Fix a pylint disable comment
+- ci: Switch the compilation GH action to Ubuntu 26.04
+- ci: Use ubuntu-latest instead of ubuntu-24.04 in GH workflows
+- dm: Add bd_dm_get_thin_pool_stats for generic thin pools
+- loop: Add _from_fd variants for the remaining loop functions
+- loop: Remove useless access check when getting loop backing file
+- dm: Check dm_task_run return value in bd_dm_map_exists
+- crypto: Set libdevmapper logging in crypto plugin too
+- fs: Reject NTFS labels starting with a dash
+- fs: Prevent VFAT labels from being interpreted as options
+- fs: Tell resize.f2fs to stop asking questions
+- ci: Better test coverage with packit and testing farm
+- misc: Add exfatprogs to test dependencies on CentOS
+- tests: Move exfatprogs version check to the test class
+- misc: Allow vendor change when installing build dependencies
+- s390: Add support for pervasive encryption using zkey
+- s390: Add support for validating the PAES setup of a LUKS2 device
+- s390: Fix parsing of multi-line values in bd_s390_zkey_list
+- tests: Write s390 plugin to config_h when available
+- misc: Install s390utils on s390x
+- crypto: Add bd_crypto_luks_format_volume_key for formatting with a given
+  volume key
+- s390: Fix argument order for zkey-cryptsetup calls
+- s390: Use NULL for empty key description in BDS390ZkeyInfo
+- spec: Fix version in the changelog
+
+dependabot[bot] (1):
+
+- infra: bump actions/checkout from 6 to 7
+
+
 Libblockdev 3.5.0
 ------------------
 
