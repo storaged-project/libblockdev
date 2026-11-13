@@ -212,8 +212,8 @@ gboolean bd_fs_exfat_check (const gchar *device, const BDExtraArg **extra, GErro
         return FALSE;
 
     ret = bd_utils_exec_and_report_status_error (args, extra, &status, error);
-    if (!ret && (status == 1)) {
-        /* no error should be reported for exit code 1 */
+    if (!ret && (status == 1 || status == 4)) {
+        /* no error should be reported for exit code 1 and exit code 4 - File system errors left uncorrected */
         g_clear_error (error);
     }
     return ret;
