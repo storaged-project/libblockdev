@@ -14,11 +14,13 @@ from gi.repository import BlockDev, GLib
 
 
 def _get_exfatprogs_version():
-    _ret, out, _err = utils.run_command("mkfs.exfat --version")
+    _ret, out, err = utils.run_command("mkfs.exfat --version")
     # exfatprogs version : 1.4.1 (2026-05-28)
-    m = re.search(r"exfatprogs version : ([\d\.]+)", out)
+    # exfatprogs 1.4.4 and newer print this line to stderr instead of stdout
+    output = out + "\n" + err
+    m = re.search(r"exfatprogs version : ([\d\.]+)", output)
     if not m or len(m.groups()) != 1:
-        raise RuntimeError("Failed to determine exfatprogs version from: %s" % out)
+        raise RuntimeError("Failed to determine exfatprogs version from: %s" % output)
     return Version(m.groups()[0])
 
 
