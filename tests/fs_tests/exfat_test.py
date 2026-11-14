@@ -163,6 +163,27 @@ class ExfatTestCheck(ExfatTestCase):
         succ = BlockDev.fs_exfat_check(self.loop_devs[0])
         self.assertTrue(succ)
 
+    def test_exfat_check_corrupted(self):
+        """Verify that checking a corrupted exfat file system reports it as not clean"""
+
+        succ = BlockDev.fs_exfat_mkfs(self.loop_devs[0], self._mkfs_options)
+        self.assertTrue(succ)
+
+        # zero the checksum sector of the main boot region
+        with open(self.loop_devs[0], "r+b") as dev:
+            sector_size = 2 ** dev.read(512)[108]
+            dev.seek(11 * sector_size)
+            dev.write(b"\0" * sector_size)
+
+        succ = BlockDev.fs_exfat_check(self.loop_devs[0])
+        self.assertFalse(succ)
+
+        succ = BlockDev.fs_exfat_repair(self.loop_devs[0])
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_exfat_check(self.loop_devs[0])
+        self.assertTrue(succ)
+
 
 class ExfatTestRepair(ExfatTestCase):
     def test_exfat_repair(self):
