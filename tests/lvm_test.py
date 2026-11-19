@@ -977,6 +977,42 @@ class LvmTestLVs(LvmPVVGLVTestCase):
         lvs = BlockDev.lvm_lvs("testVG")
         self.assertEqual(len(lvs), 1)
 
+    def test_lvs_same_name_different_vgs(self):
+        """Verify system-wide lvs keeps same-named LVs from different VGs"""
+
+        def _cleanup_testvg2():
+            try:
+                BlockDev.lvm_lvremove("testVG2", "testLV", True, None)
+            except Exception:
+                pass
+            try:
+                BlockDev.lvm_vgremove("testVG2", None)
+            except Exception:
+                pass
+            shutil.rmtree("/dev/testVG2", ignore_errors=True)
+
+        self.addCleanup(_cleanup_testvg2)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev], 0, None)
+        self.assertTrue(succ)
+        succ = BlockDev.lvm_vgcreate("testVG2", [self.loop_dev2], 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 10 * 1024**2)
+        self.assertTrue(succ)
+        succ = BlockDev.lvm_lvcreate("testVG2", "testLV", 10 * 1024**2)
+        self.assertTrue(succ)
+
+        lvs = BlockDev.lvm_lvs(None)
+        matching = [lv for lv in lvs if lv.lv_name == "testLV" and lv.vg_name in ("testVG", "testVG2")]
+        self.assertEqual(len(matching), 2)
+        self.assertEqual(sorted(lv.vg_name for lv in matching), ["testVG", "testVG2"])
+
 class LvmTestLVsMultiSegment(LvmPVVGLVTestCase):
     def _clean_up(self):
         try:

@@ -1835,10 +1835,14 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
             /* valid line, try to parse and record it */
             lvdata = get_lv_data_from_table (table, TRUE);
             if (lvdata) {
-                /* ignore duplicate entries in lvs output, these are caused by multi segments LVs */
+                /* ignore duplicate entries in lvs output, these are caused by multi segments LVs.
+                 * Compare both VG and LV name so same-named LVs in different VGs are kept. */
                 for (gsize i = 0; i < lvs->len; i++) {
-                    if (g_strcmp0 (((BDLVMLVdata *) g_ptr_array_index (lvs, i))->lv_name, lvdata->lv_name) == 0) {
-                        g_debug ("Duplicate LV entry for '%s' found in lvs output", lvdata->lv_name);
+                    BDLVMLVdata *other = (BDLVMLVdata *) g_ptr_array_index (lvs, i);
+                    if (g_strcmp0 (other->vg_name, lvdata->vg_name) == 0 &&
+                        g_strcmp0 (other->lv_name, lvdata->lv_name) == 0) {
+                        g_debug ("Duplicate LV entry for '%s/%s' found in lvs output",
+                                 lvdata->vg_name, lvdata->lv_name);
                         bd_lvm_lvdata_free (lvdata);
                         lvdata = NULL;
                         break;
