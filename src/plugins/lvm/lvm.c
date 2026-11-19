@@ -1784,13 +1784,16 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
         JsonObject *lv_obj = json_array_get_object_element (lv_array, i);
         BDLVMLVdata *lvdata = get_lv_data_from_json (lv_obj);
         if (lvdata) {
-            /* ignore duplicate entries in lvs output, these are caused by multi segments LVs */
+            /* ignore duplicate entries in lvs output, these are caused by multi segments LVs.
+             * Compare both VG and LV name so same-named LVs in different VGs are kept. */
             gboolean duplicate = FALSE;
             for (gsize j = 0; j < lvs->len; j++) {
-                if (g_strcmp0 (((BDLVMLVdata *) g_ptr_array_index (lvs, j))->lv_name, lvdata->lv_name) == 0) {
+                BDLVMLVdata *other = (BDLVMLVdata *) g_ptr_array_index (lvs, j);
+                if (g_strcmp0 (other->vg_name, lvdata->vg_name) == 0 &&
+                    g_strcmp0 (other->lv_name, lvdata->lv_name) == 0) {
                     bd_utils_log_format (BD_UTILS_LOG_DEBUG,
-                                         "Duplicate LV entry for '%s' found in lvs output",
-                                         lvdata->lv_name);
+                                         "Duplicate LV entry for '%s/%s' found in lvs output",
+                                         lvdata->vg_name, lvdata->lv_name);
                     bd_lvm_lvdata_free (lvdata);
                     duplicate = TRUE;
                     break;
@@ -1855,7 +1858,9 @@ BDLVMLVdata** bd_lvm_lvs_tree (const gchar *vg_name, GError **error) {
             gboolean merged = FALSE;
             for (gsize j = 0; j < lvs->len; j++) {
                 BDLVMLVdata *other = (BDLVMLVdata *) g_ptr_array_index (lvs, j);
-                if (g_strcmp0 (other->lv_name, lvdata->lv_name) == 0) {
+                /* Merge only segments of the same LV (same VG + LV name). */
+                if (g_strcmp0 (other->vg_name, lvdata->vg_name) == 0 &&
+                    g_strcmp0 (other->lv_name, lvdata->lv_name) == 0) {
                     merge_lv_data (other, lvdata);
                     bd_lvm_lvdata_free (lvdata);
                     merged = TRUE;

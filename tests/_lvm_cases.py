@@ -1199,6 +1199,34 @@ class LvmTestLVs(LvmPVVGLVTestCase):
         lvs = BlockDev.lvm_lvs("testVG")
         self.assertEqual(len(lvs), 1)
 
+    def test_lvs_same_name_different_vgs(self):
+        """Verify system-wide lvs keeps same-named LVs from different VGs"""
+
+        # cleanups run LIFO: remove LV, then VG, then leftover /dev node
+        self.addCleanup(shutil.rmtree, "/dev/testVG2", ignore_errors=True)
+        self.addCleanup(BlockDev.lvm_vgremove, "testVG2", None)
+        self.addCleanup(self._lvremove, "testVG2", "testLV")
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev], 0, None)
+        self.assertTrue(succ)
+        succ = BlockDev.lvm_vgcreate("testVG2", [self.loop_dev2], 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 10 * 1024**2)
+        self.assertTrue(succ)
+        succ = BlockDev.lvm_lvcreate("testVG2", "testLV", 10 * 1024**2)
+        self.assertTrue(succ)
+
+        lvs = BlockDev.lvm_lvs(None)
+        matching = [lv for lv in lvs if lv.lv_name == "testLV" and lv.vg_name in ("testVG", "testVG2")]
+        self.assertEqual(len(matching), 2)
+        self.assertCountEqual([lv.vg_name for lv in matching], ["testVG", "testVG2"])
+
     def test_lvinfo_tree(self):
         """Verify that it's possible to gather info about LVs"""
 
