@@ -33,6 +33,7 @@ def check_cryptsetup_version(version):
 HAVE_BITLK = check_cryptsetup_version("2.3.0")
 HAVE_FVAULT2 = check_cryptsetup_version("2.6.0")
 HAVE_OPAL = check_cryptsetup_version("2.7.0")
+HAVE_BITLK_CLEARKEY = check_cryptsetup_version("2.8.2")
 
 
 @required_plugins(("crypto", "loop"))
@@ -1785,6 +1786,7 @@ class CryptoTestBitlk(CryptoTestCase):
         self.assertEqual(info.cipher, "aes")
         self.assertEqual(info.mode, "xts-plain64")
         self.assertEqual(info.sector_size, 512)
+        self.assertFalse(info.has_clearkey)
 
         ctx = BlockDev.CryptoKeyslotContext(passphrase=self.passphrase)
         succ = BlockDev.crypto_bitlk_open(self.bitlk_dev, "libblockdevTestBitlk", ctx)
@@ -1807,6 +1809,35 @@ class CryptoTestBitlk(CryptoTestCase):
         succ = BlockDev.crypto_bitlk_close("libblockdevTestBitlk")
         self.assertTrue(succ)
         self.assertFalse(os.path.exists("/dev/mapper/libblockdevTestBitlk"))
+
+    @unittest.skipUnless(HAVE_BITLK_CLEARKEY, "BITLK Clear Key not supported")
+    def test_bitlk_clearkey(self):
+        """Verify that opening/closing a BitLocker device with Clear Key works"""
+        clearkey_img = "bitlk-aes-xts-128-clearkey-only.img"
+        succ, loop = BlockDev.loop_setup(os.path.join(self.tempdir, clearkey_img))
+        if not succ:
+            raise RuntimeError("Failed to setup loop device for testing")
+        dev = "/dev/%s" % loop
+        try:
+            info = BlockDev.crypto_bitlk_info(dev)
+            self.assertIsNotNone(info)
+            self.assertTrue(info.has_clearkey)
+            self.assertEqual(info.uuid, "df73cb51-ff48-4033-8d56-a32cc2b1ab7a")
+
+            # Open with NULL context (Clear Key)
+            succ = BlockDev.crypto_bitlk_open(dev, "libblockdevTestBitlkCK", None)
+            self.assertTrue(succ)
+            self.assertTrue(os.path.exists("/dev/mapper/libblockdevTestBitlkCK"))
+
+            succ = BlockDev.crypto_bitlk_close("libblockdevTestBitlkCK")
+            self.assertTrue(succ)
+            self.assertFalse(os.path.exists("/dev/mapper/libblockdevTestBitlkCK"))
+        finally:
+            try:
+                BlockDev.crypto_bitlk_close("libblockdevTestBitlkCK")
+            except:
+                pass
+            BlockDev.loop_teardown(dev)
 
 
 class CryptoTestFVAULT2(CryptoTestCase):
