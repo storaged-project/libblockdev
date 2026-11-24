@@ -14,6 +14,14 @@
       - automake
   when: ansible_facts['distribution'] == 'Fedora'
 
+- name: Enable copr repository with libnvme3
+  command: "dnf -y copr enable @storage/nvme-cli"
+  when: ansible_facts['distribution'] == 'Fedora'
+
+- name: Allow package vendor changes (Fedora)
+  command: "dnf config-manager setopt allow_vendor_change=True"
+  when: ansible_facts['distribution'] == 'Fedora'
+
 - name: Install dnf-plugins-core for dnf builddep (Fedora)
   package: name=dnf-plugins-core state=present
   when: ansible_facts['distribution'] == 'Fedora'
@@ -28,7 +36,7 @@
     name:
       - libfdisk-devel
       - keyutils-libs-devel
-      - libnvme-devel
+      - libnvme3-devel
       - e2fsprogs-devel
       - json-glib-devel
       - libatasmart-devel
