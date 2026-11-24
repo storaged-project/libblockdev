@@ -1,0 +1,33 @@
+name: Build libnvme3
+description: Build upstream libnvme 3.2 for Ubuntu runners that only ship libnvme 1.x
+
+runs:
+  using: composite
+  steps:
+    - name: Install libnvme build dependencies
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y meson ninja-build libjson-c-dev \
+          libssl-dev libkeyutils-dev libkmod-dev
+
+    - name: Build and install libnvme3
+      shell: bash
+      run: |
+        src="$RUNNER_TEMP/nvme-cli"
+        prefix="$RUNNER_TEMP/libnvme3"
+        git clone --depth 1 --branch v3.2 https://github.com/linux-nvme/nvme-cli.git "$src"
+        test "$(git -C "$src" rev-parse HEAD)" = ce55132af26607e1904a0f449f94eeae028cfee5
+
+        meson setup "$src/build" "$src" \
+          --prefix="$prefix" --libdir=lib \
+          -Dlibnvme=enabled -Dfabrics=enabled -Dnvme=disabled \
+          -Ddocs=false -Dpython=disabled -Dtests=false -Dexamples=false \
+          -Dliburing=disabled -Dnvme-discoverd=disabled -Dnvme-keysd=disabled \
+          -Dtop=disabled
+        meson install -C "$src/build"
+
+        {
+          echo "PKG_CONFIG_PATH=$prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+          echo "LD_LIBRARY_PATH=$prefix/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+        } >> "$GITHUB_ENV"
