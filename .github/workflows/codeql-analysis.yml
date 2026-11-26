@@ -26,6 +26,8 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v7
 
+    - uses: ./.github/actions/build-libnvme3
+
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v4

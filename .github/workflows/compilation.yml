@@ -24,6 +24,8 @@ jobs:
         sudo apt -y install ansible
         ansible-playbook -b -i "localhost," -c local misc/install-test-dependencies.yml -e "test_dependencies=false"
 
+    - uses: ./.github/actions/build-libnvme3
+
     - name: Install compiler
       run: |
         sudo apt -y install ${{ matrix.compiler }}

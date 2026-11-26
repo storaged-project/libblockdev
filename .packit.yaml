@@ -4,8 +4,11 @@ actions:
     - 'sed -i -e "s/@WITH_..*@/1/g" -e "s/@MAJOR_VER@/3/g" dist/libblockdev.spec'
   create-archive:
     - './autogen.sh'
-    - './configure'
+    # Extra Copr repos are not available during SRPM creation.
+    - './configure --without-nvme'
     - 'make'
+    # Keep NVMe enabled in the spec used for the binary RPM build.
+    - 'sed -i "s/^%define with_nvme 0$/%define with_nvme 1/" dist/libblockdev.spec'
     - 'make local'
     - 'bash -c "ls *.tar*"'
   get-current-version:
@@ -13,6 +16,8 @@ actions:
 
 jobs:
 - job: copr_build
+  additional_repos:
+    - copr://@storage/nvme-cli
   targets:
   - fedora-rawhide-aarch64
   - fedora-rawhide-ppc64le
@@ -108,6 +113,11 @@ jobs:
     - centos-stream-10-x86_64
     - centos-stream-10-aarch64
   branch: master
+  tf_extra_params:
+    environments:
+      - artifacts:
+        - type: repository-file
+          id: https://copr.fedorainfracloud.org/coprs/g/storage/nvme-cli/repo/fedora-$releasever/group_storage-nvme-cli-fedora-$releasever.repo
 
 - job: tests
   identifier: fips
@@ -141,6 +151,8 @@ jobs:
     environments:
       - artifacts:
         - type: repository-file
+          id: https://copr.fedorainfracloud.org/coprs/g/storage/nvme-cli/repo/fedora-$releasever/group_storage-nvme-cli-fedora-$releasever.repo
+        - type: repository-file
           id: https://copr.fedorainfracloud.org/coprs/g/storage/blivet-daily/repo/fedora-$releasever/group_storage-blivet-daily-fedora-$releasever.repo
         tmt:
           context:
@@ -158,6 +170,8 @@ jobs:
   tf_extra_params:
     environments:
       - artifacts:
+        - type: repository-file
+          id: https://copr.fedorainfracloud.org/coprs/g/storage/nvme-cli/repo/fedora-$releasever/group_storage-nvme-cli-fedora-$releasever.repo
         - type: repository-file
           id: https://copr.fedorainfracloud.org/coprs/g/storage/udisks-daily/repo/fedora-$releasever/group_storage-udisks-daily-fedora-$releasever.repo
         tmt:
@@ -186,7 +200,6 @@ srpm_build_deps:
  - libbytesize-devel
  - libfdisk-devel
  - libmount-devel
- - libnvme-devel
  - libuuid-devel
  - libyaml-devel
  - ndctl-devel

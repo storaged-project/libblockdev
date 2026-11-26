@@ -43,7 +43,7 @@ jobs:
 
       - name: Run csmock build in the container
         run: |
-          podman exec -it ${{ env.CI_CONTAINER }} bash -c "/ci/run_csmock_tests -c /ci/copr-builder.conf -p libblockdev-udisks -t ${{ env.CSMOCK_TOOLS }} -r ${{ matrix.chroot }}"
+          podman exec -it ${{ env.CI_CONTAINER }} bash -c "/ci/run_csmock_tests -c /ci/copr-builder.conf -p libblockdev-udisks -t ${{ env.CSMOCK_TOOLS }} -r ${{ matrix.chroot }} --copr-repo @storage/nvme-cli"
 
       - name: Upload the csmock logs
         if: always()
